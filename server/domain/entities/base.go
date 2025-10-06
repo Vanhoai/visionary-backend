@@ -2,39 +2,39 @@ package entities
 
 import "time"
 
-// BaseEntity represents the base structure for all entities in the domain.
-type BaseEntity struct {
+// Base represents the base structure for all entities in the domain.
+type Base struct {
 	ID        string    `json:"id"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
 // GetID returns the unique identifier of the entity.
-func (e *BaseEntity) GetID() string {
+func (e *Base) GetID() string {
 	return e.ID
 }
 
 // SetID sets the unique identifier of the entity.
-func (e *BaseEntity) SetID(id string) {
+func (e *Base) SetID(id string) {
 	e.ID = id
 }
 
 // GetCreatedAt returns the creation timestamp of the entity.
-func (e *BaseEntity) GetCreatedAt() time.Time {
+func (e *Base) GetCreatedAt() time.Time {
 	return e.CreatedAt
 }
 
 // SetCreatedAt sets the creation timestamp of the entity.
-func (e *BaseEntity) SetCreatedAt(t time.Time) {
+func (e *Base) SetCreatedAt(t time.Time) {
 	e.CreatedAt = t
 }
 
 // GetUpdatedAt returns the last updated timestamp of the entity.
-func (e *BaseEntity) GetUpdatedAt() time.Time {
+func (e *Base) GetUpdatedAt() time.Time {
 	return e.UpdatedAt
 }
 
 // SetUpdatedAt sets the last updated timestamp of the entity.
-func (e *BaseEntity) SetUpdatedAt(t time.Time) {
+func (e *Base) SetUpdatedAt(t time.Time) {
 	e.UpdatedAt = t
 }

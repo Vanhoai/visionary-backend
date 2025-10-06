@@ -2,7 +2,10 @@ module go-hexagonal-architecture
 
 go 1.25.1
 
-require github.com/gofiber/fiber/v2 v2.52.9
+require (
+	github.com/gofiber/fiber/v2 v2.52.9
+	server v0.0.0
+)
 
 require (
 	github.com/andybalholm/brotli v1.2.0 // indirect
@@ -18,7 +21,6 @@ require (
 )
 
 replace (
-	go-hexagonal-architecture/adapters => ./adapters
-	go-hexagonal-architecture/core => ./core
-	go-hexagonal-architecture/domain => ./domain
+	core => ./core
+	server => ./server
 )

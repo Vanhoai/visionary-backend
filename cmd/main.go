@@ -8,15 +8,13 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/adaptor"
 )
 
-const ServiceName = "Go Hexagonal Architecture"
+func catchme() {
+	panic("oh no")
+}
 
 func main() {
 	app := fiber.New()
 	app.Use(adaptor.HTTPMiddleware(middlewares.LogMiddleware))
-
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("Welcome to " + ServiceName)
-	})
 
 	log.Fatal(app.Listen(":3000"))
 }

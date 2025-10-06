@@ -6,5 +6,5 @@ import (
 )
 
 type AccountRepository struct {
-	repositories.IBaseRepository[*entities.AccountEntity]
+	repositories.IBaseRepository[*entities.Account]
 }

@@ -1,3 +1,3 @@
-module go-hexagonal-architecture/core
+module core
 
 go 1.25.1
