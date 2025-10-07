@@ -1,7 +1,11 @@
 package services
 
-import "app/domain/repositories"
+import "server/domain/repositories"
 
 type AccountService struct {
-	AccountRepository *repositories.IAccountRepository
+	repository *repositories.AccountRepository
+}
+
+func NewAccountService(repository *repositories.AccountRepository) *AccountService {
+	return &AccountService{repository}
 }

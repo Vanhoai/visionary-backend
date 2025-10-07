@@ -1,3 +1,8 @@
 package applications
 
-type AuthApplicationService struct{}
+import "server/domain/services"
+
+type AuthApplicationService struct {
+	authService    services.AuthService    `inject:"AuthService"`
+	accountService services.AccountService `inject:"AccountService"`
+}

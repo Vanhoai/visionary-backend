@@ -1,9 +1,9 @@
 package postgresql
 
 import (
-	"app/domain/repositories"
 	"context"
 	"fmt"
+	"server/domain/repositories"
 )
 
 type BaseRepository[T repositories.Entity] struct {

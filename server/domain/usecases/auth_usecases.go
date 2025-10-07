@@ -1,6 +1,7 @@
 package usecases
 
 type EmailPasswordReq struct {
+	AuthType string `json:"authType"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
@@ -15,6 +16,6 @@ type RefreshTokenReq struct {
 }
 
 type ManageSessionUseCases interface {
-	AuthWithEmailPassword(req *EmailPasswordReq) (*AuthResponse, error)
+	AuthWithEmailAndPassword(req *EmailPasswordReq) (*AuthResponse, error)
 	RefreshToken(req *RefreshTokenReq) (*AuthResponse, error)
 }

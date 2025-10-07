@@ -1,9 +1,11 @@
 package services
 
-import "server/domain/entities"
+import "server/domain/repositories"
 
-type NotificationService struct{}
+type NotificationService struct {
+	repository repositories.NotificationRepository
+}
 
-func (service *NotificationService) FindByAccountID(accountID string) []*entities.Notification {
-	return []*entities.Notification{}
+func NewNotificationService(repository repositories.NotificationRepository) *NotificationService {
+	return &NotificationService{repository}
 }
