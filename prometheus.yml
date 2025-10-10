@@ -1,0 +1,23 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: "scylla-cluster"
+    replica: "A"
+
+scrape_configs:
+  - job_name: "scylla"
+    honor_labels: true
+    static_configs:
+      - targets:
+          - "scylla-node01:9180"
+          - "scylla-node02:9180"
+          - "scylla-node03:9180"
+        labels:
+          cluster: "scylla-cluster"
+          dc: "datacenter1"
+
+  - job_name: "scylla-manager"
+    static_configs:
+      - targets:
+          - "scylla-manager:5090"
