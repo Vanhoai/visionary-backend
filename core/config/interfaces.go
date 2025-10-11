@@ -1,55 +1,55 @@
 package config
 
 type ServerConfig struct {
-	Host         string `mapstructure:"host"`
-	Port         string `mapstructure:"port"`
-	ReadTimeout  int    `mapstructure:"read_timeout"`
-	WriteTimeout int    `mapstructure:"write_timeout"`
+	Host         string `env:"HOST" envDefault:"0.0.0.0"`
+	Port         string `env:"PORT" envDefault:"8080"`
+	ReadTimeout  int    `env:"READ_TIMEOUT" envDefault:"30"`
+	WriteTimeout int    `env:"WRITE_TIMEOUT" envDefault:"30"`
 }
 
 type PostgresConfig struct {
-	Host            string `mapstructure:"host"`
-	Port            string `mapstructure:"port"`
-	Username        string `mapstructure:"username"`
-	Password        string `mapstructure:"password"`
-	Database        string `mapstructure:"database"`
-	MaxOpenConns    int    `mapstructure:"max_open_conns"`
-	MaxIdleConns    int    `mapstructure:"max_idle_conns"`
-	ConnMaxLifetime int    `mapstructure:"conn_max_lifetime"`
+	Host            string `env:"HOST"`
+	Port            string `env:"PORT" envDefault:"5432"`
+	Username        string `env:"USERNAME"`
+	Password        string `env:"PASSWORD"`
+	Database        string `env:"DATABASE"`
+	MaxOpenConns    int    `env:"MAX_OPEN_CONNS" envDefault:"25"`
+	MaxIdleConns    int    `env:"MAX_IDLE_CONNS" envDefault:"5"`
+	ConnMaxLifetime int    `env:"CONN_MAX_LIFETIME" envDefault:"300"`
 }
 
 type ScyllaConfig struct {
-	Hosts             []string `mapstructure:"hosts"`
-	Port              string   `mapstructure:"port"`
-	Keyspace          string   `mapstructure:"keyspace"`
-	Username          string   `mapstructure:"username"`
-	Password          string   `mapstructure:"password"`
-	Consistency       string   `mapstructure:"consistency"`
-	Timeout           int      `mapstructure:"timeout"`
-	ConnectTimeout    int      `mapstructure:"connect_timeout"`
-	NumConns          int      `mapstructure:"num_conns"`
-	ReplicationFactor int      `mapstructure:"replication_factor"`
+	Hosts             []string `env:"HOSTS" envSeparator:","`
+	Port              string   `env:"PORT" envDefault:"9042"`
+	Keyspace          string   `env:"KEYSPACE"`
+	Username          string   `env:"USERNAME"`
+	Password          string   `env:"PASSWORD"`
+	Consistency       string   `env:"CONSISTENCY" envDefault:"QUORUM"`
+	Timeout           int      `env:"TIMEOUT" envDefault:"10"`
+	ConnectTimeout    int      `env:"CONNECT_TIMEOUT" envDefault:"10"`
+	NumConns          int      `env:"NUM_CONNS" envDefault:"2"`
+	ReplicationFactor int      `env:"REPLICATION_FACTOR" envDefault:"3"`
 }
 
 type RedisConfig struct {
-	Host         string `mapstructure:"host"`
-	Port         string `mapstructure:"port"`
-	Password     string `mapstructure:"password"`
-	DB           string `mapstructure:"db"`
-	PoolSize     int    `mapstructure:"pool_size"`
-	MinIdleConns int    `mapstructure:"min_idle_conns"`
-	MaxRetries   int    `mapstructure:"max_retries"`
-	DialTimeout  int    `mapstructure:"dial_timeout"`
-	ReadTimeout  int    `mapstructure:"read_timeout"`
-	WriteTimeout int    `mapstructure:"write_timeout"`
+	Host         string `env:"HOST"`
+	Port         string `env:"PORT" envDefault:"6379"`
+	Password     string `env:"PASSWORD"`
+	DB           string `env:"DB" envDefault:"0"`
+	PoolSize     int    `env:"POOL_SIZE" envDefault:"10"`
+	MinIdleConns int    `env:"MIN_IDLE_CONNS" envDefault:"5"`
+	MaxRetries   int    `env:"MAX_RETRIES" envDefault:"3"`
+	DialTimeout  int    `env:"DIAL_TIMEOUT" envDefault:"5"`
+	ReadTimeout  int    `env:"READ_TIMEOUT" envDefault:"3"`
+	WriteTimeout int    `env:"WRITE_TIMEOUT" envDefault:"3"`
 }
 
 type LoggingConfig struct {
-	Level      string `mapstructure:"level"`
-	Format     string `mapstructure:"format"`
-	Output     string `mapstructure:"output"`
-	FilePath   string `mapstructure:"file_path"`
-	MaxSize    int    `mapstructure:"max_size"`
-	MaxBackups int    `mapstructure:"max_backups"`
-	MaxAge     int    `mapstructure:"max_age"`
+	Level      string `env:"LEVEL" envDefault:"info"`
+	Format     string `env:"FORMAT" envDefault:"json"`
+	Output     string `env:"OUTPUT" envDefault:"stdout"`
+	FilePath   string `env:"FILE_PATH" envDefault:"logs/app.log"`
+	MaxSize    int    `env:"MAX_SIZE" envDefault:"100"`
+	MaxBackups int    `env:"MAX_BACKUPS" envDefault:"3"`
+	MaxAge     int    `env:"MAX_AGE" envDefault:"7"`
 }

@@ -4,7 +4,6 @@ import (
 	"adapters/primary/middlewares"
 	"adapters/secondary/repositories/scylla"
 	"core/config"
-	"flag"
 	"fmt"
 	"log"
 	"reflect"
@@ -239,15 +238,12 @@ func (c *Container) Make(target interface{}) error {
 }
 
 func main() {
-	// Parse command line flags
-	env := flag.String("env", "dev", "Environment mode (dev, staging, prod)")
-	config, err := config.LoadConfig(*env)
+	cfg, err := config.LoadConfig()
 	if err != nil {
 		log.Fatalf("Failed to load config: %v", err)
 	}
 
-	// print object
-	fmt.Printf("%+v", config)
+	fmt.Printf("Config loaded: %+v\n", cfg)
 
 	di := CreateNewContainer()
 	// Register repositories
