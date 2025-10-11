@@ -3,6 +3,8 @@ package main
 import (
 	"adapters/primary/middlewares"
 	"adapters/secondary/repositories/scylla"
+	"core/config"
+	"flag"
 	"fmt"
 	"log"
 	"reflect"
@@ -237,13 +239,23 @@ func (c *Container) Make(target interface{}) error {
 }
 
 func main() {
+	// Parse command line flags
+	env := flag.String("env", "dev", "Environment mode (dev, staging, prod)")
+	config, err := config.LoadConfig(*env)
+	if err != nil {
+		log.Fatalf("Failed to load config: %v", err)
+	}
+
+	// print object
+	fmt.Printf("%+v", config)
+
 	di := CreateNewContainer()
 	// Register repositories
 	di.SingletonV2(scylla.AccountRepositoryImpl{})
 	di.SingletonV2(scylla.NotificationRepositoryImpl{})
 
-	di.Get("AccountRepository")
-	di.Get("NotificationRepository")
+	// di.Get("AccountRepository")
+	// di.Get("NotificationRepository")
 
 	// Register services
 	// di.Singleton(services.NewAccountService)
@@ -256,5 +268,5 @@ func main() {
 	app := fiber.New()
 	app.Use(adaptor.HTTPMiddleware(middlewares.LogMiddleware))
 
-	log.Fatal(app.Listen(":3000"))
+	log.Fatal(app.Listen(":8080"))
 }

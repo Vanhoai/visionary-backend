@@ -111,3 +111,5 @@ hs_err_pid*
 
 config/config.private.yaml
 tmp/
+.env
+config.yaml

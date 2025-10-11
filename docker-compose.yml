@@ -1,7 +1,22 @@
 services:
+  # Redis caching
+  redis:
+    image: redis:latest
+    container_name: redis-caching
+    restart: always
+    ports:
+      - "${REDIS_PORT}:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - hexagonal-network
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
+
   # ScyllaDB Cluster with 3 nodes
   scylla-node01:
-    image: scylladb/scylla
+    image: scylladb/scylla:latest
     container_name: scylla-node01
     hostname: scylla-node01
     ports:
@@ -11,7 +26,7 @@ services:
     volumes:
       - scylla_data01:/var/lib/scylla
     networks:
-      - scylla-net
+      - hexagonal-network
     command: --smp 1 --memory 1G --overprovisioned 1 --api-address 0.0.0.0
     healthcheck:
       test: ["CMD", "cqlsh", "-e", "describe keyspaces"]
@@ -20,25 +35,25 @@ services:
       retries: 5
 
   scylla-node02:
-    image: scylladb/scylla
+    image: scylladb/scylla:latest
     container_name: scylla-node02
     hostname: scylla-node02
     volumes:
       - scylla_data02:/var/lib/scylla
     networks:
-      - scylla-net
+      - hexagonal-network
     command: --smp 1 --memory 1G --overprovisioned 1 --seeds=scylla-node01
     depends_on:
       - scylla-node01
 
   scylla-node03:
-    image: scylladb/scylla
+    image: scylladb/scylla:latest
     container_name: scylla-node03
     hostname: scylla-node03
     volumes:
       - scylla_data03:/var/lib/scylla
     networks:
-      - scylla-net
+      - hexagonal-network
     command: --smp 1 --memory 1G --overprovisioned 1 --seeds=scylla-node01
     depends_on:
       - scylla-node01
@@ -51,7 +66,7 @@ services:
   #     - "5080:5080" # Manager API
   #     - "5090:5090" # Manager Prometheus
   #   networks:
-  #     - scylla-net
+  #     - hexagonal-network
   #   depends_on:
   #     - scylla-node01
   #   environment:
@@ -66,7 +81,7 @@ services:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
     networks:
-      - scylla-net
+      - hexagonal-network
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
       - "--storage.tsdb.path=/prometheus"
@@ -79,7 +94,7 @@ services:
     volumes:
       - grafana_data:/var/lib/grafana
     networks:
-      - scylla-net
+      - hexagonal-network
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_USERS_ALLOW_SIGN_UP=false
@@ -90,7 +105,8 @@ volumes:
   scylla_data03:
   prometheus_data:
   grafana_data:
+  redis_data:
 
 networks:
-  scylla-net:
+  hexagonal-network:
     driver: bridge
