@@ -1,6 +1,6 @@
 package services
 
-import "domain/repositories"
+import "go-hexagonal-architecture/domain/repositories"
 
 type NotificationService struct {
 	repository repositories.NotificationRepository

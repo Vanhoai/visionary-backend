@@ -2,8 +2,8 @@ package scylla
 
 import (
 	"context"
-	"domain/entities"
-	"domain/repositories"
+	"go-hexagonal-architecture/domain/entities"
+	"go-hexagonal-architecture/domain/repositories"
 )
 
 type accountRepositoryImpl struct {

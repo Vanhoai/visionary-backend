@@ -1,8 +1,6 @@
 package applications
 
-import (
-	"domain/services"
-)
+import "go-hexagonal-architecture/domain/services"
 
 type NotificationApplicationService struct {
 	notificationService *services.NotificationService `inject:"NotificationService"`

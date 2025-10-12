@@ -1,8 +1,6 @@
 package repositories
 
-import (
-	"domain/entities"
-)
+import "go-hexagonal-architecture/domain/entities"
 
 type NotificationRepository interface {
 	BaseRepository[*entities.Notification]

@@ -2,7 +2,7 @@ package repositories
 
 import (
 	"context"
-	"domain/entities"
+	"go-hexagonal-architecture/domain/entities"
 )
 
 type AccountRepository interface {

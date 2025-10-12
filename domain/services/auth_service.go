@@ -1,8 +1,6 @@
 package services
 
-import (
-	"domain/apis"
-)
+import "go-hexagonal-architecture/domain/apis"
 
 type AuthService struct {
 	authApi *apis.AuthApi

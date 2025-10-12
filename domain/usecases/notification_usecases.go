@@ -1,6 +1,6 @@
 package usecases
 
-import "domain/entities"
+import "go-hexagonal-architecture/domain/entities"
 
 // ======================== MANAGE NOTIFICATION ========================
 type ManageNotificationUseCases interface {

@@ -1,6 +1,6 @@
 package apis
 
-import "domain/apis"
+import "go-hexagonal-architecture/domain/apis"
 
 type authApiImpl struct{}
 

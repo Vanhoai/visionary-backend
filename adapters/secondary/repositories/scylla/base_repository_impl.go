@@ -2,7 +2,7 @@ package scylla
 
 import (
 	"context"
-	"domain/repositories"
+	"go-hexagonal-architecture/domain/repositories"
 )
 
 type baseRepositoryImpl[T repositories.Entity] struct{}

@@ -2,8 +2,8 @@ package postgresql
 
 import (
 	"context"
-	"domain/repositories"
 	"fmt"
+	"go-hexagonal-architecture/domain/repositories"
 )
 
 type BaseRepository[T repositories.Entity] struct {
