@@ -1,6 +1,6 @@
 package services
 
-import "go-hexagonal-architecture/domain/repositories"
+import "visionary-backend/domain/repositories"
 
 type AccountService struct {
 	repository *repositories.AccountRepository

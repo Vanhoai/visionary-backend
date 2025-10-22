@@ -1,8 +1,8 @@
 package scylla
 
 import (
-	"go-hexagonal-architecture/domain/entities"
-	"go-hexagonal-architecture/domain/repositories"
+	"visionary-backend/domain/entities"
+	"visionary-backend/domain/repositories"
 )
 
 type notificationRepositoryImpl struct {

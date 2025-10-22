@@ -1,6 +1,6 @@
 package applications
 
-import "go-hexagonal-architecture/domain/services"
+import "visionary-backend/domain/services"
 
 type AuthApplicationService struct {
 	authService    *services.AuthService    `inject:"AuthService"`

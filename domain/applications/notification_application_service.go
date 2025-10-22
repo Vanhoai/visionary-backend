@@ -1,6 +1,6 @@
 package applications
 
-import "go-hexagonal-architecture/domain/services"
+import "visionary-backend/domain/services"
 
 type NotificationApplicationService struct {
 	notificationService *services.NotificationService `inject:"NotificationService"`

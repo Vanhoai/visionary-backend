@@ -19,7 +19,7 @@ func CreateNewContainer() *Container {
 	}
 }
 
-// Register a service with the factory function
+// Container Register a service with the factory function
 func (c *Container) Register(name string, provider interface{}) error {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
@@ -34,7 +34,7 @@ func (c *Container) Register(name string, provider interface{}) error {
 	return nil
 }
 
-// Register singleton service with auto contructor
+// SingletonV2 Register singleton service with auto constructor
 func (c *Container) SingletonV2(provider interface{}) error {
 	// Retrieve name of struct return type
 	providerValue := reflect.ValueOf(provider)
@@ -81,7 +81,7 @@ func (c *Container) SingletonV2(provider interface{}) error {
 	})
 }
 
-// Register singleton service
+// Singleton Register singleton service
 func (c *Container) Singleton(provider interface{}) error {
 	// Retrieve name from struct return type
 	providerValue := reflect.ValueOf(provider)

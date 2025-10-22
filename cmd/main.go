@@ -1,11 +1,11 @@
 package main
 
 import (
-	"go-hexagonal-architecture/adapters/primary/middlewares"
-	"go-hexagonal-architecture/adapters/secondary/repositories/scylla"
-	"go-hexagonal-architecture/core/config"
-	"go-hexagonal-architecture/core/di"
 	"log"
+	"visionary-backend/adapters/primary/middlewares"
+	"visionary-backend/adapters/secondary/repositories/scylla"
+	"visionary-backend/core/config"
+	"visionary-backend/core/di"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/adaptor"
@@ -20,7 +20,6 @@ func main() {
 	// Create context and cancel function
 	// ctx, cancel := context.WithCancel(context.Background())
 	// defer cancel()
-
 	di := di.CreateNewContainer()
 
 	// Register repositories

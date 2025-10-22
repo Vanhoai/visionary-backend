@@ -1,6 +1,6 @@
 package services
 
-import "go-hexagonal-architecture/domain/apis"
+import "visionary-backend/domain/apis"
 
 type AuthService struct {
 	authApi *apis.AuthApi
