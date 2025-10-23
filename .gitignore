@@ -113,3 +113,4 @@ config/config.private.yaml
 tmp/
 .env
 config.yaml
+keys/

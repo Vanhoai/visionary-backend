@@ -1,109 +1,109 @@
 services:
-  redis:
-    image: redis:latest
-    container_name: redis-caching
-    restart: always
-    ports:
-      - "${REDIS_PORT}:6379"
-    volumes:
-      - redis_data:/data
-    networks:
-      - visionary-network
-    environment:
-      - REDIS_PASSWORD=${REDIS_PASSWORD}
-    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
+    redis:
+        image: redis:latest
+        container_name: redis-caching
+        restart: always
+        ports:
+            - "6379:6379"
+        volumes:
+            - redis_data:/data
+        networks:
+            - visionary-network
+        environment:
+            - REDIS_PASSWORD=Hinsun
+        command: ["redis-server", "--requirepass", "Hinsun"]
 
-  scylla-node01:
-    image: scylladb/scylla:latest
-    container_name: scylla-node01
-    hostname: scylla-node01
-    ports:
-      - "9042:9042" # CQL native transport port
-      - "10000:10000" # REST API port
-      - "9180:9180" # Prometheus API port
-    volumes:
-      - scylla_data01:/var/lib/scylla
-    networks:
-      - visionary-network
-    command: --smp 1 --memory 1G --overprovisioned 1 --api-address 0.0.0.0
-    healthcheck:
-      test: ["CMD", "cqlsh", "-e", "describe keyspaces"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
+    scylla-node01:
+        image: scylladb/scylla:latest
+        container_name: scylla-node01
+        hostname: scylla-node01
+        ports:
+            - "9042:9042" # CQL native transport port
+            - "10000:10000" # REST API port
+            - "9180:9180" # Prometheus API port
+        volumes:
+            - scylla_data01:/var/lib/scylla
+        networks:
+            - visionary-network
+        command: --smp 1 --memory 1G --overprovisioned 1 --api-address 0.0.0.0
+        healthcheck:
+            test: ["CMD", "cqlsh", "-e", "describe keyspaces"]
+            interval: 30s
+            timeout: 10s
+            retries: 5
 
-  scylla-node02:
-    image: scylladb/scylla:latest
-    container_name: scylla-node02
-    hostname: scylla-node02
-    volumes:
-      - scylla_data02:/var/lib/scylla
-    networks:
-      - visionary-network
-    command: --smp 1 --memory 1G --overprovisioned 1 --seeds=scylla-node01
-    depends_on:
-      - scylla-node01
+    scylla-node02:
+        image: scylladb/scylla:latest
+        container_name: scylla-node02
+        hostname: scylla-node02
+        volumes:
+            - scylla_data02:/var/lib/scylla
+        networks:
+            - visionary-network
+        command: --smp 1 --memory 1G --overprovisioned 1 --seeds=scylla-node01
+        depends_on:
+            - scylla-node01
 
-  scylla-node03:
-    image: scylladb/scylla:latest
-    container_name: scylla-node03
-    hostname: scylla-node03
-    volumes:
-      - scylla_data03:/var/lib/scylla
-    networks:
-      - visionary-network
-    command: --smp 1 --memory 1G --overprovisioned 1 --seeds=scylla-node01
-    depends_on:
-      - scylla-node01
+    scylla-node03:
+        image: scylladb/scylla:latest
+        container_name: scylla-node03
+        hostname: scylla-node03
+        volumes:
+            - scylla_data03:/var/lib/scylla
+        networks:
+            - visionary-network
+        command: --smp 1 --memory 1G --overprovisioned 1 --seeds=scylla-node01
+        depends_on:
+            - scylla-node01
 
-  scylla-manager:
-    image: scylladb/scylla-manager
-    container_name: scylla-manager
-    ports:
-      - "5080:5080" # Manager API
-      - "5090:5090" # Manager Prometheus
-    networks:
-      - visionary-network
-    depends_on:
-      - scylla-node01
-    environment:
-      - SCYLLA_MANAGER_PROMETHEUS_PORT=5090
+    scylla-manager:
+        image: scylladb/scylla-manager
+        container_name: scylla-manager
+        ports:
+            - "5080:5080" # Manager API
+            - "5090:5090" # Manager Prometheus
+        networks:
+            - visionary-network
+        depends_on:
+            - scylla-node01
+        environment:
+            - SCYLLA_MANAGER_PROMETHEUS_PORT=5090
 
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: prometheus
-    ports:
-      - "9090:9090"
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-      - prometheus_data:/prometheus
-    networks:
-      - visionary-network
-    command:
-      - "--config.file=/etc/prometheus/prometheus.yml"
-      - "--storage.tsdb.path=/prometheus"
+    prometheus:
+        image: prom/prometheus:latest
+        container_name: prometheus
+        ports:
+            - "9090:9090"
+        volumes:
+            - ./prometheus.yml:/etc/prometheus/prometheus.yml
+            - prometheus_data:/prometheus
+        networks:
+            - visionary-network
+        command:
+            - "--config.file=/etc/prometheus/prometheus.yml"
+            - "--storage.tsdb.path=/prometheus"
 
-  grafana:
-    image: grafana/grafana:latest
-    container_name: grafana
-    ports:
-      - "3000:3000"
-    volumes:
-      - grafana_data:/var/lib/grafana
-    networks:
-      - visionary-network
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-      - GF_USERS_ALLOW_SIGN_UP=false
+    grafana:
+        image: grafana/grafana:latest
+        container_name: grafana
+        ports:
+            - "3000:3000"
+        volumes:
+            - grafana_data:/var/lib/grafana
+        networks:
+            - visionary-network
+        environment:
+            - GF_SECURITY_ADMIN_PASSWORD=admin
+            - GF_USERS_ALLOW_SIGN_UP=false
 
 volumes:
-  scylla_data01:
-  scylla_data02:
-  scylla_data03:
-  prometheus_data:
-  grafana_data:
-  redis_data:
+    scylla_data01:
+    scylla_data02:
+    scylla_data03:
+    prometheus_data:
+    grafana_data:
+    redis_data:
 
 networks:
-  visionary-network:
-    driver: bridge
+    visionary-network:
+        driver: bridge
