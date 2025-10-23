@@ -1,6 +1,6 @@
 package secure
 
-// Env:
+// Environment variables for cryptography
 // CRYPTOGRAPHY_TYPE = SYMMETRIC | ASYMMETRIC
 // ALGORITHM = RSA | EC | HS512
 
@@ -17,7 +17,12 @@ const (
 	EC  CryptoAlgorithm = "EC"
 )
 
-type Cryptography interface {
-	GetEncodeKey() ([]byte, error)
-	GetDecodeKey() ([]byte, error)
+type Cryptography struct{}
+
+func (c *Cryptography) GetEncodeKey() ([]byte, error) {
+	return []byte("your-encode-key"), nil
+}
+
+func (c *Cryptography) GetDecodeKey() ([]byte, error) {
+	return []byte("your-decode-key"), nil
 }

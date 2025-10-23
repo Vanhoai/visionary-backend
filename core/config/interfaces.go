@@ -29,8 +29,10 @@ type ServerConfig struct {
 }
 
 type CryptographyConfig struct {
-	Type      string `yaml:"type" mapstructure:"type"`
-	Algorithm string `yaml:"algorithm" mapstructure:"algorithm"`
+	Type                   string `yaml:"type" mapstructure:"type"`
+	Algorithm              string `yaml:"algorithm" mapstructure:"algorithm"`
+	AccessDurationMinutes  uint64 `yaml:"access_duration_minutes" mapstructure:"access_duration_minutes"`
+	RefreshDurationMinutes uint64 `yaml:"refresh_duration_minutes" mapstructure:"refresh_duration_minutes"`
 }
 
 type MetricsConfig struct {

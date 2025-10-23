@@ -21,12 +21,12 @@ type Claims struct {
 }
 
 type JwtSecure struct {
-	cryptography    Cryptography
+	cryptography    *Cryptography
 	accessDuration  time.Duration
 	refreshDuration time.Duration
 }
 
-func NewJwt(cryptography Cryptography, accessDuration, refreshDuration time.Duration) *JwtSecure {
+func NewJwtSecure(cryptography *Cryptography, accessDuration, refreshDuration time.Duration) *JwtSecure {
 	return &JwtSecure{
 		cryptography:    cryptography,
 		accessDuration:  accessDuration,
@@ -34,6 +34,7 @@ func NewJwt(cryptography Cryptography, accessDuration, refreshDuration time.Dura
 	}
 }
 
+// JwtSecure GetDuration returns the duration for the given token type (milliseconds)
 func (j *JwtSecure) GetDuration(tokenType TokenType) time.Duration {
 	switch tokenType {
 	case ACCESS_TOKEN:

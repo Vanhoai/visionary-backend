@@ -10,8 +10,14 @@ import (
 	"os"
 )
 
-type AsymmetricPersistence interface {
-	GenerateKeys() error
+// AsymmetricPersistence represents the storage structure for asymmetric cryptographic keys.
+// Functions:
+// LoadKeys: Loads the private and public keys from specified file paths.
+// GenerateAndSave: Generates a new pair of asymmetric keys and saves them to specified file paths.
+
+type AsymmetricPersistence struct {
+	PrivateKey []byte
+	PublicKey  []byte
 }
 
 func GenerateRSA(bits int) (*rsa.PrivateKey, *rsa.PublicKey) {

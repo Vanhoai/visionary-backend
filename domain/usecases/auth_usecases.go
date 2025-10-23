@@ -16,6 +16,7 @@ type RefreshTokenReq struct {
 }
 
 type ManageSessionUseCases interface {
-	AuthWithEmailAndPassword(req *EmailPasswordReq) (*AuthResponse, error)
+	SignInWithEmail(req *EmailPasswordReq) (*AuthResponse, error)
+	SignUpWithEmail(req *EmailPasswordReq) (*AuthResponse, error)
 	RefreshToken(req *RefreshTokenReq) (*AuthResponse, error)
 }

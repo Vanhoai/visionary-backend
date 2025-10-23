@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"strings"
 	"sync"
 	"time"
@@ -25,6 +26,7 @@ func Load(configPath string, configFile string) (*Config, error) {
 	return safe.Try(func() (*Config, error) {
 		var config *Config
 		vip := viper.New()
+
 		vip.AddConfigPath(configPath)
 		vip.SetConfigName(configFile)
 		vip.SetConfigType("yaml")
@@ -38,6 +40,7 @@ func Load(configPath string, configFile string) (*Config, error) {
 		// Unmarshal config into struct
 		safe.MustNoValue(vip.Unmarshal(&config))
 
+		// Apply environment variable overrides to the config
 		applyEnvOverrides(config)
 
 		vip.WatchConfig()
@@ -63,6 +66,13 @@ func applyEnvOverrides(config *Config) {}
 
 func (c *Config) Validate() error {
 	return nil
+}
+
+func (c *Config) GetServerAddress() string {
+	host := c.Server.Host
+	port := c.Server.Port
+
+	return fmt.Sprintf("%s:%d", host, port)
 }
 
 func Init() {
