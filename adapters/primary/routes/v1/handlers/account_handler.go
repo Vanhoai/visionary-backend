@@ -1,12 +1,18 @@
 package handlers
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"visionary-backend/domain/applications"
+
+	"github.com/gofiber/fiber/v2"
+)
 
 type AccountHandler interface {
 	GetAccountById(ctx *fiber.Ctx) error
 }
 
-type accountHandlerImpl struct{}
+type accountHandlerImpl struct {
+	AccountAppService *applications.AccountAppService `inject:"AccountAppService"`
+}
 
 func NewAccountHandler() AccountHandler {
 	return &accountHandlerImpl{}

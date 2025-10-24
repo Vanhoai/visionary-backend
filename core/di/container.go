@@ -4,228 +4,242 @@ import (
 	"fmt"
 	"reflect"
 	"sync"
+	"visionary-backend/core/safe"
 )
 
-type Container struct {
-	mutex     sync.RWMutex             // Protects the services and providers maps in concurrent scenarios
-	services  map[string]interface{}   // Holds instantiated services
-	providers map[string]reflect.Value // Holds provider functions for services
+type Lifecycle uint8
+
+const (
+	Singleton Lifecycle = iota // Single instance shared across all resolutions
+	Transient                  // New instance created for each resolution
+	Scoped                     // Single instance per scope (future implementation)
+)
+
+type ServiceDescriptor struct {
+	Name      string        // Name of the service
+	Lifecycle Lifecycle     // Lifecycle of the service
+	Provider  reflect.Value // Provider function for creating the service
+	Instance  any           // Cached instance for Singleton services
+	Type      reflect.Type  // Type of the service
 }
 
-func CreateNewContainer() *Container {
-	return &Container{
-		services:  make(map[string]interface{}),
-		providers: make(map[string]reflect.Value),
+type DIC struct {
+	mutex           sync.RWMutex
+	services        map[string]*ServiceDescriptor
+	resolutionStack []string // For detecting circular dependencies
+	resolving       sync.Map // Track services currently being resolved
+}
+
+func NewDIC() *DIC {
+	return &DIC{
+		services:        make(map[string]*ServiceDescriptor),
+		resolutionStack: make([]string, 0),
 	}
 }
 
-// Container Register a service with the factory function
-func (c *Container) Register(name string, provider interface{}) error {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
+// DIC Register registers a service with the given name, provider function, and lifecycle
+func (di *DIC) Register(name string, provider any, lifecycle Lifecycle) error {
+	di.mutex.Lock()
+	defer di.mutex.Unlock()
 
-	var providerValue = reflect.ValueOf(provider)
-	if providerValue.Kind() != reflect.Func {
-		return fmt.Errorf("provider must be a function")
+	providerValue := reflect.ValueOf(provider)
+	safe.Assert(providerValue.Kind() == reflect.Func, fmt.Sprintf("provider for '%s' must be a function", name))
+
+	providerType := providerValue.Type()
+	safe.Assert(providerType.NumOut() == 1, fmt.Sprintf("provider for '%s' must return exactly one value", name))
+
+	returnType := providerType.Out(0)
+	di.services[name] = &ServiceDescriptor{
+		Name:      name,
+		Lifecycle: lifecycle,
+		Provider:  providerValue,
+		Type:      returnType,
 	}
 
-	c.providers[name] = providerValue
-	fmt.Printf("Registered provider for: %s\n", name)
 	return nil
 }
 
-// SingletonV2 Register singleton service with auto constructor
-func (c *Container) SingletonV2(provider interface{}) error {
-	// Retrieve name of struct return type
-	providerValue := reflect.ValueOf(provider)
-	if providerValue.Kind() != reflect.Struct {
-		return fmt.Errorf("provider must be a struct")
+// DIC RegisterInstance registers an existing instance as a singleton service
+func (di *DIC) RegisterInstance(name string, instance any) error {
+	di.mutex.Lock()
+	defer di.mutex.Unlock()
+
+	instanceValue := reflect.ValueOf(instance)
+
+	di.services[name] = &ServiceDescriptor{
+		Name:      name,
+		Lifecycle: Singleton,
+		Instance:  instance,
+		Type:      instanceValue.Type(),
 	}
 
-	providerType := providerValue.Type() // scylla.AccountRepositoryImpl
-	name := providerType.Name()          // AccountRepositoryImpl
-
-	// Replace "Impl" suffix to get interface name
-	if len(name) > 4 && name[len(name)-4:] == "Impl" {
-		name = name[:len(name)-4]
-	}
-
-	return c.Register(name, func() interface{} {
-		instance := reflect.New(providerType).Elem()
-		fmt.Printf("Number of fields in %s: %d\n", providerType.Name(), providerType.NumField())
-
-		// Auto-inject dependencies
-		for i := 0; i < providerType.NumField(); i++ {
-			field := providerType.Field(i)
-			injectTag := field.Tag.Get("inject")
-			fmt.Printf("Field: %s, Inject Tag: %s\n", field.Name, injectTag)
-
-			if injectTag == "" {
-				fmt.Println("No inject tag, skipping...")
-				continue
-			}
-
-			// service, err := c.Get(injectTag)
-			// if err != nil {
-			// 	panic(fmt.Sprintf("failed to inject dependency for field %s: %v", field.Name, err))
-			// }
-
-			// if instance.Field(i).Kind() != reflect.Ptr {
-			// 	panic(fmt.Sprintf("field %s is not a pointer", field.Name))
-			// }
-
-			// instance.Field(i).Set(reflect.ValueOf(service))
-		}
-
-		return instance.Addr().Interface()
-	})
+	return nil
 }
 
-// Singleton Register singleton service
-func (c *Container) Singleton(provider interface{}) error {
-	// Retrieve name from struct return type
+// Singleton registers a struct as a singleton with auto-injection
+func (di *DIC) Singleton(name string, provider any) error {
 	providerValue := reflect.ValueOf(provider)
-	if providerValue.Kind() != reflect.Func {
-		return fmt.Errorf("provider must be a function")
+
+	// If it's already a function, register directly as singleton
+	if providerValue.Kind() == reflect.Func {
+		return di.Register(name, provider, Singleton)
 	}
+
+	// If it's a struct, create a factory function with auto-injection
+	safe.Assert(providerValue.Kind() == reflect.Struct, fmt.Sprintf("provider for '%s' must be a struct or function", name))
 
 	providerType := providerValue.Type()
-	if providerType.NumOut() == 0 {
-		return fmt.Errorf("provider must return at least one value")
+	factory := func() any {
+		return di.createInstanceWithInjection(providerType)
 	}
 
-	returnsType := providerType.Out(0)
-	var name string
-	if returnsType.Kind() == reflect.Ptr {
-		name = returnsType.Elem().Name()
-	} else {
-		name = returnsType.Name()
-	}
-
-	return c.Register(name, provider)
+	return di.Register(name, factory, Singleton)
 }
 
-func (c *Container) RetrieveNameFromType(class interface{}) (string, error) {
-	classType := reflect.TypeOf(class)
-	if classType.Kind() != reflect.Struct {
-		return "", fmt.Errorf("class must be a struct")
-	}
+// createInstanceWithInjection creates a new instance with auto-injected dependencies
+func (c *DIC) createInstanceWithInjection(structType reflect.Type) any {
+	instance := reflect.New(structType).Elem()
 
-	name := classType.Name()
-	if len(name) > 4 && name[len(name)-4:] == "Impl" {
-		name = name[:len(name)-4]
-	}
+	// Inject dependencies based on struct field tags
+	for i := range structType.NumField() {
+		field := structType.Field(i)
+		fieldValue := instance.Field(i)
 
-	return name, nil
-}
-
-// Get retrieve a service by name, instantiating it if necessary
-func (c *Container) Get(name string) (interface{}, error) {
-	c.mutex.RLock()
-
-	// check if service is already instantiated
-	if service, exists := c.services[name]; exists {
-		c.mutex.RUnlock()
-		return service, nil
-	}
-
-	// check if provider exists
-	provider, exists := c.providers[name]
-	c.mutex.RUnlock()
-
-	if !exists {
-		return nil, fmt.Errorf("service not found: %s", name)
-	}
-
-	// Resolve dependencies and call provider
-	args, err := c.resolveProviderArgs(provider)
-	if err != nil {
-		return nil, fmt.Errorf("failed to resolve dependencies for %s: %w", name, err)
-	}
-
-	results := provider.Call(args)
-	if len(results) == 0 {
-		return nil, fmt.Errorf("provider must return at least one value")
-	}
-
-	service := results[0].Interface()
-
-	// Now acquire write lock to store the result
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-
-	// Double-check if another goroutine already created it
-	if existingService, exists := c.services[name]; exists {
-		return existingService, nil
-	}
-
-	c.services[name] = service
-	fmt.Println("Instantiated service:", name)
-	return service, nil
-}
-
-func (c *Container) resolveProviderArgs(provider reflect.Value) ([]reflect.Value, error) {
-
-	providerType := provider.Type()
-	numArgs := providerType.NumIn()
-	args := make([]reflect.Value, numArgs)
-
-	for i := 0; i < numArgs; i++ {
-		argType := providerType.In(i)
-
-		// Try to find a registered service that matches the argument type
-		var serviceName string
-		if argType.Kind() == reflect.Ptr {
-			serviceName = argType.Elem().Name()
-		} else {
-			serviceName = argType.Name()
+		if !fieldValue.CanSet() {
+			continue
 		}
 
-		service, err := c.Get(serviceName)
-		if err != nil {
-			return nil, fmt.Errorf("failed to resolve dependency for %s: %w", serviceName, err)
-		}
-
-		args[i] = reflect.ValueOf(service)
-	}
-
-	return args, nil
-}
-
-// Make creates an instance of a struct and auto-injects dependencies using `inject` tags
-func (c *Container) Make(target interface{}) error {
-	targetValue := reflect.ValueOf(target)
-	if targetValue.Kind() != reflect.Ptr {
-		return fmt.Errorf("target must be a pointer")
-	}
-
-	targetValue = targetValue.Elem()
-	if targetValue.Kind() != reflect.Struct {
-		return fmt.Errorf("target must be a pointer to struct")
-	}
-
-	targetType := targetValue.Type()
-	for i := 0; i < targetValue.NumField(); i++ {
-		field := targetValue.Field(i)
-		fieldType := targetType.Field(i)
-
-		// Check for inject tag
-		injectTag := fieldType.Tag.Get("inject")
+		injectTag := field.Tag.Get("inject")
 		if injectTag == "" {
 			continue
 		}
 
-		service, err := c.Get(injectTag)
-		if err != nil {
-			return fmt.Errorf("failed to inject dependency for field %s: %v", fieldType.Name, err)
-		}
+		dependency := safe.Must(c.Resolve(injectTag))
 
-		if field.Kind() != reflect.Ptr {
-			return fmt.Errorf("field %s is not a pointer", fieldType.Name)
-		}
+		// Type checking
+		dependencyValue := reflect.ValueOf(dependency)
+		safe.Assert(
+			dependencyValue.Type().AssignableTo(fieldValue.Type()),
+			fmt.Sprintf("dependency '%s' type mismatch: expected %s, got %s",
+				injectTag, fieldValue.Type(), dependencyValue.Type()),
+		)
 
-		field.Set(reflect.ValueOf(service))
+		fieldValue.Set(dependencyValue)
 	}
 
-	return nil
+	return instance.Addr().Interface()
+}
+
+// Resolve resolves a service by name
+func (c *DIC) Resolve(name string) (any, error) {
+	return safe.Try(func() (any, error) {
+		// Check for circular dependencies
+		if _, isResolving := c.resolving.Load(name); isResolving {
+			return nil, fmt.Errorf("circular dependency detected while resolving '%s': %v", name, c.resolutionStack)
+		}
+
+		c.resolving.Store(name, true)
+		c.resolutionStack = append(c.resolutionStack, name)
+
+		defer func() {
+			c.resolving.Delete(name)
+			if len(c.resolutionStack) > 0 {
+				c.resolutionStack = c.resolutionStack[:len(c.resolutionStack)-1]
+			}
+		}()
+
+		c.mutex.RLock()
+		descriptor, exists := c.services[name]
+		c.mutex.RUnlock()
+
+		safe.Assert(exists, fmt.Sprintf("no provider registered for '%s'", name))
+
+		// For Singleton, return cached instance if exists
+		if descriptor.Lifecycle == Singleton && descriptor.Instance != nil {
+			return descriptor.Instance, nil
+		}
+
+		// Call provider to create instance
+		results := descriptor.Provider.Call([]reflect.Value{})
+		safe.Assert(len(results) >= 1, fmt.Sprintf("provider for '%s' must return at least one value", name))
+
+		service := results[0].Interface()
+
+		// Cache singleton instances
+		if descriptor.Lifecycle == Singleton {
+			c.mutex.Lock()
+			descriptor.Instance = service
+			c.mutex.Unlock()
+		}
+
+		return service, nil
+	})
+}
+
+// ResolveTyped resolves a service by name with type safety using generics
+func ResolveTyped[T any](c *DIC, name string) (T, error) {
+	service, err := c.Resolve(name)
+	if err != nil {
+		var zero T
+		return zero, err
+	}
+
+	result, ok := service.(T)
+	if !ok {
+		var zero T
+		return zero, fmt.Errorf("service '%s' cannot be cast to type %T", name, zero)
+	}
+
+	return result, nil
+}
+
+// MustResolve resolves a service and panics on error
+func (c *DIC) MustResolve(name string) any {
+	return safe.Must(c.Resolve(name))
+}
+
+// MustResolveTyped resolves a service with type safety and panics on error
+func MustResolveTyped[T any](c *DIC, name string) T {
+	return safe.Must(ResolveTyped[T](c, name))
+}
+
+// IsRegistered checks if a service is registered
+func (c *DIC) IsRegistered(name string) bool {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+	_, exists := c.services[name]
+	return exists
+}
+
+// GetRegisteredServices returns all registered service names
+func (c *DIC) GetRegisteredServices() []string {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+
+	names := make([]string, 0, len(c.services))
+	for name := range c.services {
+		names = append(names, name)
+	}
+	return names
+}
+
+// Clear removes all registered services
+func (c *DIC) Clear() {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	c.services = make(map[string]*ServiceDescriptor)
+	c.resolutionStack = make([]string, 0)
+}
+
+// Remove removes a specific service registration
+func (c *DIC) Remove(name string) bool {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+
+	if _, exists := c.services[name]; exists {
+		delete(c.services, name)
+		return true
+	}
+	return false
 }
