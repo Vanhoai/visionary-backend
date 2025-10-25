@@ -1,0 +1,18 @@
+[workspace.package]
+version = "1.0.0"
+
+[workspace]
+resolver = "3"
+members = [
+    "modules/adapters",
+    "modules/application",
+    "modules/core",
+    "modules/domain"
+]
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace.dependencies]
+async-trait = "0.1.89"
+serde = "1.0.228"
