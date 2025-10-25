@@ -1,43 +1,45 @@
 package main
 
 import (
-	"fmt"
 	"log"
+	"visionary-backend/adapters/primary/handlers"
 	"visionary-backend/adapters/primary/routes"
 	"visionary-backend/adapters/secondary/apis"
 	"visionary-backend/adapters/secondary/repositories/scylla"
 	"visionary-backend/core/config"
 	"visionary-backend/core/di"
 	"visionary-backend/core/safe"
+	"visionary-backend/core/utilities"
 	"visionary-backend/domain/applications"
 	"visionary-backend/domain/services"
 
 	"github.com/goccy/go-json"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 )
 
 // Initialize application services, repositories, and other dependencies here
-func initializeServices(container *di.DIC) error {
+func initializeServices(container *di.DIC) {
 	// Register database connections
-	container.RegisterInstance("ScyllaDatabase", &scylla.ScyllaDatabase{
+	safe.MustNoValue(container.RegisterInstance("ScyllaDatabase", &scylla.ScyllaDatabase{
 		Connection: "127.0.0.1",
 		Port:       9042,
-	})
+	}))
 
 	// Register repositories
-	container.Singleton("AccountRepository", scylla.AccountRepositoryImpl{})
+	safe.MustNoValue(container.Singleton("AccountRepository", scylla.AccountRepositoryImpl{}))
 
 	// Register apis
-	container.Singleton("AuthApi", apis.AuthApiImpl{})
+	safe.MustNoValue(container.Singleton("AuthApi", apis.AuthApiImpl{}))
 
 	// Register services
-	container.Singleton("AuthService", services.AuthService{})
-	container.Singleton("AccountService", services.AccountService{})
+	safe.MustNoValue(container.Singleton("AuthService", services.AuthService{}))
+	safe.MustNoValue(container.Singleton("AccountService", services.AccountService{}))
 
 	// Register application services
-	container.Singleton("AccountAppService", applications.AccountAppService{})
-	container.Singleton("AuthAppService", applications.AuthAppService{})
+	safe.MustNoValue(container.Singleton("AccountAppService", applications.AccountAppService{}))
+	safe.MustNoValue(container.Singleton("AuthAppService", applications.AuthAppService{}))
 
 	// accountRepository := di.MustResolveTyped[*scylla.AccountRepositoryImpl](container, "AccountRepository")
 	// accountService := di.MustResolveTyped[*services.AccountService](container, "AccountService")
@@ -49,44 +51,35 @@ func initializeServices(container *di.DIC) error {
 
 	// Print all registered services
 	// fmt.Println("Registered services:", container.GetRegisteredServices())
-	return nil
 }
 
-func initRouters(app *fiber.App, container *di.DIC) error {
+func initRouters(app *fiber.App, container *di.DIC) {
 	// Resolve application services
 	authAppService := di.MustResolveTyped[*applications.AuthAppService](container, "AuthAppService")
 
 	// Setup middlewares
+	app.Use(logger.New())
 	app.Use(recover.New())
 
 	// Setup routers
 	routers := routes.NewRouter(app, authAppService)
 	routers.Setup(container)
-
-	// Print all registered routes
-	for _, route := range app.GetRoutes() {
-		if route.Path == "/" || route.Method == "HEAD" {
-			continue
-		}
-
-		fmt.Printf("Method: %s, Path: %s\n", route.Method, route.Path)
-	}
-
-	return nil
 }
 
 func main() {
-	// Load configuration
+	// Load configuration & common initializations
 	config.Init()
+	utilities.InitValidator()
 
 	// Initialize services
 	container := di.NewDIC()
-	safe.MustNoValue(initializeServices(container))
+	initializeServices(container)
 
 	// Initialize app & routers
 	app := fiber.New(fiber.Config{
-		JSONEncoder: json.Marshal,
-		JSONDecoder: json.Unmarshal,
+		JSONEncoder:  json.Marshal,
+		JSONDecoder:  json.Unmarshal,
+		ErrorHandler: handlers.ErrorHandler,
 	})
 
 	initRouters(app, container)

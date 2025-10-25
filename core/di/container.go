@@ -37,7 +37,7 @@ func NewDIC() *DIC {
 	}
 }
 
-// DIC Register registers a service with the given name, provider function, and lifecycle
+// Register registers a service with the given name, provider function, and lifecycle
 func (di *DIC) Register(name string, provider any, lifecycle Lifecycle) error {
 	di.mutex.Lock()
 	defer di.mutex.Unlock()
@@ -59,7 +59,7 @@ func (di *DIC) Register(name string, provider any, lifecycle Lifecycle) error {
 	return nil
 }
 
-// DIC RegisterInstance registers an existing instance as a singleton service
+// RegisterInstance registers an existing instance as a singleton service
 func (di *DIC) RegisterInstance(name string, instance any) error {
 	di.mutex.Lock()
 	defer di.mutex.Unlock()
@@ -97,7 +97,7 @@ func (di *DIC) Singleton(name string, provider any) error {
 }
 
 // createInstanceWithInjection creates a new instance with auto-injected dependencies
-func (c *DIC) createInstanceWithInjection(structType reflect.Type) any {
+func (di *DIC) createInstanceWithInjection(structType reflect.Type) any {
 	instance := reflect.New(structType).Elem()
 
 	// Inject dependencies based on struct field tags
@@ -114,7 +114,7 @@ func (c *DIC) createInstanceWithInjection(structType reflect.Type) any {
 			continue
 		}
 
-		dependency := safe.Must(c.Resolve(injectTag))
+		dependency := safe.Must(di.Resolve(injectTag))
 
 		// Type checking
 		dependencyValue := reflect.ValueOf(dependency)
@@ -131,26 +131,26 @@ func (c *DIC) createInstanceWithInjection(structType reflect.Type) any {
 }
 
 // Resolve resolves a service by name
-func (c *DIC) Resolve(name string) (any, error) {
+func (di *DIC) Resolve(name string) (any, error) {
 	return safe.Try(func() (any, error) {
 		// Check for circular dependencies
-		if _, isResolving := c.resolving.Load(name); isResolving {
-			return nil, fmt.Errorf("circular dependency detected while resolving '%s': %v", name, c.resolutionStack)
+		if _, isResolving := di.resolving.Load(name); isResolving {
+			return nil, fmt.Errorf("circular dependency detected while resolving '%s': %v", name, di.resolutionStack)
 		}
 
-		c.resolving.Store(name, true)
-		c.resolutionStack = append(c.resolutionStack, name)
+		di.resolving.Store(name, true)
+		di.resolutionStack = append(di.resolutionStack, name)
 
 		defer func() {
-			c.resolving.Delete(name)
-			if len(c.resolutionStack) > 0 {
-				c.resolutionStack = c.resolutionStack[:len(c.resolutionStack)-1]
+			di.resolving.Delete(name)
+			if len(di.resolutionStack) > 0 {
+				di.resolutionStack = di.resolutionStack[:len(di.resolutionStack)-1]
 			}
 		}()
 
-		c.mutex.RLock()
-		descriptor, exists := c.services[name]
-		c.mutex.RUnlock()
+		di.mutex.RLock()
+		descriptor, exists := di.services[name]
+		di.mutex.RUnlock()
 
 		safe.Assert(exists, fmt.Sprintf("no provider registered for '%s'", name))
 
@@ -167,9 +167,9 @@ func (c *DIC) Resolve(name string) (any, error) {
 
 		// Cache singleton instances
 		if descriptor.Lifecycle == Singleton {
-			c.mutex.Lock()
+			di.mutex.Lock()
 			descriptor.Instance = service
-			c.mutex.Unlock()
+			di.mutex.Unlock()
 		}
 
 		return service, nil
@@ -194,8 +194,8 @@ func ResolveTyped[T any](c *DIC, name string) (T, error) {
 }
 
 // MustResolve resolves a service and panics on error
-func (c *DIC) MustResolve(name string) any {
-	return safe.Must(c.Resolve(name))
+func (di *DIC) MustResolve(name string) any {
+	return safe.Must(di.Resolve(name))
 }
 
 // MustResolveTyped resolves a service with type safety and panics on error
@@ -204,41 +204,41 @@ func MustResolveTyped[T any](c *DIC, name string) T {
 }
 
 // IsRegistered checks if a service is registered
-func (c *DIC) IsRegistered(name string) bool {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-	_, exists := c.services[name]
+func (di *DIC) IsRegistered(name string) bool {
+	di.mutex.RLock()
+	defer di.mutex.RUnlock()
+	_, exists := di.services[name]
 	return exists
 }
 
 // GetRegisteredServices returns all registered service names
-func (c *DIC) GetRegisteredServices() []string {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
+func (di *DIC) GetRegisteredServices() []string {
+	di.mutex.RLock()
+	defer di.mutex.RUnlock()
 
-	names := make([]string, 0, len(c.services))
-	for name := range c.services {
+	names := make([]string, 0, len(di.services))
+	for name := range di.services {
 		names = append(names, name)
 	}
 	return names
 }
 
 // Clear removes all registered services
-func (c *DIC) Clear() {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
+func (di *DIC) Clear() {
+	di.mutex.Lock()
+	defer di.mutex.Unlock()
 
-	c.services = make(map[string]*ServiceDescriptor)
-	c.resolutionStack = make([]string, 0)
+	di.services = make(map[string]*ServiceDescriptor)
+	di.resolutionStack = make([]string, 0)
 }
 
 // Remove removes a specific service registration
-func (c *DIC) Remove(name string) bool {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
+func (di *DIC) Remove(name string) bool {
+	di.mutex.Lock()
+	defer di.mutex.Unlock()
 
-	if _, exists := c.services[name]; exists {
-		delete(c.services, name)
+	if _, exists := di.services[name]; exists {
+		delete(di.services, name)
 		return true
 	}
 	return false

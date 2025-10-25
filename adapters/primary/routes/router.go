@@ -26,7 +26,7 @@ func NewRouter(
 	}
 }
 
-func (r *Router) Setup(container *di.DIC) error {
+func (r *Router) Setup(container *di.DIC) {
 	api := r.app.Group("/api")
 
 	authAppService := di.MustResolveTyped[*applications.AuthAppService](container, "AuthAppService")
@@ -41,6 +41,4 @@ func (r *Router) Setup(container *di.DIC) error {
 	v2AchievementHandler := v2handlers.NewAchievementHandler()
 	v2Routes := v2.NewV2Routers(v2AchievementHandler)
 	v2Routes.Setup(api)
-
-	return nil
 }
