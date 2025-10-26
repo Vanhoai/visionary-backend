@@ -1,5 +1,5 @@
-enum EnumProvider {
+pub enum EnumProvider {
     Password,
     Google,
-    Github
+    Github,
 }
