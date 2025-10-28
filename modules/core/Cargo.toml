@@ -7,3 +7,10 @@ edition = "2024"
 workspace = true
 
 [dependencies]
+serde = { workspace = true, features = ["derive"] }
+dotenv = { workspace = true }
+config = { workspace = true }
+once_cell = { workspace = true }
+openssl = { workspace = true }
+jsonwebtoken = { workspace = true, features = ["rust_crypto"] }
+rand = { workspace = true }

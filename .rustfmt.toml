@@ -1,7 +1,7 @@
-# Rust edition 2021
+# Rust edition 2024
 use_small_heuristics = "Max"
 reorder_imports = true
-edition = "2021"
+edition = "2024"
 
 # # Use Unix style newlines, with 2 spaces tabulation.
 newline_style = "Unix"
@@ -15,7 +15,7 @@ hard_tabs = false
 # format_strings = true
 
 # # Increase the max line width
-max_width = 120
+max_width = 80
 # comment_width = 100
 
 # # Merge nested imports
