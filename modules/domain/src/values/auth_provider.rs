@@ -1,5 +1,6 @@
-pub enum EnumProvider {
+pub enum AuthProvider {
     Password,
     Google,
     Github,
+    Face,
 }

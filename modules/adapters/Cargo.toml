@@ -7,3 +7,11 @@ edition = "2024"
 workspace = true
 
 [dependencies]
+shared = { path = "../shared" }
+domain = { path = "../domain" }
+axum = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+async-trait = { workspace = true }
+once_cell = { workspace = true }
+validator = { workspace = true }

@@ -15,7 +15,7 @@ hard_tabs = false
 # format_strings = true
 
 # # Increase the max line width
-max_width = 80
+max_width = 120
 # comment_width = 100
 
 # # Merge nested imports

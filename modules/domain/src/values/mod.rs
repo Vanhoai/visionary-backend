@@ -1,1 +1,1 @@
-pub mod providers;
+pub mod auth_provider;

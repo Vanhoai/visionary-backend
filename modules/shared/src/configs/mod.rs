@@ -1,8 +1,8 @@
-use std::sync::Arc;
 use crate::configs::configs::{AppConfig, DevelopmentConfig, ProductionConfig};
 use config::{Config, Environment};
 use dotenv::var;
 use once_cell::sync::Lazy;
+use std::sync::Arc;
 
 pub mod configs;
 
@@ -24,6 +24,7 @@ impl AppConfig {
                     mode: deserialized.mode,
                     server: deserialized.server,
                     redis: deserialized.redis,
+                    crypto: deserialized.crypto,
                     jwt: deserialized.jwt,
                 }
             },
@@ -36,6 +37,7 @@ impl AppConfig {
                     mode: deserialized.mode,
                     server: deserialized.dev_server,
                     redis: deserialized.dev_redis,
+                    crypto: deserialized.dev_crypto,
                     jwt: deserialized.dev_jwt,
                 }
             },

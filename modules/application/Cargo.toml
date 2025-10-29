@@ -7,7 +7,7 @@ edition = "2024"
 workspace = true
 
 [dependencies]
-core = { path = "../core" }
+shared = { path = "../shared" }
 domain = { path = "../domain" }
 adapters = { path = "../adapters" }
 tokio = { workspace = true, features = ["full"] }

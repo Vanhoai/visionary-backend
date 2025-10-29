@@ -7,5 +7,10 @@ edition = "2024"
 workspace = true
 
 [dependencies]
+shared = { path = "../shared" }
 async-trait = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
+uuid = { workspace = true, features = ["v4", "v7"] }
+chrono = { workspace = true }
+argon2 = { workspace = true }
+validator = { workspace = true, features = ["derive"] }

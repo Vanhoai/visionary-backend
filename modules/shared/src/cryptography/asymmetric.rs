@@ -1,6 +1,7 @@
 use openssl::ec::{EcGroup, EcKey};
 use openssl::nid::Nid;
 use openssl::pkey::PKey;
+use openssl::rsa::Rsa;
 use std::fs::File;
 use std::io::Write;
 
@@ -11,19 +12,16 @@ pub enum CurveAlgorithms {
     SECP521R1,
 }
 
-pub struct EcAlgorithms {}
+type KeypairResult<T> = Result<T, Box<dyn std::error::Error>>;
 
-impl EcAlgorithms {
-    pub fn new() -> Self {
-        EcAlgorithms {}
-    }
+pub struct AsymmetricKeyGenerator;
 
-    pub fn generate_keypair(
-        &self,
+impl AsymmetricKeyGenerator {
+    pub fn generate_ec_keypair(
         curve: CurveAlgorithms,
         private_key_path: &str,
         public_key_path: &str,
-    ) -> Result<(), Box<dyn std::error::Error>> {
+    ) -> KeypairResult<(Vec<u8>, Vec<u8>)> {
         // Convert curve name to NID
         let nid = match curve {
             CurveAlgorithms::SECP256K1 => Nid::SECP256K1,
@@ -42,14 +40,38 @@ impl EcAlgorithms {
 
         // Serialize private key to PEM format
         let private_key_pem = keypair.private_key_to_pem_pkcs8()?;
+
         let mut private_key_file = File::create(private_key_path)?;
         private_key_file.write_all(&private_key_pem)?;
 
         // Serialize public key to PEM format
         let public_key_pem = keypair.public_key_to_pem()?;
+
         let mut public_key_file = File::create(public_key_path)?;
         public_key_file.write_all(&public_key_pem)?;
 
-        Ok(())
+        println!("Public key file generated at: {}", public_key_path);
+        println!("Private key file generated at: {}", private_key_path);
+        Ok((private_key_pem, public_key_pem))
+    }
+
+    pub fn generate_rsa_keypair(
+        key_size: u32,
+        private_key_path: &str,
+        public_key_path: &str,
+    ) -> KeypairResult<(Vec<u8>, Vec<u8>)> {
+        let rsa = Rsa::generate(key_size)?;
+
+        let keypair = PKey::from_rsa(rsa)?;
+
+        let private_key_pem = keypair.private_key_to_pem_pkcs8()?;
+        let mut private_key_file = File::create(private_key_path)?;
+        private_key_file.write_all(&private_key_pem)?;
+
+        let public_key_pem = keypair.public_key_to_pem()?;
+        let mut public_key_file = File::create(public_key_path)?;
+        public_key_file.write_all(&public_key_pem)?;
+
+        Ok((private_key_pem, public_key_pem))
     }
 }
