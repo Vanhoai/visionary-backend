@@ -31,13 +31,11 @@ impl AuthAppService {
     }
 }
 
-// ============================== MANAGE SESSION USE CASES ==============================
+// region ============================== MANAGE SESSION USE CASES ==============================
 #[async_trait]
 impl ManageSessionUseCases for AuthAppService {
     async fn sign_up(&self, params: &AuthParams) -> Result<AccountEntity, Failure> {
-        
-        
-        Err(Failure::BadRequest("Sign up not implemented".to_string()))
+        Err(Failure::NotImplemented("Sign up not implemented".to_string()))
     }
 
     async fn sign_in(&self, params: &AuthParams) -> Result<AuthResponse, Failure> {
@@ -48,4 +46,4 @@ impl ManageSessionUseCases for AuthAppService {
         Ok(AuthResponse { access_token: "TOKEN".to_string(), refresh_token: "TOKEN".to_string() })
     }
 }
-// ============================== MANAGE SESSION USE CASES ==============================
+// endregion ============================== MANAGE SESSION USE CASES ==============================

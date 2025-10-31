@@ -3,18 +3,18 @@ use serde::Serialize;
 use shared::models::failure::Failure;
 use uuid::Uuid;
 
+use crate::entities::base_entity::BaseEntity;
+
 #[derive(Debug, Clone, Serialize)]
 pub struct AccountEntity {
-    pub id: String,
+    #[serde(flatten)]
+    pub base: BaseEntity,
     pub username: String,
     pub avatar: String,
     pub email: String,
     pub email_verified: bool,
     pub bio: String,
     pub is_active: bool,
-    pub created_at: i64,
-    pub updated_at: i64,
-    pub deleted_at: Option<i64>,
 }
 
 impl AccountEntity {
@@ -23,20 +23,14 @@ impl AccountEntity {
     pub fn new(username: String, email: String) -> Result<Self, Failure> {
         Self::validate_username(&username)?;
 
-        let uuid = Uuid::now_v7().to_string();
-        let now = chrono::Utc::now().timestamp();
-
         Ok(AccountEntity {
-            id: uuid,
+            base: BaseEntity::new(),
             username,
-            avatar: String::new(),
             email,
+            avatar: String::new(),
             email_verified: false,
-            bio: String::new(),
+            bio: "Please write your bio.".to_string(),
             is_active: true,
-            created_at: now,
-            updated_at: now,
-            deleted_at: None,
         })
     }
 

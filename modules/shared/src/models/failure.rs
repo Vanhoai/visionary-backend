@@ -10,6 +10,8 @@ pub enum Failure {
     Conflict(String),
     DatabaseError(String),
     ValidationError(String),
+    NotImplemented(String),
+    InternalError(String),
 }
 
 impl Failure {
@@ -25,6 +27,8 @@ impl Failure {
             Failure::Conflict(msg) => msg,
             Failure::DatabaseError(msg) => msg,
             Failure::ValidationError(msg) => msg,
+            Failure::NotImplemented(msg) => msg,
+            Failure::InternalError(msg) => msg,
         }
     }
 
@@ -40,6 +44,8 @@ impl Failure {
             Failure::Conflict(_) => "CONFLICT",
             Failure::DatabaseError(_) => "DATABASE_ERROR",
             Failure::ValidationError(_) => "VALIDATION_ERROR",
+            Failure::NotImplemented(_) => "NOT_IMPLEMENTED",
+            Failure::InternalError(_) => "INTERNAL_ERROR",
         }
     }
 
@@ -55,6 +61,8 @@ impl Failure {
             Failure::Conflict(_) => 409,
             Failure::DatabaseError(_) => 500,
             Failure::ValidationError(_) => 422,
+            Failure::NotImplemented(_) => 401,
+            Failure::InternalError(_) => 500,
         }
     }
 }

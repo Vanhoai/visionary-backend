@@ -3,7 +3,6 @@ use axum::{
     extract::{FromRequest, Request},
 };
 use serde::de::DeserializeOwned;
-use std::collections::HashMap;
 use validator::Validate;
 
 use crate::shared::models::failure::HttpFailure;

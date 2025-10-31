@@ -1,14 +1,14 @@
+use mongodb::{Collection, Database};
+use mongodb::options::ClientOptions;
 use once_cell::sync::Lazy;
 use std::sync::Arc;
+use tokio::sync::OnceCell;
 
-use crate::secondary::{
-    apis::auth_api_impl::AuthApiImpl,
-    repositories::{
-        account_repository_impl::AccountRepositoryImpl, notification_repository_impl::NotificationRepositoryImpl,
-        provider_repository_impl::ProviderRepositoryImpl, session_repository_impl::SessionRepositoryImpl,
-    },
-};
-
+use crate::secondary::apis::auth_api_impl::AuthApiImpl;
+use crate::secondary::repositories::mongodb::mongo_account_repository::MongoAccountRepository;
+use crate::secondary::repositories::mongodb::mongo_notification_repository::MongoNotificationRepository;
+use crate::secondary::repositories::mongodb::mongo_provider_repository::MongoProviderRepository;
+use crate::secondary::repositories::mongodb::mongo_session_repository::MongoSessionRepository;
 use domain::{
     apis::auth_api::AuthApi,
     applications::{auth_app_service::AuthAppService, notification_app_service::NotificationAppService},
@@ -24,6 +24,8 @@ use domain::{
         session_service::{SessionService, SessionServiceImpl},
     },
 };
+use domain::entities::account_entity::AccountEntity;
+use shared::configs::APP_CONFIG;
 
 pub struct Container {
     // Repositories
@@ -48,9 +50,15 @@ pub struct Container {
 }
 
 impl Container {
-    pub fn new() -> Self {
+    pub async fn new() -> Self {
+        // Initialize database connection
+        let mongodb_connection = Self::create_mongo_connection().await;
+        
+        // Initialize collections
+        let account_collection = Arc::new(mongodb_connection.collection("accounts"));
+        
         // Initialize repositories
-        let account_repository = Self::create_account_repository();
+        let account_repository = Self::create_account_repository(account_collection.clone());
         let provider_repository = Self::create_provider_repository();
         let session_repository = Self::create_session_repository();
         let notification_repository = Self::create_notification_repository();
@@ -98,21 +106,31 @@ impl Container {
         }
     }
 
+    // Database
+    async fn create_mongo_connection() -> Database {
+        let uri = APP_CONFIG.mongo.connection_string();
+        let client_options = ClientOptions::parse(uri).await.unwrap();
+
+        // Create a new client and connect to the server
+        let client = mongodb::Client::with_options(client_options).unwrap();
+        client.database(&APP_CONFIG.mongo.database)
+    }
+
     // Repository factories
-    fn create_account_repository() -> Arc<dyn AccountRepository> {
-        Arc::new(AccountRepositoryImpl::new())
+    fn create_account_repository(collection: Arc<Collection<AccountEntity>>) -> Arc<dyn AccountRepository> {
+        Arc::new(MongoAccountRepository::new(collection))
     }
 
     fn create_provider_repository() -> Arc<dyn ProviderRepository> {
-        Arc::new(ProviderRepositoryImpl::new())
+        Arc::new(MongoProviderRepository::new())
     }
 
     fn create_session_repository() -> Arc<dyn SessionRepository> {
-        Arc::new(SessionRepositoryImpl::new())
+        Arc::new(MongoSessionRepository::new())
     }
 
     fn create_notification_repository() -> Arc<dyn NotificationRepository> {
-        Arc::new(NotificationRepositoryImpl::new())
+        Arc::new(MongoNotificationRepository::new())
     }
 
     // Apis factories
@@ -161,10 +179,16 @@ impl Container {
     pub fn auth_app_service(&self) -> Arc<AuthAppService> {
         self.auth_app_service.clone()
     }
-    
+
     pub fn notification_app_service(&self) -> Arc<NotificationAppService> {
         self.notification_app_service.clone()
     }
 }
 
-pub static DI_CONTAINER: Lazy<Arc<Container>> = Lazy::new(|| Arc::new(Container::new()));
+static DI_CONTAINER: OnceCell<Arc<Container>> = OnceCell::const_new();
+pub async fn instance() -> Arc<Container> {
+    DI_CONTAINER
+        .get_or_init(|| async { Arc::new(Container::new().await) })
+        .await
+        .clone()
+}

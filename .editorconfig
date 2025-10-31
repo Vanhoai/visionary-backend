@@ -8,8 +8,7 @@ indent_style = space
 insert_final_newline = true
 trim_trailing_whitespace = true
 
-[*.go]
-indent_style = space
+[*.rs]
 indent_size = 4
 
 [*.{json,yml,yaml}]

@@ -1,9 +1,23 @@
 use serde::Deserialize;
 
+use crate::functions::deserialize_functions::deserialize_comma_separated;
+
 #[derive(Debug, Deserialize)]
 pub struct ServerConfig {
     pub host: String,
     pub port: u16,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct CorsConfig {
+    pub enabled: bool,
+    #[serde(deserialize_with = "deserialize_comma_separated")]
+    pub allow_origins: Vec<String>,
+    #[serde(deserialize_with = "deserialize_comma_separated")]
+    pub allow_headers: Vec<String>,
+    #[serde(deserialize_with = "deserialize_comma_separated")]
+    pub allow_methods: Vec<String>,
+    pub allow_credentials: bool,
 }
 
 #[derive(Debug, Deserialize)]
@@ -12,6 +26,21 @@ pub struct RedisConfig {
     pub port: u16,
     pub db: u8,
     pub password: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct MongoConfig {
+    pub host: String,
+    pub port: u16,
+    pub database: String,
+    pub username: String,
+    pub password: String,
+}
+
+impl MongoConfig {
+    pub fn connection_string(&self) -> String {
+        format!("mongodb+srv://{}:{}@{}:{}/", self.username, self.password, self.host, self.port)
+    }
 }
 
 #[derive(Debug, Deserialize)]
@@ -32,24 +61,8 @@ pub struct JwtConfig {
 pub struct AppConfig {
     pub mode: String,
     pub server: ServerConfig,
-    pub redis: RedisConfig,
-    pub crypto: CryptoConfig,
-    pub jwt: JwtConfig,
-}
-
-#[derive(Deserialize, Debug)]
-pub struct DevelopmentConfig {
-    pub mode: String,
-    pub dev_server: ServerConfig,
-    pub dev_redis: RedisConfig,
-    pub dev_crypto: CryptoConfig,
-    pub dev_jwt: JwtConfig,
-}
-
-#[derive(Deserialize, Debug)]
-pub struct ProductionConfig {
-    pub mode: String,
-    pub server: ServerConfig,
+    pub cors: CorsConfig,
+    pub mongo: MongoConfig,
     pub redis: RedisConfig,
     pub crypto: CryptoConfig,
     pub jwt: JwtConfig,
