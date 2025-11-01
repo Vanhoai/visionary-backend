@@ -29,18 +29,9 @@ pub struct RedisConfig {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct MongoConfig {
-    pub host: String,
-    pub port: u16,
-    pub database: String,
-    pub username: String,
-    pub password: String,
-}
-
-impl MongoConfig {
-    pub fn connection_string(&self) -> String {
-        format!("mongodb+srv://{}:{}@{}:{}/", self.username, self.password, self.host, self.port)
-    }
+pub struct DatabaseConfig {
+    pub mongo_uri: String,
+    pub mongo_database: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -62,7 +53,7 @@ pub struct AppConfig {
     pub mode: String,
     pub server: ServerConfig,
     pub cors: CorsConfig,
-    pub mongo: MongoConfig,
+    pub database: DatabaseConfig,
     pub redis: RedisConfig,
     pub crypto: CryptoConfig,
     pub jwt: JwtConfig,

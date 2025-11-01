@@ -1,7 +1,9 @@
-use mongodb::{Collection, Database};
-use mongodb::options::ClientOptions;
+use mongodb::bson::doc;
+use mongodb::options::{ClientOptions, ServerApi, ServerApiVersion};
+use mongodb::{Client, Collection, Database};
 use once_cell::sync::Lazy;
 use std::sync::Arc;
+use std::time::Duration;
 use tokio::sync::OnceCell;
 
 use crate::secondary::apis::auth_api_impl::AuthApiImpl;
@@ -9,6 +11,7 @@ use crate::secondary::repositories::mongodb::mongo_account_repository::MongoAcco
 use crate::secondary::repositories::mongodb::mongo_notification_repository::MongoNotificationRepository;
 use crate::secondary::repositories::mongodb::mongo_provider_repository::MongoProviderRepository;
 use crate::secondary::repositories::mongodb::mongo_session_repository::MongoSessionRepository;
+use domain::entities::account_entity::AccountEntity;
 use domain::{
     apis::auth_api::AuthApi,
     applications::{auth_app_service::AuthAppService, notification_app_service::NotificationAppService},
@@ -24,7 +27,6 @@ use domain::{
         session_service::{SessionService, SessionServiceImpl},
     },
 };
-use domain::entities::account_entity::AccountEntity;
 use shared::configs::APP_CONFIG;
 
 pub struct Container {
@@ -53,10 +55,10 @@ impl Container {
     pub async fn new() -> Self {
         // Initialize database connection
         let mongodb_connection = Self::create_mongo_connection().await;
-        
+
         // Initialize collections
         let account_collection = Arc::new(mongodb_connection.collection("accounts"));
-        
+
         // Initialize repositories
         let account_repository = Self::create_account_repository(account_collection.clone());
         let provider_repository = Self::create_provider_repository();
@@ -108,12 +110,21 @@ impl Container {
 
     // Database
     async fn create_mongo_connection() -> Database {
-        let uri = APP_CONFIG.mongo.connection_string();
-        let client_options = ClientOptions::parse(uri).await.unwrap();
+        let uri = APP_CONFIG.database.mongo_uri.clone();
+
+        let server_api = ServerApi::builder().version(ServerApiVersion::V1).build();
+        let mut client_options = ClientOptions::parse(uri).await.unwrap();
+        client_options.server_api = Some(server_api);
+
+        // Configure connection pool
+        client_options.min_pool_size = Some(10);
+        client_options.max_pool_size = Some(100);
+        client_options.connect_timeout = Some(Duration::from_secs(5));
+        client_options.server_selection_timeout = Some(Duration::from_secs(5));
 
         // Create a new client and connect to the server
-        let client = mongodb::Client::with_options(client_options).unwrap();
-        client.database(&APP_CONFIG.mongo.database)
+        let client = Client::with_options(client_options).unwrap();
+        client.database(&APP_CONFIG.database.mongo_database)
     }
 
     // Repository factories
@@ -187,8 +198,5 @@ impl Container {
 
 static DI_CONTAINER: OnceCell<Arc<Container>> = OnceCell::const_new();
 pub async fn instance() -> Arc<Container> {
-    DI_CONTAINER
-        .get_or_init(|| async { Arc::new(Container::new().await) })
-        .await
-        .clone()
+    DI_CONTAINER.get_or_init(|| async { Arc::new(Container::new().await) }).await.clone()
 }

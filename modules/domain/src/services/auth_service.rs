@@ -9,7 +9,7 @@ use argon2::{Argon2, PasswordHash, PasswordVerifier, password_hash::PasswordHash
 
 #[async_trait]
 pub trait AuthService: Send + Sync {
-    async fn hash_password(&self, password: &str) -> Result<String, Failure>;
+    fn hash_password(&self, password: &str) -> Result<String, Failure>;
     async fn verify_password(&self, password: &str, hash: &str) -> Result<bool, Failure>;
 }
 
@@ -25,7 +25,7 @@ impl AuthServiceImpl {
 
 #[async_trait]
 impl AuthService for AuthServiceImpl {
-    async fn hash_password(&self, password: &str) -> Result<String, Failure> {
+    fn hash_password(&self, password: &str) -> Result<String, Failure> {
         let salt = SaltString::generate(&mut OsRng);
         let argon2 = Argon2::default();
 

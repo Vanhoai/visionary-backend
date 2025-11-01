@@ -53,9 +53,9 @@ pub fn initialize_app() -> Router {
     tracing::info!("Starting application with mode: {:?}", APP_CONFIG.mode);
 
     let traces = TraceLayer::new_for_http()
-        .make_span_with(trace::DefaultMakeSpan::new().level(Level::DEBUG))
-        .on_request(trace::DefaultOnRequest::new().level(Level::DEBUG))
-        .on_response(trace::DefaultOnResponse::new().level(Level::DEBUG));
+        .make_span_with(trace::DefaultMakeSpan::new().level(Level::INFO))
+        .on_request(trace::DefaultOnRequest::new().level(Level::INFO))
+        .on_response(trace::DefaultOnResponse::new().level(Level::INFO));
 
     match APP_CONFIG.cors.enabled {
         true => {

@@ -33,7 +33,7 @@ impl AppConfig {
             mode: deserialized.mode,
             server: deserialized.server,
             cors: deserialized.cors,
-            mongo: deserialized.mongo,
+            database: deserialized.database,
             redis: deserialized.redis,
             crypto: deserialized.crypto,
             jwt: deserialized.jwt,

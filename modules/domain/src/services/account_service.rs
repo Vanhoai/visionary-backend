@@ -1,8 +1,8 @@
+use crate::entities::account_entity::AccountEntity;
 use crate::repositories::account_repository::AccountRepository;
 use async_trait::async_trait;
-use std::sync::Arc;
 use shared::models::failure::Failure;
-use crate::entities::account_entity::AccountEntity;
+use std::sync::Arc;
 
 #[async_trait]
 pub trait AccountService: Send + Sync {
@@ -23,10 +23,17 @@ impl AccountServiceImpl {
 #[async_trait]
 impl AccountService for AccountServiceImpl {
     async fn check_email_exists(&self, email: &str) -> Result<bool, Failure> {
-        todo!()
+        match self.repository.find_by_email(email).await? {
+            Some(_) => Ok(true),
+            None => Ok(false),
+        }
     }
 
     async fn create_account(&self, username: String, email: String) -> Result<AccountEntity, Failure> {
-        todo!()
+        // Business logic: validate & create account will be here
+        let account = AccountEntity::new(username, email)?;
+
+        // Save to repository
+        self.repository.create(account).await
     }
 }

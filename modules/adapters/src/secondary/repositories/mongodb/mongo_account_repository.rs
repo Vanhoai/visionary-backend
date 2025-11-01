@@ -2,6 +2,7 @@ use async_trait::async_trait;
 use domain::entities::account_entity::AccountEntity;
 use domain::repositories::account_repository::AccountRepository;
 use mongodb::Collection;
+use shared::types::DomainResponse;
 use std::sync::Arc;
 
 pub struct MongoAccountRepository {
@@ -15,4 +16,12 @@ impl MongoAccountRepository {
 }
 
 #[async_trait]
-impl AccountRepository for MongoAccountRepository {}
+impl AccountRepository for MongoAccountRepository {
+    async fn create(&self, account: AccountEntity) -> DomainResponse<AccountEntity> {
+        Ok(account)
+    }
+
+    async fn find_by_email(&self, email: &str) -> DomainResponse<Option<AccountEntity>> {
+        Ok(None)
+    }
+}

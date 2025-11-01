@@ -35,7 +35,19 @@ impl AuthAppService {
 #[async_trait]
 impl ManageSessionUseCases for AuthAppService {
     async fn sign_up(&self, params: &AuthParams) -> Result<AccountEntity, Failure> {
-        Err(Failure::NotImplemented("Sign up not implemented".to_string()))
+        // 1. Check if email already exists
+        if self.account_service.check_email_exists(&params.email).await? {
+            return Err(Failure::Conflict("Email already exists".to_string()));
+        }
+
+        // 2. Hash password before saving
+        let hashed_password = self.auth_service.hash_password(&params.password)?;
+
+        // 3. Create account & provider
+        let username = params.email.split("@").collect::<Vec<&str>>()[0].to_string();
+        let account = self.account_service.create_account(username, params.email.clone()).await?;
+
+        Ok(account)
     }
 
     async fn sign_in(&self, params: &AuthParams) -> Result<AuthResponse, Failure> {
