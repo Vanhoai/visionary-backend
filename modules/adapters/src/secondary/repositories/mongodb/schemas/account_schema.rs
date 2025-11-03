@@ -23,7 +23,7 @@ pub struct AccountSchema {
 impl EntitySchema<AccountEntity> for AccountSchema {
     fn from_entity(entity: AccountEntity) -> Self {
         Self {
-            id: Some(ObjectId::from_str(entity.base.id.as_str()).unwrap()),
+            id: entity.base.id.as_ref().and_then(|id| ObjectId::from_str(id).ok()),
             username: entity.username,
             avatar: entity.avatar,
             email: entity.email,
@@ -39,7 +39,7 @@ impl EntitySchema<AccountEntity> for AccountSchema {
     fn to_entity(&self) -> AccountEntity {
         AccountEntity {
             base: domain::entities::base_entity::BaseEntity {
-                id: self.id.as_ref().unwrap().to_string(),
+                id: self.id.as_ref().map(|oid| oid.to_hex()),
                 created_at: self.created_at,
                 updated_at: self.updated_at,
                 deleted_at: self.deleted_at,

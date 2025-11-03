@@ -1,8 +1,8 @@
-use std::sync::Arc;
 use crate::services::notification_service::NotificationService;
+use std::sync::Arc;
 
 pub struct NotificationAppService {
-    notification_service: Arc<dyn NotificationService>
+    notification_service: Arc<dyn NotificationService>,
 }
 
 impl NotificationAppService {

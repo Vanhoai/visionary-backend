@@ -9,11 +9,10 @@ pub struct ProviderEntity {
     pub account_id: String,
     pub auth_provider: String,
     pub identify: String,
-    pub extra: Option<String>,
 }
 
 impl ProviderEntity {
-    pub fn new(account_id: String, provider: AuthProvider, identify: String, extra: Option<String>) -> Self {
-        Self { base: BaseEntity::new(), account_id, auth_provider: provider.to_string(), identify, extra }
+    pub fn new(include_id: bool, account_id: String, provider: AuthProvider, identify: String) -> Self {
+        Self { base: BaseEntity::new(include_id), account_id, auth_provider: provider.to_string(), identify }
     }
 }

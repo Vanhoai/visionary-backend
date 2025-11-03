@@ -1,7 +1,5 @@
-use crate::repositories::account_repository::AccountRepository;
 use async_trait::async_trait;
 use shared::models::failure::Failure;
-use std::sync::Arc;
 
 use argon2::password_hash::SaltString;
 use argon2::password_hash::rand_core::OsRng;
@@ -10,16 +8,14 @@ use argon2::{Argon2, PasswordHash, PasswordVerifier, password_hash::PasswordHash
 #[async_trait]
 pub trait AuthService: Send + Sync {
     fn hash_password(&self, password: &str) -> Result<String, Failure>;
-    async fn verify_password(&self, password: &str, hash: &str) -> Result<bool, Failure>;
+    fn verify_password(&self, password: &str, hash: &str) -> Result<bool, Failure>;
 }
 
-pub struct AuthServiceImpl {
-    repository: Arc<dyn AccountRepository>,
-}
+pub struct AuthServiceImpl {}
 
 impl AuthServiceImpl {
-    pub fn new(repository: Arc<dyn AccountRepository>) -> Self {
-        Self { repository }
+    pub fn new() -> Self {
+        Self {}
     }
 }
 
@@ -35,7 +31,7 @@ impl AuthService for AuthServiceImpl {
         }
     }
 
-    async fn verify_password(&self, password: &str, hash: &str) -> Result<bool, Failure> {
+    fn verify_password(&self, password: &str, hash: &str) -> Result<bool, Failure> {
         let parsed_hash =
             PasswordHash::new(hash).map_err(|e| Failure::InternalServerError(format!("Invalid hash format: {}", e)))?;
 

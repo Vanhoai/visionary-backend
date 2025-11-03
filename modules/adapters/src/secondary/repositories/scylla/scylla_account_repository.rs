@@ -26,6 +26,10 @@ impl BaseRepository<AccountEntity> for ScyllaAccountRepository {
         todo!()
     }
 
+    async fn remove(&self, id: &str) -> DomainResponse<AccountEntity> {
+        todo!()
+    }
+
     async fn find_by_id(&self, id: &str) -> DomainResponse<Option<AccountEntity>> {
         todo!()
     }

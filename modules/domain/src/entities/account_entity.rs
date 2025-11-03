@@ -19,12 +19,12 @@ pub struct AccountEntity {
 }
 
 impl AccountEntity {
-    pub fn new(username: String, email: String) -> Result<Self, Failure> {
+    pub fn new(include_id: bool, username: String, email: String) -> Result<Self, Failure> {
         Self::validate_username(&username)?;
         Self::validate_email(&email)?;
 
         Ok(AccountEntity {
-            base: BaseEntity::new(),
+            base: BaseEntity::new(include_id),
             username,
             email,
             avatar: String::new(),

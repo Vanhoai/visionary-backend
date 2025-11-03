@@ -15,7 +15,6 @@ use crate::shared::utilities::databases;
 use domain::{
     apis::auth_api::AuthApi,
     applications::{auth_app_service::AuthAppService, notification_app_service::NotificationAppService},
-    entities::account_entity::AccountEntity,
     repositories::{
         account_repository::AccountRepository, notification_repository::NotificationRepository,
         provider_repository::ProviderRepository, session_repository::SessionRepository,
@@ -36,7 +35,7 @@ pub struct AppState {
 }
 
 impl AppState {
-    pub async fn new() -> Self {
+    pub async fn new() -> Result<Self, Box<dyn std::error::Error>> {
         // Initialize database connection
         let mongodb_connection = databases::mongo_client().await;
 
@@ -55,7 +54,7 @@ impl AppState {
 
         // Initialize services
         let account_service = Self::create_account_service(account_repository.clone());
-        let auth_service = Self::create_auth_service(account_repository.clone());
+        let auth_service = Self::create_auth_service();
         let provider_service = Self::create_provider_service(provider_repository.clone());
         let notification_service = Self::create_notification_service(notification_repository.clone());
         let session_service = Self::create_session_service(session_repository.clone());
@@ -71,7 +70,8 @@ impl AppState {
 
         let notification_app_service = Self::create_notification_app_service(notification_service.clone());
 
-        AppState { auth_app_service, notification_app_service }
+        // Return AppState
+        Ok(AppState { auth_app_service, notification_app_service })
     }
 
     // Repository factories
@@ -101,8 +101,8 @@ impl AppState {
         Arc::new(AccountServiceImpl::new(repository))
     }
 
-    fn create_auth_service(repository: Arc<dyn AccountRepository>) -> Arc<dyn AuthService> {
-        Arc::new(AuthServiceImpl::new(repository))
+    fn create_auth_service() -> Arc<dyn AuthService> {
+        Arc::new(AuthServiceImpl::new())
     }
 
     fn create_provider_service(repository: Arc<dyn ProviderRepository>) -> Arc<dyn ProviderService> {

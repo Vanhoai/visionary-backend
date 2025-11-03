@@ -49,9 +49,6 @@ impl AsymmetricKeyGenerator {
 
         let mut public_key_file = File::create(public_key_path)?;
         public_key_file.write_all(&public_key_pem)?;
-
-        println!("Public key file generated at: {}", public_key_path);
-        println!("Private key file generated at: {}", private_key_path);
         Ok((private_key_pem, public_key_pem))
     }
 
@@ -71,7 +68,6 @@ impl AsymmetricKeyGenerator {
         let public_key_pem = keypair.public_key_to_pem()?;
         let mut public_key_file = File::create(public_key_path)?;
         public_key_file.write_all(&public_key_pem)?;
-
         Ok((private_key_pem, public_key_pem))
     }
 }

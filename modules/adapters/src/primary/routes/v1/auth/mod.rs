@@ -1,4 +1,4 @@
-pub mod routes;
-mod sign_in;
 mod oauth;
-mod sign_up;
+pub mod routes;
+mod sign_in_function;
+mod sign_up_function;

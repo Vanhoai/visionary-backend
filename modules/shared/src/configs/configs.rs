@@ -44,8 +44,8 @@ pub struct CryptoConfig {
 
 #[derive(Debug, Deserialize)]
 pub struct JwtConfig {
-    pub access_duration: String,
-    pub refresh_duration: String,
+    pub access_token_expiry: i64,
+    pub refresh_token_expiry: i64,
 }
 
 #[derive(Deserialize, Debug)]

@@ -14,4 +14,4 @@ uuid = { workspace = true, features = ["v4", "v7"] }
 chrono = { workspace = true }
 argon2 = { workspace = true }
 validator = { workspace = true, features = ["derive"] }
-regex = "1.12.2"
+regex = { workspace = true }
