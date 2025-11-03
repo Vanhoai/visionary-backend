@@ -1,20 +1,20 @@
-use async_trait::async_trait;
-use std::sync::Arc;
-
-use shared::models::failure::Failure;
-
 use crate::apis::auth_api::AuthApi;
 use crate::entities::account_entity::AccountEntity;
-use crate::services::account_service::AccountService;
-use crate::services::auth_service::AuthService;
-use crate::services::provider_service::ProviderService;
+use crate::services::{
+    account_service::AccountService, auth_service::AuthService, provider_service::ProviderService,
+    session_service::SessionService,
+};
 use crate::usecases::auth_usecases::{AuthParams, AuthResponse, ManageSessionUseCases, RefreshTokenParams};
+use async_trait::async_trait;
+use shared::models::failure::Failure;
+use std::sync::Arc;
 
 pub struct AuthAppService {
     // services
     auth_service: Arc<dyn AuthService>,
     account_service: Arc<dyn AccountService>,
     provider_service: Arc<dyn ProviderService>,
+    session_service: Arc<dyn SessionService>,
 
     // apis
     auth_api: Arc<dyn AuthApi>,
@@ -25,9 +25,10 @@ impl AuthAppService {
         auth_service: Arc<dyn AuthService>,
         account_service: Arc<dyn AccountService>,
         provider_service: Arc<dyn ProviderService>,
+        session_service: Arc<dyn SessionService>,
         auth_api: Arc<dyn AuthApi>,
     ) -> Self {
-        Self { auth_service, account_service, provider_service, auth_api }
+        Self { auth_service, account_service, provider_service, session_service, auth_api }
     }
 }
 

@@ -1,11 +1,19 @@
-#[derive(Clone, Debug)]
+use crate::entities::base_entity::BaseEntity;
+use crate::values::auth_provider::AuthProvider;
+use serde::Serialize;
+
+#[derive(Clone, Serialize)]
 pub struct ProviderEntity {
-    pub id: String,
+    #[serde(flatten)]
+    pub base: BaseEntity,
     pub account_id: String,
-    pub provider: String,
+    pub auth_provider: String,
     pub identify: String,
     pub extra: Option<String>,
-    pub created_at: i64,
-    pub updated_at: i64,
-    pub deleted_at: Option<i64>,
+}
+
+impl ProviderEntity {
+    pub fn new(account_id: String, provider: AuthProvider, identify: String, extra: Option<String>) -> Self {
+        Self { base: BaseEntity::new(), account_id, auth_provider: provider.to_string(), identify, extra }
+    }
 }

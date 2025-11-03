@@ -2,5 +2,14 @@ pub enum AuthProvider {
     Password,
     Google,
     Github,
-    Face,
+}
+
+impl AuthProvider {
+    pub fn to_string(&self) -> String {
+        match self {
+            AuthProvider::Password => "PASSWORD".to_string(),
+            AuthProvider::Google => "GOOGLE".to_string(),
+            AuthProvider::Github => "GITHUB".to_string(),
+        }
+    }
 }

@@ -3,36 +3,43 @@ use axum::Router;
 use axum::http::header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE};
 use axum::http::{HeaderName, HeaderValue, Method};
 use shared::configs::APP_CONFIG;
+use std::sync::Arc;
 use tower_http::cors::CorsLayer;
 use tower_http::trace;
 use tower_http::trace::TraceLayer;
 use tracing::Level;
 
-fn allow_method_from_string(method: &str) -> Method {
+use adapters::shared::di::state::AppState;
+
+fn allow_method_from_string(method: &str) -> Result<Method, Box<dyn std::error::Error>> {
     match method.to_uppercase().as_str() {
-        "GET" => Method::GET,
-        "POST" => Method::POST,
-        "PATCH" => Method::PATCH,
-        "DELETE" => Method::DELETE,
-        "PUT" => Method::PUT,
-        "OPTIONS" => Method::OPTIONS,
-        "HEAD" => Method::HEAD,
-        "TRACE" => Method::TRACE,
-        "CONNECT" => Method::CONNECT,
-        _ => Method::GET,
+        "GET" => Ok(Method::GET),
+        "POST" => Ok(Method::POST),
+        "PATCH" => Ok(Method::PATCH),
+        "DELETE" => Ok(Method::DELETE),
+        "PUT" => Ok(Method::PUT),
+        "OPTIONS" => Ok(Method::OPTIONS),
+        "HEAD" => Ok(Method::HEAD),
+        "TRACE" => Ok(Method::TRACE),
+        "CONNECT" => Ok(Method::CONNECT),
+        _ => Err(format!("Unsupported HTTP method: {}", method).into()),
     }
 }
 
-fn build_cors() -> CorsLayer {
+fn build_cors() -> Result<CorsLayer, Box<dyn std::error::Error>> {
     let origins = APP_CONFIG
         .cors
         .allow_origins
         .iter()
-        .map(|origin| HeaderValue::from_str(origin).unwrap())
-        .collect::<Vec<HeaderValue>>();
+        .map(|origin| HeaderValue::from_str(origin))
+        .collect::<Result<Vec<HeaderValue>, _>>()?;
 
-    let allow_methods =
-        APP_CONFIG.cors.allow_methods.iter().map(|method| allow_method_from_string(method)).collect::<Vec<Method>>();
+    let allow_methods = APP_CONFIG
+        .cors
+        .allow_methods
+        .iter()
+        .map(|method| allow_method_from_string(method))
+        .collect::<Result<Vec<Method>, _>>()?;
 
     let allow_headers = APP_CONFIG
         .cors
@@ -41,14 +48,14 @@ fn build_cors() -> CorsLayer {
         .map(|header| header.parse::<HeaderName>().unwrap())
         .collect::<Vec<HeaderName>>();
 
-    CorsLayer::new()
+    Ok(CorsLayer::new()
         .allow_origin(origins)
         .allow_credentials(APP_CONFIG.cors.allow_credentials)
         .allow_methods(allow_methods)
-        .allow_headers(allow_headers)
+        .allow_headers(allow_headers))
 }
 
-pub fn initialize_app() -> Router {
+pub async fn initialize_app() -> Result<Router, Box<dyn std::error::Error>> {
     tracing_subscriber::fmt().with_target(false).compact().init();
     tracing::info!("Starting application with mode: {:?}", APP_CONFIG.mode);
 
@@ -57,15 +64,17 @@ pub fn initialize_app() -> Router {
         .on_request(trace::DefaultOnRequest::new().level(Level::INFO))
         .on_response(trace::DefaultOnResponse::new().level(Level::INFO));
 
+    let state = Arc::new(AppState::new().await);
     match APP_CONFIG.cors.enabled {
         true => {
             tracing::info!("CORS is enabled");
-            routes::execute().layer(build_cors()).layer(traces)
+            let cors = build_cors()?;
+            Ok(routes::execute().layer(cors).layer(traces).with_state(state.clone()))
         },
 
         false => {
             tracing::info!("CORS is disabled");
-            routes::execute().layer(traces)
+            Ok(routes::execute().layer(traces).with_state(state))
         },
     }
 }
