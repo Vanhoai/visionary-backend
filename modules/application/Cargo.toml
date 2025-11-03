@@ -1,0 +1,18 @@
+[package]
+name = "application"
+version = "0.1.0"
+edition = "2024"
+
+[lints]
+workspace = true
+
+[dependencies]
+shared = { path = "../shared" }
+domain = { path = "../domain" }
+adapters = { path = "../adapters" }
+tokio = { workspace = true, features = ["full"] }
+axum = { workspace = true }
+tracing-subscriber = { workspace = true, features = ["env-filter"] }
+tracing = { workspace = true }
+dotenv = { workspace = true }
+tower-http = { workspace = true, features = ["cors", "trace"] }

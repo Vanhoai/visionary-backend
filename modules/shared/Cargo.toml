@@ -1,0 +1,15 @@
+[package]
+name = "shared"
+version = "0.1.0"
+edition = "2024"
+
+[lints]
+workspace = true
+
+[dependencies]
+serde = { workspace = true, features = ["derive"] }
+dotenv = { workspace = true }
+config = { workspace = true }
+once_cell = { workspace = true }
+openssl = { workspace = true }
+jsonwebtoken = { workspace = true, features = ["rust_crypto"] }

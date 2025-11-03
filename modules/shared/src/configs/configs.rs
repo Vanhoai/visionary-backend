@@ -1,0 +1,60 @@
+use serde::Deserialize;
+
+use crate::functions::deserialize_functions::deserialize_comma_separated;
+
+#[derive(Debug, Deserialize)]
+pub struct ServerConfig {
+    pub host: String,
+    pub port: u16,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct CorsConfig {
+    pub enabled: bool,
+    #[serde(deserialize_with = "deserialize_comma_separated")]
+    pub allow_origins: Vec<String>,
+    #[serde(deserialize_with = "deserialize_comma_separated")]
+    pub allow_headers: Vec<String>,
+    #[serde(deserialize_with = "deserialize_comma_separated")]
+    pub allow_methods: Vec<String>,
+    pub allow_credentials: bool,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct RedisConfig {
+    pub host: String,
+    pub port: u16,
+    pub db: u8,
+    pub password: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct DatabaseConfig {
+    pub mongo_uri: String,
+    pub mongo_database: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct CryptoConfig {
+    pub algorithm_type: String,
+    pub algorithm: String,
+    pub key_size: Option<u32>,
+    pub curve: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct JwtConfig {
+    pub access_duration: String,
+    pub refresh_duration: String,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct AppConfig {
+    pub mode: String,
+    pub server: ServerConfig,
+    pub cors: CorsConfig,
+    pub database: DatabaseConfig,
+    pub redis: RedisConfig,
+    pub crypto: CryptoConfig,
+    pub jwt: JwtConfig,
+}

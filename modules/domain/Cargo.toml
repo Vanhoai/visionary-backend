@@ -1,0 +1,17 @@
+[package]
+name = "domain"
+version = "0.1.0"
+edition = "2024"
+
+[lints]
+workspace = true
+
+[dependencies]
+shared = { path = "../shared" }
+async-trait = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+uuid = { workspace = true, features = ["v4", "v7"] }
+chrono = { workspace = true }
+argon2 = { workspace = true }
+validator = { workspace = true, features = ["derive"] }
+regex = "1.12.2"
