@@ -1,11 +1,12 @@
-use chrono::format::Numeric::Timestamp;
-use serde::Serialize;
-use shared::models::failure::Failure;
-use uuid::Uuid;
-
 use crate::entities::base_entity::BaseEntity;
+use regex::Regex;
+use serde::{Deserialize, Serialize};
+use shared::models::failure::Failure;
 
-#[derive(Debug, Clone, Serialize)]
+const MAX_USERNAME_LENGTH: usize = 20;
+const EMAIL_REGEX: &str = r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}$";
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AccountEntity {
     #[serde(flatten)]
     pub base: BaseEntity,
@@ -18,10 +19,9 @@ pub struct AccountEntity {
 }
 
 impl AccountEntity {
-    const MAX_USERNAME_LENGTH: usize = 20;
-
     pub fn new(username: String, email: String) -> Result<Self, Failure> {
         Self::validate_username(&username)?;
+        Self::validate_email(&email)?;
 
         Ok(AccountEntity {
             base: BaseEntity::new(),
@@ -34,11 +34,22 @@ impl AccountEntity {
         })
     }
 
+    fn validate_email(email: &str) -> Result<(), Failure> {
+        let regex = Regex::new(EMAIL_REGEX)
+            .map_err(|e| Failure::ValidationError(format!("Failed to compile email regex: {}", e)))?;
+
+        if !regex.is_match(email) {
+            return Err(Failure::ValidationError(format!("Please provide a valid email address: {}", email)));
+        }
+
+        Ok(())
+    }
+
     fn validate_username(username: &str) -> Result<(), Failure> {
-        if username.len() > Self::MAX_USERNAME_LENGTH {
+        if username.len() > MAX_USERNAME_LENGTH {
             return Err(Failure::ValidationError(format!(
                 "Username must not exceed {} characters",
-                Self::MAX_USERNAME_LENGTH
+                MAX_USERNAME_LENGTH
             )));
         }
 

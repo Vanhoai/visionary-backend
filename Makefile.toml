@@ -1,6 +1,6 @@
 [env] ## tells cargo make that we're in the context of a Cargo workspace
 CARGO_MAKE_EXTEND_WORKSPACE_MAKEFILE = true
-MODE = "DEVELOPMENT"
+MODE = "PRODUCTION"
 
 [config] ## we want most/all of our tasks to run in the context of a workspace
 default_to_workspace = false

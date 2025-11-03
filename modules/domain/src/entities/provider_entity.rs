@@ -1,8 +1,8 @@
 use crate::entities::base_entity::BaseEntity;
 use crate::values::auth_provider::AuthProvider;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Serialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct ProviderEntity {
     #[serde(flatten)]
     pub base: BaseEntity,

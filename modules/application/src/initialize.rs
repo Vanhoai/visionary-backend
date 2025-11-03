@@ -56,8 +56,17 @@ fn build_cors() -> Result<CorsLayer, Box<dyn std::error::Error>> {
 }
 
 pub async fn initialize_app() -> Result<Router, Box<dyn std::error::Error>> {
-    tracing_subscriber::fmt().with_target(false).compact().init();
-    tracing::info!("Starting application with mode: {:?}", APP_CONFIG.mode);
+    tracing_subscriber::fmt()
+        .with_target(false)
+        .with_thread_ids(true)
+        .with_max_level(Level::INFO)
+        .with_line_number(true)
+        .with_level(true)
+        .with_env_filter(tracing_subscriber::EnvFilter::from_default_env().add_directive(Level::INFO.into()))
+        .init();
+
+    tracing::info!("🔧 Mode: {}", APP_CONFIG.mode);
+    tracing::info!("🦀 Server: {}:{}", APP_CONFIG.server.host, APP_CONFIG.server.port);
 
     let traces = TraceLayer::new_for_http()
         .make_span_with(trace::DefaultMakeSpan::new().level(Level::INFO))
@@ -67,13 +76,13 @@ pub async fn initialize_app() -> Result<Router, Box<dyn std::error::Error>> {
     let state = Arc::new(AppState::new().await);
     match APP_CONFIG.cors.enabled {
         true => {
-            tracing::info!("CORS is enabled");
+            tracing::info!("🌐 CORS is enabled");
             let cors = build_cors()?;
             Ok(routes::execute().layer(cors).layer(traces).with_state(state.clone()))
         },
 
         false => {
-            tracing::info!("CORS is disabled");
+            tracing::info!("🌐 CORS is disabled");
             Ok(routes::execute().layer(traces).with_state(state))
         },
     }

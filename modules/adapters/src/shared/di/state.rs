@@ -1,8 +1,17 @@
-use mongodb::options::{ClientOptions, ServerApi, ServerApiVersion};
-use mongodb::{Client, Collection, Database};
+use mongodb::Collection;
 use std::sync::Arc;
-use std::time::Duration;
 
+use crate::secondary::{
+    apis::auth_api_impl::AuthApiImpl,
+    repositories::mongodb::{
+        mongo_account_repository::MongoAccountRepository,
+        mongo_notification_repository::MongoNotificationRepository,
+        mongo_provider_repository::MongoProviderRepository,
+        mongo_session_repository::MongoSessionRepository,
+        schemas::{account_schema::AccountSchema, provider_schema::ProviderSchema},
+    },
+};
+use crate::shared::utilities::databases;
 use domain::{
     apis::auth_api::AuthApi,
     applications::{auth_app_service::AuthAppService, notification_app_service::NotificationAppService},
@@ -19,16 +28,6 @@ use domain::{
         session_service::{SessionService, SessionServiceImpl},
     },
 };
-use shared::configs::APP_CONFIG;
-
-use crate::secondary::{
-    apis::auth_api_impl::AuthApiImpl,
-    repositories::mongodb::{
-        mongo_account_repository::MongoAccountRepository, mongo_notification_repository::MongoNotificationRepository,
-        mongo_provider_repository::MongoProviderRepository, mongo_session_repository::MongoSessionRepository,
-    },
-};
-use crate::shared::utilities::databases;
 
 #[derive(Clone)]
 pub struct AppState {
@@ -39,14 +38,15 @@ pub struct AppState {
 impl AppState {
     pub async fn new() -> Self {
         // Initialize database connection
-        let mongodb_connection = Self::create_mongo_connection().await;
+        let mongodb_connection = databases::mongo_client().await;
 
         // Initialize collections
         let account_collection = Arc::new(mongodb_connection.collection(databases::ACCOUNT_TABLE));
+        let provider_collection = Arc::new(mongodb_connection.collection(databases::PROVIDER_TABLE));
 
         // Initialize repositories
         let account_repository = Self::create_account_repository(account_collection.clone());
-        let provider_repository = Self::create_provider_repository();
+        let provider_repository = Self::create_provider_repository(provider_collection.clone());
         let session_repository = Self::create_session_repository();
         let notification_repository = Self::create_notification_repository();
 
@@ -74,32 +74,13 @@ impl AppState {
         AppState { auth_app_service, notification_app_service }
     }
 
-    // Database
-    async fn create_mongo_connection() -> Database {
-        let uri = APP_CONFIG.database.mongo_uri.clone();
-
-        let server_api = ServerApi::builder().version(ServerApiVersion::V1).build();
-        let mut client_options = ClientOptions::parse(uri).await.unwrap();
-        client_options.server_api = Some(server_api);
-
-        // Configure connection pool
-        client_options.min_pool_size = Some(10);
-        client_options.max_pool_size = Some(100);
-        client_options.connect_timeout = Some(Duration::from_secs(5));
-        client_options.server_selection_timeout = Some(Duration::from_secs(5));
-
-        // Create a new client and connect to the server
-        let client = Client::with_options(client_options).unwrap();
-        client.database(&APP_CONFIG.database.mongo_database)
-    }
-
     // Repository factories
-    fn create_account_repository(collection: Arc<Collection<AccountEntity>>) -> Arc<dyn AccountRepository> {
+    fn create_account_repository(collection: Arc<Collection<AccountSchema>>) -> Arc<dyn AccountRepository> {
         Arc::new(MongoAccountRepository::new(collection))
     }
 
-    fn create_provider_repository() -> Arc<dyn ProviderRepository> {
-        Arc::new(MongoProviderRepository::new())
+    fn create_provider_repository(collection: Arc<Collection<ProviderSchema>>) -> Arc<dyn ProviderRepository> {
+        Arc::new(MongoProviderRepository::new(collection))
     }
 
     fn create_session_repository() -> Arc<dyn SessionRepository> {
