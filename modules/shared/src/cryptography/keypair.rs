@@ -1,8 +1,4 @@
-use crate::configs::APP_CONFIG;
 use jsonwebtoken::{Algorithm, DecodingKey, EncodingKey};
-use std::io::Error;
-
-type BoxGeneric<T> = Result<T, Box<dyn std::error::Error>>;
 
 pub enum AlgorithmType {
     Symmetric,
@@ -10,7 +6,7 @@ pub enum AlgorithmType {
 }
 
 impl AlgorithmType {
-    pub fn from_string(algorithm_type: String) -> BoxGeneric<Self> {
+    pub fn from_string(algorithm_type: String) -> Result<Self, Box<dyn std::error::Error>> {
         match algorithm_type.as_str() {
             "SYMMETRIC" => Ok(AlgorithmType::Symmetric),
             "ASYMMETRIC" => Ok(AlgorithmType::Asymmetric),
@@ -26,7 +22,7 @@ pub struct Keypair {
 }
 
 impl Keypair {
-    pub fn parse_algorithm(alg: &str) -> BoxGeneric<Algorithm> {
+    pub fn parse_algorithm(alg: &str) -> Result<Algorithm, Box<dyn std::error::Error>> {
         match alg {
             "HS256" => Ok(Algorithm::HS256),
             "HS384" => Ok(Algorithm::HS384),

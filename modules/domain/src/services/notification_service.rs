@@ -1,6 +1,8 @@
-use std::sync::Arc;
-use async_trait::async_trait;
 use crate::repositories::notification_repository::NotificationRepository;
+use crate::usecases::notification_usecases::PushNotification;
+use async_trait::async_trait;
+use shared::types::DomainResponse;
+use std::sync::Arc;
 
 #[async_trait]
 pub trait NotificationService: Send + Sync {}

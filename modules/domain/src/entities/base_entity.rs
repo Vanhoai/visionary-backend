@@ -15,6 +15,6 @@ impl BaseEntity {
         let now = chrono::Utc::now().timestamp();
         let id = if include_id { Some(uuid.clone()) } else { None };
 
-        BaseEntity { id: id, created_at: now, updated_at: now, deleted_at: None }
+        BaseEntity { id, created_at: now, updated_at: now, deleted_at: None }
     }
 }

@@ -14,30 +14,34 @@ impl ScyllaAccountRepository {
 
 #[async_trait]
 impl BaseRepository<AccountEntity> for ScyllaAccountRepository {
-    async fn create(&self, entity: AccountEntity) -> DomainResponse<AccountEntity> {
+    async fn create(&self, _entity: AccountEntity) -> DomainResponse<AccountEntity> {
         todo!()
     }
 
-    async fn update(&self, id: &str, entity: AccountEntity) -> DomainResponse<AccountEntity> {
+    async fn update(&self, _id: &str, _entity: AccountEntity) -> DomainResponse<AccountEntity> {
         todo!()
     }
 
-    async fn delete(&self, id: &str) -> DomainResponse<AccountEntity> {
+    async fn delete(&self, _: &str) -> DomainResponse<AccountEntity> {
         todo!()
     }
 
-    async fn remove(&self, id: &str) -> DomainResponse<AccountEntity> {
+    async fn remove(&self, _: &str) -> DomainResponse<AccountEntity> {
         todo!()
     }
 
-    async fn find_by_id(&self, id: &str) -> DomainResponse<Option<AccountEntity>> {
+    async fn find(&self, _: &str) -> DomainResponse<Option<AccountEntity>> {
+        todo!()
+    }
+
+    async fn finds(&self) -> DomainResponse<Vec<AccountEntity>> {
         todo!()
     }
 }
 
 #[async_trait]
 impl AccountRepository for ScyllaAccountRepository {
-    async fn find_by_email(&self, email: &str) -> DomainResponse<Option<AccountEntity>> {
+    async fn find_by_email(&self, _: &str) -> DomainResponse<Option<AccountEntity>> {
         todo!()
     }
 }

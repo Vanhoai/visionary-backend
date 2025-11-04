@@ -8,13 +8,16 @@ use crate::secondary::{
         mongo_notification_repository::MongoNotificationRepository,
         mongo_provider_repository::MongoProviderRepository,
         mongo_session_repository::MongoSessionRepository,
-        schemas::{account_schema::AccountSchema, provider_schema::ProviderSchema},
+        schemas::{account_schema::AccountSchema, provider_schema::ProviderSchema, session_schema::SessionSchema},
     },
 };
 use crate::shared::utilities::databases;
 use domain::{
     apis::auth_api::AuthApi,
-    applications::{auth_app_service::AuthAppService, notification_app_service::NotificationAppService},
+    applications::{
+        auth_app_service::AuthAppService, notification_app_service::NotificationAppService,
+        session_app_service::SessionAppService,
+    },
     repositories::{
         account_repository::AccountRepository, notification_repository::NotificationRepository,
         provider_repository::ProviderRepository, session_repository::SessionRepository,
@@ -32,6 +35,7 @@ use domain::{
 pub struct AppState {
     pub auth_app_service: Arc<AuthAppService>,
     pub notification_app_service: Arc<NotificationAppService>,
+    pub session_app_service: Arc<SessionAppService>,
 }
 
 impl AppState {
@@ -42,11 +46,12 @@ impl AppState {
         // Initialize collections
         let account_collection = Arc::new(mongodb_connection.collection(databases::ACCOUNT_TABLE));
         let provider_collection = Arc::new(mongodb_connection.collection(databases::PROVIDER_TABLE));
+        let session_collection = Arc::new(mongodb_connection.collection(databases::SESSION_TABLE));
 
         // Initialize repositories
         let account_repository = Self::create_account_repository(account_collection.clone());
         let provider_repository = Self::create_provider_repository(provider_collection.clone());
-        let session_repository = Self::create_session_repository();
+        let session_repository = Self::create_session_repository(session_collection.clone());
         let notification_repository = Self::create_notification_repository();
 
         // Initialize apis
@@ -69,9 +74,10 @@ impl AppState {
         );
 
         let notification_app_service = Self::create_notification_app_service(notification_service.clone());
+        let session_app_service = Self::create_session_app_service(session_service.clone());
 
         // Return AppState
-        Ok(AppState { auth_app_service, notification_app_service })
+        Ok(AppState { auth_app_service, notification_app_service, session_app_service })
     }
 
     // Repository factories
@@ -83,8 +89,8 @@ impl AppState {
         Arc::new(MongoProviderRepository::new(collection))
     }
 
-    fn create_session_repository() -> Arc<dyn SessionRepository> {
-        Arc::new(MongoSessionRepository::new())
+    fn create_session_repository(collection: Arc<Collection<SessionSchema>>) -> Arc<dyn SessionRepository> {
+        Arc::new(MongoSessionRepository::new(collection))
     }
 
     fn create_notification_repository() -> Arc<dyn NotificationRepository> {
@@ -132,5 +138,9 @@ impl AppState {
         notification_service: Arc<dyn NotificationService>,
     ) -> Arc<NotificationAppService> {
         Arc::new(NotificationAppService::new(notification_service))
+    }
+
+    fn create_session_app_service(session_service: Arc<dyn SessionService>) -> Arc<SessionAppService> {
+        Arc::new(SessionAppService::new(session_service))
     }
 }

@@ -1,5 +1,6 @@
 use async_trait::async_trait;
 use domain::repositories::base_repository::BaseRepository;
+use futures::stream::TryStreamExt;
 use mongodb::Collection;
 use mongodb::bson::oid::ObjectId;
 use mongodb::bson::{doc, to_document};
@@ -55,8 +56,12 @@ macro_rules! impl_mongo_base_repository {
                 self.base.remove(id).await
             }
 
-            async fn find_by_id(&self, id: &str) -> shared::types::DomainResponse<Option<$entity>> {
-                self.base.find_by_id(id).await
+            async fn find(&self, id: &str) -> shared::types::DomainResponse<Option<$entity>> {
+                self.base.find(id).await
+            }
+
+            async fn finds(&self) -> shared::types::DomainResponse<Vec<$entity>> {
+                self.base.finds().await
             }
         }
     };
@@ -160,7 +165,7 @@ where
         Ok(schema.to_entity())
     }
 
-    async fn find_by_id(&self, id: &str) -> DomainResponse<Option<E>> {
+    async fn find(&self, id: &str) -> DomainResponse<Option<E>> {
         let object_id =
             ObjectId::parse_str(id).map_err(|_| Failure::BadRequest(format!("Invalid ID format: {}", id)))?;
 
@@ -174,5 +179,27 @@ where
             Ok(None) => Ok(None),
             Err(e) => Err(Failure::DatabaseError(format!("Failed to find entity by ID: {}", e))),
         }
+    }
+
+    async fn finds(&self) -> DomainResponse<Vec<E>> {
+        let filter = doc! {
+            "deleted_at": { "$exists": false }
+        };
+
+        let cursor = self
+            .collection
+            .find(filter)
+            .await
+            .map_err(|e| Failure::DatabaseError(format!("Failed to find entities: {}", e)))?;
+
+        let entities = cursor
+            .try_collect::<Vec<S>>()
+            .await
+            .map_err(|e| Failure::DatabaseError(format!("Failed to iterate over entities: {}", e)))?
+            .into_iter()
+            .map(|schema| schema.to_entity())
+            .collect();
+
+        Ok(entities)
     }
 }

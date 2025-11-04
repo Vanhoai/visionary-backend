@@ -1,3 +1,5 @@
+use std::error::Error;
+
 #[derive(Debug)]
 pub enum Failure {
     BadRequest(String),
@@ -12,6 +14,7 @@ pub enum Failure {
     ValidationError(String),
     NotImplemented(String),
     InternalError(String),
+    ExternalServiceError(String),
 }
 
 impl Failure {
@@ -29,6 +32,7 @@ impl Failure {
             Failure::ValidationError(msg) => msg,
             Failure::NotImplemented(msg) => msg,
             Failure::InternalError(msg) => msg,
+            Failure::ExternalServiceError(msg) => msg,
         }
     }
 
@@ -46,6 +50,7 @@ impl Failure {
             Failure::ValidationError(_) => "VALIDATION_ERROR",
             Failure::NotImplemented(_) => "NOT_IMPLEMENTED",
             Failure::InternalError(_) => "INTERNAL_ERROR",
+            Failure::ExternalServiceError(_) => "EXTERNAL_SERVICE_ERROR",
         }
     }
 
@@ -63,6 +68,7 @@ impl Failure {
             Failure::ValidationError(_) => 422,
             Failure::NotImplemented(_) => 401,
             Failure::InternalError(_) => 500,
+            Failure::ExternalServiceError(_) => 502,
         }
     }
 }

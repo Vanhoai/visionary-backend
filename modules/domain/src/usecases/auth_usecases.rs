@@ -15,6 +15,13 @@ pub struct AuthParams {
     pub password: String,
 }
 
+#[derive(Debug, Clone)]
+pub struct SessionMetadata {
+    pub ip_address: String,
+    pub user_agent: String,
+    pub device_type: String,
+}
+
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AuthResponse {
@@ -31,6 +38,6 @@ pub struct RefreshTokenParams {
 #[async_trait]
 pub trait ManageSessionUseCases: Send + Sync {
     async fn sign_up(&self, params: &AuthParams) -> Result<AccountEntity, Failure>;
-    async fn sign_in(&self, params: &AuthParams) -> Result<AuthResponse, Failure>;
-    async fn refresh_token(&self, params: &RefreshTokenParams) -> Result<AuthResponse, Failure>;
+    async fn sign_in(&self, params: &AuthParams, metadata: &SessionMetadata) -> Result<AuthResponse, Failure>;
+    async fn refresh_token(&self, params: &RefreshTokenParams, metadata: &SessionMetadata) -> Result<AuthResponse, Failure>;
 }

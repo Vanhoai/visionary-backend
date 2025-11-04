@@ -21,3 +21,6 @@ mongodb = { workspace = true }
 prometheus = { workspace = true }
 scylla = { workspace = true }
 chrono = { workspace = true }
+uuid = { workspace = true }
+reqwest = { workspace = true, features = ["json"] }
+base64 = { workspace = true }
