@@ -37,6 +37,7 @@ impl AppConfig {
             redis: deserialized.redis,
             crypto: deserialized.crypto,
             jwt: deserialized.jwt,
+            oauth2: deserialized.oauth2,
         }
     }
 }

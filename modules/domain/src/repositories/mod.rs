@@ -3,3 +3,4 @@ pub mod base_repository;
 pub mod notification_repository;
 pub mod provider_repository;
 pub mod session_repository;
+pub mod work_repository;

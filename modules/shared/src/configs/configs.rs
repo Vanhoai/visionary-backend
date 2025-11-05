@@ -47,6 +47,16 @@ pub struct JwtConfig {
     pub refresh_token_expiry: i64,
 }
 
+#[derive(Debug, Deserialize)]
+pub struct OAuth2Config {
+    pub google_client_id: String,
+    pub google_client_secret: String,
+    pub google_redirect_url: String,
+    pub github_client_id: String,
+    pub github_client_secret: String,
+    pub github_redirect_url: String,
+}
+
 #[derive(Deserialize, Debug)]
 pub struct AppConfig {
     pub mode: String,
@@ -56,4 +66,5 @@ pub struct AppConfig {
     pub redis: RedisConfig,
     pub crypto: CryptoConfig,
     pub jwt: JwtConfig,
+    pub oauth2: OAuth2Config
 }

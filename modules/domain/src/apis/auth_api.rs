@@ -1,4 +1,7 @@
 use async_trait::async_trait;
+use shared::types::DomainResponse;
 
 #[async_trait]
-pub trait AuthApi: Send + Sync {}
+pub trait AuthApi: Send + Sync {
+    async fn verify_google_token(&self, id_token: &str) -> DomainResponse<()>;
+}

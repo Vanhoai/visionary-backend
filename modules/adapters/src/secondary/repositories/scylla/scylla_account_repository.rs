@@ -2,6 +2,8 @@ use async_trait::async_trait;
 use domain::entities::account_entity::AccountEntity;
 use domain::repositories::account_repository::AccountRepository;
 use domain::repositories::base_repository::BaseRepository;
+use shared::models::filters::ScyllaFilter;
+use shared::models::paginate::Paginate;
 use shared::types::DomainResponse;
 
 pub struct ScyllaAccountRepository {}
@@ -14,6 +16,8 @@ impl ScyllaAccountRepository {
 
 #[async_trait]
 impl BaseRepository<AccountEntity> for ScyllaAccountRepository {
+    type Filter = ScyllaFilter;
+
     async fn create(&self, _entity: AccountEntity) -> DomainResponse<AccountEntity> {
         todo!()
     }
@@ -35,6 +39,14 @@ impl BaseRepository<AccountEntity> for ScyllaAccountRepository {
     }
 
     async fn finds(&self) -> DomainResponse<Vec<AccountEntity>> {
+        todo!()
+    }
+
+    async fn finds_paginated(&self, page: u32, page_size: u32) -> DomainResponse<(Paginate, Vec<AccountEntity>)> {
+        todo!()
+    }
+
+    async fn finds_by_filter(&self, filter: Self::Filter) -> DomainResponse<Vec<AccountEntity>> {
         todo!()
     }
 }

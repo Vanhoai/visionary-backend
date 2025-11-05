@@ -15,3 +15,8 @@ openssl = { workspace = true }
 jsonwebtoken = { workspace = true, features = ["rust_crypto"] }
 rand = { workspace = true }
 chrono = { workspace = true }
+oauth2 = { workspace = true, features = ["reqwest"] }
+uuid = { workspace = true, features = ["v7"] }
+reqwest = { workspace = true, features = ["json"] }
+validator = { workspace = true, features = ["derive"] }
+mongodb = { workspace = true }

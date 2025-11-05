@@ -6,3 +6,4 @@ pub mod enrollment_entity;
 pub mod lesson_entity;
 pub mod provider_entity;
 pub mod session_entity;
+pub mod work_entity;

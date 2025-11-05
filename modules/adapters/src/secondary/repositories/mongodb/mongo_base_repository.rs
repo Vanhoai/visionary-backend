@@ -7,6 +7,8 @@ use mongodb::bson::{doc, to_document};
 use serde::Serialize;
 use serde::de::DeserializeOwned;
 use shared::models::failure::Failure;
+use shared::models::filters::{MongoFilter, MongoFilterConverter};
+use shared::models::paginate::Paginate;
 use shared::types::DomainResponse;
 use std::marker::PhantomData;
 use std::sync::Arc;
@@ -40,6 +42,8 @@ macro_rules! impl_mongo_base_repository {
     ($repository:ty, $entity:ty, $schema:ty) => {
         #[async_trait::async_trait]
         impl domain::repositories::base_repository::BaseRepository<$entity> for $repository {
+            type Filter = shared::models::filters::MongoFilter;
+
             async fn create(&self, entity: $entity) -> shared::types::DomainResponse<$entity> {
                 self.base.create(entity).await
             }
@@ -63,6 +67,21 @@ macro_rules! impl_mongo_base_repository {
             async fn finds(&self) -> shared::types::DomainResponse<Vec<$entity>> {
                 self.base.finds().await
             }
+
+            async fn finds_paginated(
+                &self,
+                page: u32,
+                page_size: u32,
+            ) -> shared::types::DomainResponse<(shared::models::paginate::Paginate, Vec<$entity>)> {
+                self.base.finds_paginated(page, page_size).await
+            }
+
+            async fn finds_by_filter(
+                &self,
+                filter: <$repository as domain::repositories::base_repository::BaseRepository<$entity>>::Filter,
+            ) -> shared::types::DomainResponse<Vec<$entity>> {
+                self.base.finds_by_filter(filter).await
+            }
         }
     };
 }
@@ -73,6 +92,8 @@ where
     E: Send + Sync + Clone,
     S: EntitySchema<E>,
 {
+    type Filter = MongoFilter;
+
     async fn create(&self, entity: E) -> DomainResponse<E> {
         let schema = S::from_entity(entity.clone());
         let inserted_result = self
@@ -183,7 +204,7 @@ where
 
     async fn finds(&self) -> DomainResponse<Vec<E>> {
         let filter = doc! {
-            "deleted_at": { "$exists": false }
+            "deleted_at": { "$exists": false },
         };
 
         let cursor = self
@@ -196,6 +217,66 @@ where
             .try_collect::<Vec<S>>()
             .await
             .map_err(|e| Failure::DatabaseError(format!("Failed to iterate over entities: {}", e)))?
+            .into_iter()
+            .map(|schema| schema.to_entity())
+            .collect();
+
+        Ok(entities)
+    }
+
+    async fn finds_paginated(&self, page: u32, page_size: u32) -> DomainResponse<(Paginate, Vec<E>)> {
+        let filter = doc! {
+            "deleted_at": { "$exists": false }
+        };
+
+        let total_count = self
+            .collection
+            .count_documents(filter.clone())
+            .await
+            .map_err(|e| Failure::DatabaseError(format!("Failed to count entities: {}", e)))?;
+
+        let skip = ((page - 1) * page_size) as u64;
+        let limit = page_size as i64;
+
+        let cursor = self
+            .collection
+            .find(filter)
+            .skip(skip)
+            .limit(limit)
+            .await
+            .map_err(|e| Failure::DatabaseError(format!("Failed to find entities with pagination: {}", e)))?;
+
+        let entities = cursor
+            .try_collect::<Vec<S>>()
+            .await
+            .map_err(|e| Failure::DatabaseError(format!("Failed to iterate over paginated entities: {}", e)))?
+            .into_iter()
+            .map(|schema| schema.to_entity())
+            .collect();
+
+        let paginate = Paginate {
+            page,
+            page_size,
+            total_pages: ((total_count as f32) / (page_size as f32)).ceil() as u32,
+            total_records: total_count as u32,
+        };
+
+        Ok((paginate, entities))
+    }
+
+    async fn finds_by_filter(&self, filter: Self::Filter) -> DomainResponse<Vec<E>> {
+        let mongo_filter = MongoFilterConverter::convert_to_mongo_filter(&filter);
+
+        let cursor = self
+            .collection
+            .find(mongo_filter)
+            .await
+            .map_err(|e| Failure::DatabaseError(format!("Failed to find entities: {}", e)))?;
+
+        let entities = cursor
+            .try_collect::<Vec<S>>()
+            .await
+            .map_err(|e| Failure::DatabaseError(format!("Failed to iterate: {}", e)))?
             .into_iter()
             .map(|schema| schema.to_entity())
             .collect();

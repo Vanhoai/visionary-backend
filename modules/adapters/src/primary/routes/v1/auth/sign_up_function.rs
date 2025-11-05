@@ -3,7 +3,7 @@ use axum::http::StatusCode;
 use std::sync::Arc;
 
 use domain::entities::account_entity::AccountEntity;
-use domain::usecases::auth_usecases::{AuthParams, ManageSessionUseCases};
+use domain::usecases::auth_usecases::{AuthParams, ManageSessionAuthUseCase};
 
 use crate::shared::di::state::AppState;
 use crate::shared::models::failure::HttpFailure;

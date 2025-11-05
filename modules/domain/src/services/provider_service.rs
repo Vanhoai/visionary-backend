@@ -3,27 +3,24 @@ use crate::{
     values::auth_provider::AuthProvider,
 };
 use async_trait::async_trait;
+use shared::models::filters::MongoFilter;
 use shared::types::DomainResponse;
 use std::sync::Arc;
 
 #[async_trait]
 pub trait ProviderService: Send + Sync {
-    async fn create_provider(
-        &self,
-        account_id: String,
-        provider: String,
-        identify: String,
-    ) -> DomainResponse<ProviderEntity>;
+    async fn create_provider(&self, account_id: &str, provider: &str, identify: &str)
+    -> DomainResponse<ProviderEntity>;
 
     async fn find_by_account_id(&self, account_id: &str) -> DomainResponse<Vec<ProviderEntity>>;
 }
 
 pub struct ProviderServiceImpl {
-    repository: Arc<dyn ProviderRepository>,
+    repository: Arc<dyn ProviderRepository<Filter = MongoFilter>>,
 }
 
 impl ProviderServiceImpl {
-    pub fn new(repository: Arc<dyn ProviderRepository>) -> Self {
+    pub fn new(repository: Arc<dyn ProviderRepository<Filter = MongoFilter>>) -> Self {
         Self { repository }
     }
 }
@@ -32,12 +29,12 @@ impl ProviderServiceImpl {
 impl ProviderService for ProviderServiceImpl {
     async fn create_provider(
         &self,
-        account_id: String,
-        provider: String,
-        identify: String,
+        account_id: &str,
+        provider: &str,
+        identify: &str,
     ) -> DomainResponse<ProviderEntity> {
-        let auth_provider = AuthProvider::from_string(&provider)?;
-        let provider = ProviderEntity::new(false, account_id, auth_provider, identify);
+        let auth_provider = AuthProvider::from_string(provider)?;
+        let provider = ProviderEntity::new(false, account_id.to_string(), auth_provider, identify.to_string());
 
         self.repository.create(provider).await
     }

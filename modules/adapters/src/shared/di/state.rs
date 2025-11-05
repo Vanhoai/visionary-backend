@@ -1,6 +1,8 @@
 use mongodb::Collection;
 use std::sync::Arc;
 
+use crate::secondary::repositories::mongodb::mongo_work_repository::MongoWorkRepository;
+use crate::secondary::repositories::mongodb::schemas::work_schema::WorkSchema;
 use crate::secondary::{
     apis::auth_api_impl::AuthApiImpl,
     repositories::mongodb::{
@@ -12,6 +14,9 @@ use crate::secondary::{
     },
 };
 use crate::shared::utilities::databases;
+use domain::applications::account_app_service::AccountAppService;
+use domain::repositories::work_repository::WorkRepository;
+use domain::services::work_service::{WorkService, WorkServiceImpl};
 use domain::{
     apis::auth_api::AuthApi,
     applications::{
@@ -30,10 +35,12 @@ use domain::{
         session_service::{SessionService, SessionServiceImpl},
     },
 };
+use shared::models::filters::MongoFilter;
 
 #[derive(Clone)]
 pub struct AppState {
     pub auth_app_service: Arc<AuthAppService>,
+    pub account_app_service: Arc<AccountAppService>,
     pub notification_app_service: Arc<NotificationAppService>,
     pub session_app_service: Arc<SessionAppService>,
 }
@@ -47,12 +54,14 @@ impl AppState {
         let account_collection = Arc::new(mongodb_connection.collection(databases::ACCOUNT_TABLE));
         let provider_collection = Arc::new(mongodb_connection.collection(databases::PROVIDER_TABLE));
         let session_collection = Arc::new(mongodb_connection.collection(databases::SESSION_TABLE));
+        let work_collection = Arc::new(mongodb_connection.collection(databases::WORK_TABLE));
 
         // Initialize repositories
         let account_repository = Self::create_account_repository(account_collection.clone());
         let provider_repository = Self::create_provider_repository(provider_collection.clone());
         let session_repository = Self::create_session_repository(session_collection.clone());
         let notification_repository = Self::create_notification_repository();
+        let work_repository = Self::create_work_repository(work_collection.clone());
 
         // Initialize apis
         let auth_api = Self::create_auth_api();
@@ -63,6 +72,7 @@ impl AppState {
         let provider_service = Self::create_provider_service(provider_repository.clone());
         let notification_service = Self::create_notification_service(notification_repository.clone());
         let session_service = Self::create_session_service(session_repository.clone());
+        let work_service = Self::create_work_service(work_repository.clone());
 
         // Initialize application services
         let auth_app_service = Self::create_auth_app_service(
@@ -75,26 +85,39 @@ impl AppState {
 
         let notification_app_service = Self::create_notification_app_service(notification_service.clone());
         let session_app_service = Self::create_session_app_service(session_service.clone());
+        let account_app_service = Self::create_account_app_service(account_service.clone(), work_service.clone());
 
         // Return AppState
-        Ok(AppState { auth_app_service, notification_app_service, session_app_service })
+        Ok(AppState { auth_app_service, account_app_service, notification_app_service, session_app_service })
     }
 
     // Repository factories
-    fn create_account_repository(collection: Arc<Collection<AccountSchema>>) -> Arc<dyn AccountRepository> {
+    fn create_account_repository(
+        collection: Arc<Collection<AccountSchema>>,
+    ) -> Arc<dyn AccountRepository<Filter = MongoFilter>> {
         Arc::new(MongoAccountRepository::new(collection))
     }
 
-    fn create_provider_repository(collection: Arc<Collection<ProviderSchema>>) -> Arc<dyn ProviderRepository> {
+    fn create_provider_repository(
+        collection: Arc<Collection<ProviderSchema>>,
+    ) -> Arc<dyn ProviderRepository<Filter = MongoFilter>> {
         Arc::new(MongoProviderRepository::new(collection))
     }
 
-    fn create_session_repository(collection: Arc<Collection<SessionSchema>>) -> Arc<dyn SessionRepository> {
+    fn create_session_repository(
+        collection: Arc<Collection<SessionSchema>>,
+    ) -> Arc<dyn SessionRepository<Filter = MongoFilter>> {
         Arc::new(MongoSessionRepository::new(collection))
     }
 
     fn create_notification_repository() -> Arc<dyn NotificationRepository> {
         Arc::new(MongoNotificationRepository::new())
+    }
+
+    fn create_work_repository(
+        collection: Arc<Collection<WorkSchema>>,
+    ) -> Arc<dyn WorkRepository<Filter = MongoFilter>> {
+        Arc::new(MongoWorkRepository::new(collection))
     }
 
     // Apis factories
@@ -103,7 +126,7 @@ impl AppState {
     }
 
     // Service factories
-    fn create_account_service(repository: Arc<dyn AccountRepository>) -> Arc<dyn AccountService> {
+    fn create_account_service(repository: Arc<dyn AccountRepository<Filter = MongoFilter>>) -> Arc<dyn AccountService> {
         Arc::new(AccountServiceImpl::new(repository))
     }
 
@@ -111,7 +134,9 @@ impl AppState {
         Arc::new(AuthServiceImpl::new())
     }
 
-    fn create_provider_service(repository: Arc<dyn ProviderRepository>) -> Arc<dyn ProviderService> {
+    fn create_provider_service(
+        repository: Arc<dyn ProviderRepository<Filter = MongoFilter>>,
+    ) -> Arc<dyn ProviderService> {
         Arc::new(ProviderServiceImpl::new(repository))
     }
 
@@ -119,8 +144,12 @@ impl AppState {
         Arc::new(NotificationServiceImpl::new(repository))
     }
 
-    fn create_session_service(repository: Arc<dyn SessionRepository>) -> Arc<dyn SessionService> {
+    fn create_session_service(repository: Arc<dyn SessionRepository<Filter = MongoFilter>>) -> Arc<dyn SessionService> {
         Arc::new(SessionServiceImpl::new(repository))
+    }
+
+    fn create_work_service(repository: Arc<dyn WorkRepository<Filter = MongoFilter>>) -> Arc<dyn WorkService> {
+        Arc::new(WorkServiceImpl::new(repository))
     }
 
     // Application service factories
@@ -142,5 +171,12 @@ impl AppState {
 
     fn create_session_app_service(session_service: Arc<dyn SessionService>) -> Arc<SessionAppService> {
         Arc::new(SessionAppService::new(session_service))
+    }
+
+    fn create_account_app_service(
+        account_service: Arc<dyn AccountService>,
+        work_service: Arc<dyn WorkService>,
+    ) -> Arc<AccountAppService> {
+        Arc::new(AccountAppService::new(account_service, work_service))
     }
 }

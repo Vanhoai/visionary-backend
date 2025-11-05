@@ -1,3 +1,8 @@
+use async_trait::async_trait;
+use chrono::Utc;
+use std::sync::Arc;
+use uuid::Uuid;
+
 use crate::apis::auth_api::AuthApi;
 use crate::entities::account_entity::AccountEntity;
 use crate::services::{
@@ -5,15 +10,15 @@ use crate::services::{
     session_service::SessionService,
 };
 use crate::usecases::auth_usecases::{
-    AuthParams, AuthResponse, ManageSessionUseCases, RefreshTokenParams, SessionMetadata,
+    AuthParams, AuthResponse, ManageSessionAuthUseCase, OAuth2CallbackParams, OAuth2InitParams, OAuth2InitResponse,
+    OAuth2UseCase, RefreshTokenParams, SessionMetadata,
 };
-use async_trait::async_trait;
-use chrono::Utc;
 use shared::configs::APP_CONFIG;
 use shared::jwt::service::JwtService;
 use shared::models::failure::Failure;
-use std::sync::Arc;
-use uuid::Uuid;
+use shared::oauth2::oauth2_providers::OAuth2Provider;
+use shared::oauth2::oauth2_service::OAuth2Service;
+use shared::types::DomainResponse;
 
 pub struct AuthAppService {
     // services
@@ -40,10 +45,10 @@ impl AuthAppService {
 
 // region ============================== MANAGE SESSION USE CASES ==============================
 #[async_trait]
-impl ManageSessionUseCases for AuthAppService {
+impl ManageSessionAuthUseCase for AuthAppService {
     async fn sign_up(&self, params: &AuthParams) -> Result<AccountEntity, Failure> {
         // 1. Check if email already exists
-        if self.account_service.check_email_exists(params.email.clone()).await? {
+        if self.account_service.check_email_exists(&params.email).await? {
             return Err(Failure::Conflict("Email already exists".to_string()));
         }
 
@@ -52,7 +57,7 @@ impl ManageSessionUseCases for AuthAppService {
 
         // 3. Create and save account to database
         let username = params.email.split("@").collect::<Vec<&str>>()[0].to_string();
-        let account_entity = self.account_service.create_account(username, params.email.clone()).await?;
+        let account_entity = self.account_service.create_account(&username, &params.email).await?;
 
         // 4. Create provider entry for the account with hashed password - AuthProvider
         let account_id = account_entity
@@ -61,7 +66,7 @@ impl ManageSessionUseCases for AuthAppService {
             .clone()
             .ok_or(Failure::InternalServerError("Account ID should be present after creation".to_string()))?;
 
-        self.provider_service.create_provider(account_id, "PASSWORD".to_string(), hashed_password).await?;
+        self.provider_service.create_provider(&account_id, "PASSWORD", &hashed_password).await?;
         Ok(account_entity)
     }
 
@@ -69,7 +74,7 @@ impl ManageSessionUseCases for AuthAppService {
         // 1. Retrieve account and providers
         let account_entity = self
             .account_service
-            .find_by_email(params.email.clone())
+            .find_by_email(&params.email)
             .await?
             .ok_or(Failure::NotFound("This email is not registered".to_string()))?;
 
@@ -134,7 +139,7 @@ impl ManageSessionUseCases for AuthAppService {
             .await?
             .ok_or(Failure::Unauthorized("Session not found for the provided refresh token".to_string()))?;
 
-        if session_entity.account_id != account_id {
+        if session_entity.account_id != account_id || session_entity.refresh_token != params.refresh_token {
             return Err(Failure::Unauthorized("Session does not belong to the account".to_string()));
         }
 
@@ -146,7 +151,7 @@ impl ManageSessionUseCases for AuthAppService {
         // 4. Calculate new session expiry
         let expires_at = (Utc::now().timestamp()) + APP_CONFIG.jwt.refresh_token_expiry;
 
-        // 5. Create new session & invalidate old session
+        // 5. Invalidate old session & create new session
         self.session_service
             .create_session(
                 &account_id,
@@ -164,3 +169,75 @@ impl ManageSessionUseCases for AuthAppService {
     }
 }
 // endregion ============================== MANAGE SESSION USE CASES ==============================
+
+// region ============================== OAUTH2 USE CASES ==============================
+#[async_trait]
+impl OAuth2UseCase for AuthAppService {
+    async fn oauth2_init(&self, params: &OAuth2InitParams) -> DomainResponse<OAuth2InitResponse> {
+        let oauth_provider = OAuth2Provider::from_string(&params.provider)?;
+        match oauth_provider {
+            OAuth2Provider::Google => {
+                let (authorization_url, state) = OAuth2Service::get_google_auth_url();
+                Ok(OAuth2InitResponse { authorization_url, state })
+            },
+
+            OAuth2Provider::GitHub => {
+                let (authorization_url, state) = OAuth2Service::get_github_auth_url();
+                Ok(OAuth2InitResponse { authorization_url, state })
+            },
+        }
+    }
+
+    async fn oauth2_callback(
+        &self,
+        params: &OAuth2CallbackParams,
+        metadata: &SessionMetadata,
+    ) -> DomainResponse<AuthResponse> {
+        // 1. Exchange code for access token
+        let access_token = OAuth2Service::exchange_google_code(&params.code, &params.state).await?;
+
+        // 2. Get account information from Google
+        let google_account = OAuth2Service::get_google_account_information(&access_token).await?;
+
+        // 3. Check account existence
+        let account_option = self.account_service.find_by_email(&google_account.email).await?;
+        let account_id = match account_option {
+            None => {
+                let new_account =
+                    self.account_service.create_account(&google_account.name, &google_account.email).await?;
+                let new_account_id =
+                    new_account.base.id.ok_or(Failure::InternalServerError("Failed to create account".to_string()))?;
+
+                // Link Google provider
+                self.provider_service.create_provider(&new_account_id, "GOOGLE", &google_account.id).await?;
+                new_account_id
+            },
+            Some(account_entity) => account_entity
+                .base
+                .id
+                .ok_or(Failure::InternalServerError("Account ID should be present".to_string()))?,
+        };
+
+        // 4. Generate JWT tokens
+        let jit = Uuid::now_v7().to_string();
+        let access_token = JwtService::generate_access_token(&account_id, &jit)?;
+        let refresh_token = JwtService::generate_refresh_token(&account_id, &jit)?;
+
+        // 5. Create session
+        let expires_at = Utc::now().timestamp() + APP_CONFIG.jwt.refresh_token_expiry;
+        self.session_service
+            .create_session(
+                &account_id,
+                &refresh_token,
+                &jit,
+                expires_at,
+                &metadata.ip_address,
+                &metadata.user_agent,
+                &metadata.device_type,
+            )
+            .await?;
+
+        Ok(AuthResponse { access_token, refresh_token })
+    }
+}
+// endregion ============================== OAUTH2 USE CASES ==============================

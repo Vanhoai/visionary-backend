@@ -7,7 +7,7 @@ use crate::shared::utilities::validated_payload::ValidatedPayload;
 
 use axum::extract::State;
 use axum::http::{HeaderMap, StatusCode};
-use domain::usecases::auth_usecases::{AuthParams, AuthResponse, ManageSessionUseCases, SessionMetadata};
+use domain::usecases::auth_usecases::{AuthParams, AuthResponse, ManageSessionAuthUseCase, SessionMetadata};
 use std::sync::Arc;
 
 pub async fn execute(
