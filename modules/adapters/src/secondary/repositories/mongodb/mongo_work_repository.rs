@@ -1,9 +1,9 @@
 use crate::impl_mongo_base_repository;
 use crate::secondary::repositories::mongodb::mongo_base_repository::{EntitySchema, MongoBaseRepository};
-use crate::secondary::repositories::mongodb::schemas::work_schema::WorkSchema;
+use crate::secondary::repositories::mongodb::schemas::experience_schema::ExperienceSchema;
 use async_trait::async_trait;
-use domain::entities::work_entity::WorkEntity;
-use domain::repositories::work_repository::WorkRepository;
+use domain::entities::experience_entity::ExperienceEntity;
+use domain::repositories::experience_repository::ExperienceRepository;
 use futures::TryStreamExt;
 use mongodb::Collection;
 use mongodb::bson::doc;
@@ -12,21 +12,21 @@ use shared::models::failure::Failure;
 use shared::types::DomainResponse;
 use std::sync::Arc;
 
-pub struct MongoWorkRepository {
-    base: MongoBaseRepository<WorkEntity, WorkSchema>,
+pub struct MongoExperienceRepository {
+    base: MongoBaseRepository<ExperienceEntity, ExperienceSchema>,
 }
 
-impl MongoWorkRepository {
-    pub fn new(collection: Arc<Collection<WorkSchema>>) -> Self {
-        MongoWorkRepository { base: MongoBaseRepository::new(collection) }
+impl MongoExperienceRepository {
+    pub fn new(collection: Arc<Collection<ExperienceSchema>>) -> Self {
+        MongoExperienceRepository { base: MongoBaseRepository::new(collection) }
     }
 }
 
-impl_mongo_base_repository!(MongoWorkRepository, WorkEntity, WorkSchema);
+impl_mongo_base_repository!(MongoExperienceRepository, ExperienceEntity, ExperienceSchema);
 
 #[async_trait]
-impl WorkRepository for MongoWorkRepository {
-    async fn find_by_account_id(&self, account_id: &str) -> DomainResponse<Vec<WorkEntity>> {
+impl ExperienceRepository for MongoExperienceRepository {
+    async fn find_by_account_id(&self, account_id: &str) -> DomainResponse<Vec<ExperienceEntity>> {
         let object_id = ObjectId::parse_str(account_id)
             .map_err(|e| Failure::BadRequest(format!("Invalid account_id format: {}: {}", account_id, e)))?;
 
@@ -39,7 +39,7 @@ impl WorkRepository for MongoWorkRepository {
             .map_err(|e| Failure::BadRequest(format!("Mongo search error: {}", e)))?;
 
         let entities = cursor
-            .try_collect::<Vec<WorkSchema>>()
+            .try_collect::<Vec<ExperienceSchema>>()
             .await
             .map_err(|e| Failure::BadRequest(format!("Failed to collect documents: {}", e)))?
             .into_iter()
@@ -47,5 +47,20 @@ impl WorkRepository for MongoWorkRepository {
             .collect();
 
         Ok(entities)
+    }
+
+    async fn find_by_company(&self, company: &str) -> DomainResponse<Option<ExperienceEntity>> {
+        let filter = doc! { "company": company };
+        let result = self
+            .base
+            .collection
+            .find_one(filter)
+            .await
+            .map_err(|e| Failure::BadRequest(format!("Mongo search error: {}", e)))?;
+
+        match result {
+            Some(schema) => Ok(Some(schema.to_entity())),
+            None => Ok(None),
+        }
     }
 }

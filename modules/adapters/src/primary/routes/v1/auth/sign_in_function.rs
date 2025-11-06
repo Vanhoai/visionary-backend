@@ -21,7 +21,7 @@ pub async fn execute(
     let session_metadata = SessionMetadata { ip_address, user_agent, device_type };
 
     match state.auth_app_service.sign_in(&params, &session_metadata).await {
-        Ok(response) => Ok(HttpResponse::new(StatusCode::OK, "Sign in successfully ✅".to_string(), response)),
+        Ok(response) => Ok(HttpResponse::new(StatusCode::OK, "Sign in successfully ✅", response)),
         Err(failure) => Err(HttpFailure::new(failure)),
     }
 }

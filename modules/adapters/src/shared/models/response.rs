@@ -10,8 +10,8 @@ pub struct HttpResponse<T: Serialize> {
 }
 
 impl<T: Serialize> HttpResponse<T> {
-    pub fn new(status_code: StatusCode, message: String, payload: T) -> Self {
-        HttpResponse { status_code, message, payload }
+    pub fn new(status_code: StatusCode, message: &str, payload: T) -> Self {
+        HttpResponse { status_code, message: message.to_string(), payload }
     }
 }
 

@@ -13,7 +13,7 @@ pub async fn execute(
     Query(query): Query<FindSessionsQuery>,
 ) -> AxumResponse<Vec<SessionEntity>> {
     match state.session_app_service.find_sessions(&query).await {
-        Ok(response) => Ok(HttpResponse::new(StatusCode::OK, "Find sessions successful ⏰".to_string(), response)),
+        Ok(response) => Ok(HttpResponse::new(StatusCode::OK, "Find sessions successful ⏰", response)),
         Err(failure) => Err(HttpFailure::new(failure)),
     }
 }

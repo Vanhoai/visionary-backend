@@ -16,7 +16,7 @@ pub async fn execute(
     ValidatedPayload(params): ValidatedPayload<AuthParams>,
 ) -> AxumResponse<AccountEntity> {
     match state.auth_app_service.sign_up(&params).await {
-        Ok(response) => Ok(HttpResponse::new(StatusCode::OK, "Sign up successfully ✅".to_string(), response)),
+        Ok(response) => Ok(HttpResponse::new(StatusCode::OK, "Sign up successfully ✅", response)),
         Err(failure) => Err(HttpFailure::new(failure)),
     }
 }

@@ -2,6 +2,7 @@ use crate::entities::base_entity::BaseEntity;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct SessionEntity {
     #[serde(flatten)]
     pub base: BaseEntity,

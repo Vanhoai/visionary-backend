@@ -3,7 +3,6 @@ use crate::{
     values::auth_provider::AuthProvider,
 };
 use async_trait::async_trait;
-use shared::models::filters::MongoFilter;
 use shared::types::DomainResponse;
 use std::sync::Arc;
 
@@ -16,11 +15,11 @@ pub trait ProviderService: Send + Sync {
 }
 
 pub struct ProviderServiceImpl {
-    repository: Arc<dyn ProviderRepository<Filter = MongoFilter>>,
+    repository: Arc<dyn ProviderRepository>,
 }
 
 impl ProviderServiceImpl {
-    pub fn new(repository: Arc<dyn ProviderRepository<Filter = MongoFilter>>) -> Self {
+    pub fn new(repository: Arc<dyn ProviderRepository>) -> Self {
         Self { repository }
     }
 }

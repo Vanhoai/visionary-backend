@@ -3,6 +3,7 @@ use crate::values::auth_provider::AuthProvider;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ProviderEntity {
     #[serde(flatten)]
     pub base: BaseEntity,

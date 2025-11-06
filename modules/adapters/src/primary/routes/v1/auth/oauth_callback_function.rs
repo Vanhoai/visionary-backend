@@ -23,9 +23,7 @@ pub async fn execute(
     let session_metadata = SessionMetadata { ip_address, user_agent, device_type };
 
     match state.auth_app_service.oauth2_callback(&params, &session_metadata).await {
-        Ok(response) => {
-            Ok(HttpResponse::new(StatusCode::OK, "OAuth2 authentication successful ✅".to_string(), response))
-        },
+        Ok(response) => Ok(HttpResponse::new(StatusCode::OK, "OAuth2 authentication successful ✅", response)),
         Err(failure) => Err(HttpFailure::new(failure)),
     }
 }

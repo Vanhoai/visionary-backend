@@ -7,6 +7,7 @@ const MAX_USERNAME_LENGTH: usize = 20;
 const EMAIL_REGEX: &str = r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}$";
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct AccountEntity {
     #[serde(flatten)]
     pub base: BaseEntity,

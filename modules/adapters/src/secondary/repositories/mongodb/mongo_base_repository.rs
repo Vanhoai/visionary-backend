@@ -42,8 +42,6 @@ macro_rules! impl_mongo_base_repository {
     ($repository:ty, $entity:ty, $schema:ty) => {
         #[async_trait::async_trait]
         impl domain::repositories::base_repository::BaseRepository<$entity> for $repository {
-            type Filter = shared::models::filters::MongoFilter;
-
             async fn create(&self, entity: $entity) -> shared::types::DomainResponse<$entity> {
                 self.base.create(entity).await
             }
@@ -75,13 +73,6 @@ macro_rules! impl_mongo_base_repository {
             ) -> shared::types::DomainResponse<(shared::models::paginate::Paginate, Vec<$entity>)> {
                 self.base.finds_paginated(page, page_size).await
             }
-
-            async fn finds_by_filter(
-                &self,
-                filter: <$repository as domain::repositories::base_repository::BaseRepository<$entity>>::Filter,
-            ) -> shared::types::DomainResponse<Vec<$entity>> {
-                self.base.finds_by_filter(filter).await
-            }
         }
     };
 }
@@ -92,8 +83,6 @@ where
     E: Send + Sync + Clone,
     S: EntitySchema<E>,
 {
-    type Filter = MongoFilter;
-
     async fn create(&self, entity: E) -> DomainResponse<E> {
         let schema = S::from_entity(entity.clone());
         let inserted_result = self
@@ -262,25 +251,5 @@ where
         };
 
         Ok((paginate, entities))
-    }
-
-    async fn finds_by_filter(&self, filter: Self::Filter) -> DomainResponse<Vec<E>> {
-        let mongo_filter = MongoFilterConverter::convert_to_mongo_filter(&filter);
-
-        let cursor = self
-            .collection
-            .find(mongo_filter)
-            .await
-            .map_err(|e| Failure::DatabaseError(format!("Failed to find entities: {}", e)))?;
-
-        let entities = cursor
-            .try_collect::<Vec<S>>()
-            .await
-            .map_err(|e| Failure::DatabaseError(format!("Failed to iterate: {}", e)))?
-            .into_iter()
-            .map(|schema| schema.to_entity())
-            .collect();
-
-        Ok(entities)
     }
 }

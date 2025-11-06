@@ -12,7 +12,7 @@ pub async fn execute(
     Query(query): Query<OAuth2InitParams>,
 ) -> AxumResponse<OAuth2InitResponse> {
     match state.auth_app_service.oauth2_init(&query).await {
-        Ok(response) => Ok(HttpResponse::new(StatusCode::OK, "OAuth2 initialization successful ✅".to_string(), response)),
+        Ok(response) => Ok(HttpResponse::new(StatusCode::OK, "OAuth2 initialization successful ✅", response)),
         Err(failure) => Err(HttpFailure::new(failure)),
     }
 }

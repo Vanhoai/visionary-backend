@@ -3,7 +3,6 @@ use crate::{
     usecases::session_usecases::FindSessionsQuery,
 };
 use async_trait::async_trait;
-use shared::models::filters::MongoFilter;
 use shared::types::DomainResponse;
 use std::sync::Arc;
 
@@ -26,11 +25,11 @@ pub trait SessionService: Send + Sync {
 }
 
 pub struct SessionServiceImpl {
-    repository: Arc<dyn SessionRepository<Filter = MongoFilter>>,
+    repository: Arc<dyn SessionRepository>,
 }
 
 impl SessionServiceImpl {
-    pub fn new(repository: Arc<dyn SessionRepository<Filter = MongoFilter>>) -> Self {
+    pub fn new(repository: Arc<dyn SessionRepository>) -> Self {
         Self { repository }
     }
 }

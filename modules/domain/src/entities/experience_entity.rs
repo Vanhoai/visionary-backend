@@ -10,45 +10,56 @@ static MAX_COMPANY_LENGTH: usize = 100;
 static MAX_LOCATION_LENGTH: usize = 100;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct WorkEntity {
+#[serde(rename_all = "camelCase")]
+pub struct ExperienceEntity {
     #[serde(flatten)]
     pub base: BaseEntity,
     pub account_id: String,
-    pub technologies: String,
+    pub technologies: Vec<String>,
     pub position: String,
-    pub responsibility: String,
+    pub responsibility: Vec<String>,
     pub company: String,
     pub location: String,
+    pub start_date: i64,
+    pub end_date: Option<i64>,
+    pub is_current: bool,
 }
 
-impl WorkEntity {
+impl ExperienceEntity {
     pub fn new(
         include_id: bool,
-        account_id: String,
-        technologies: String,
-        position: String,
-        responsibility: String,
-        company: String,
-        location: String,
+        account_id: &str,
+        technologies: &Vec<String>,
+        position: &str,
+        responsibility: &Vec<String>,
+        company: &str,
+        location: &str,
+        start_date: i64,
+        end_date: Option<i64>,
+        is_current: bool,
     ) -> DomainResponse<Self> {
-        Self::validate_technologies(&technologies)?;
-        Self::validate_position(&position)?;
-        Self::validate_responsibility(&responsibility)?;
-        Self::validate_company(&company)?;
-        Self::validate_location(&location)?;
+        Self::validate_technologies(technologies.clone())?;
+        Self::validate_position(position)?;
+        Self::validate_responsibility(responsibility.clone())?;
+        Self::validate_company(company)?;
+        Self::validate_location(location)?;
+        Self::validate_dates(start_date, end_date)?;
 
-        Ok(WorkEntity {
+        Ok(ExperienceEntity {
             base: BaseEntity::new(include_id),
-            account_id,
-            technologies,
-            position,
-            responsibility,
-            company,
-            location,
+            account_id: account_id.to_string(),
+            technologies: technologies.clone(),
+            position: position.to_string(),
+            responsibility: responsibility.clone(),
+            company: company.to_string(),
+            location: location.to_string(),
+            start_date,
+            end_date,
+            is_current,
         })
     }
 
-    fn validate_technologies(technologies: &str) -> DomainResponse<()> {
+    fn validate_technologies(technologies: Vec<String>) -> DomainResponse<()> {
         if technologies.len() > MAX_TECHNOLOGIES_LENGTH {
             return Err(Failure::ValidationError(format!(
                 "Technologies must not exceed {} characters",
@@ -70,7 +81,7 @@ impl WorkEntity {
         Ok(())
     }
 
-    fn validate_responsibility(responsibility: &str) -> DomainResponse<()> {
+    fn validate_responsibility(responsibility: Vec<String>) -> DomainResponse<()> {
         if responsibility.len() > MAX_RESPONSIBILITY_LENGTH {
             return Err(Failure::ValidationError(format!(
                 "Responsibility must not exceed {} characters",
@@ -95,6 +106,21 @@ impl WorkEntity {
                 "Location must not exceed {} characters",
                 MAX_LOCATION_LENGTH
             )));
+        }
+
+        Ok(())
+    }
+
+    fn validate_dates(start_date: i64, end_date: Option<i64>) -> DomainResponse<()> {
+        if let Some(end) = end_date {
+            if end < start_date {
+                return Err(Failure::ValidationError("End date cannot be earlier than start date".to_string()));
+            }
+        }
+
+        let now = chrono::Utc::now().timestamp_millis();
+        if end_date.unwrap_or(now) > now {
+            return Err(Failure::ValidationError("Dates cannot be in the future".to_string()));
         }
 
         Ok(())
