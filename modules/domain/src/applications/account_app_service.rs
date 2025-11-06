@@ -125,5 +125,21 @@ impl ManageRoleAccountUseCase for AccountAppService {
         let role_updated = self.role_service.find_and_update_role_by_account_id(account_id, &params.role_name).await?;
         Ok(role_updated)
     }
+
+    async fn find_role_by_account_id(&self, account_id: &str) -> DomainResponse<RoleEntity> {
+        // 1. Verify account exists
+        let account = self.account_service.find_account_by_id(account_id).await?;
+        if account.is_none() {
+            return Err(Failure::NotFound(format!("Account with id {} not found", account_id)));
+        }
+
+        // 2. Find role
+        let role = self.role_service.find_role_by_account_id(account_id).await?;
+        if role.is_none() {
+            return Err(Failure::NotFound(format!("Role for account id {} not found", account_id)));
+        }
+
+        Ok(role.unwrap())
+    }
 }
 // endregion =================================== MANAGE ROLES ACCOUNT USE CASE ===================================

@@ -51,6 +51,8 @@ pub trait ManageRoleAccountUseCase: Send + Sync {
         account_id: &str,
         params: &UpdateRoleToAccountParams,
     ) -> DomainResponse<RoleEntity>;
+    
+    async fn find_role_by_account_id(&self, account_id: &str) -> DomainResponse<RoleEntity>;
 }
 // endregion =================================== MANAGE ROLE ACCOUNT USE CASE ===================================
 

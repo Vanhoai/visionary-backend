@@ -6,6 +6,7 @@
       <sourceFolder url="file://$MODULE_DIR$/modules/application/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/modules/domain/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/modules/shared/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/modules/processors/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />

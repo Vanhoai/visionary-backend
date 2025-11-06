@@ -11,6 +11,7 @@ use shared::models::failure::Failure;
 pub struct AuthClaims {
     pub account_id: String,
     pub jit: String,
+    pub role: Option<String>,
 }
 
 impl AuthClaims {
@@ -24,7 +25,11 @@ impl AuthClaims {
             })?;
 
         let claims_wrapped = JwtService::verify_access_token(token).map_err(|e| HttpFailure::new(e))?;
-        Ok(AuthClaims { account_id: claims_wrapped.claims.sub, jit: claims_wrapped.claims.jit })
+        Ok(AuthClaims {
+            account_id: claims_wrapped.claims.sub,
+            jit: claims_wrapped.claims.jit,
+            role: claims_wrapped.claims.role,
+        })
     }
 }
 

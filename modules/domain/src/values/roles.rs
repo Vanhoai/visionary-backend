@@ -1,5 +1,6 @@
 use shared::models::failure::Failure;
 
+#[derive(Debug)]
 pub enum Role {
     Admin,
     Normal,
