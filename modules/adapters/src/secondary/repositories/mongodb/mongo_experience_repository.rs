@@ -8,10 +8,12 @@ use futures::TryStreamExt;
 use mongodb::Collection;
 use mongodb::bson::doc;
 use mongodb::bson::oid::ObjectId;
+use processors::MongoRepository;
 use shared::models::failure::Failure;
 use shared::types::DomainResponse;
 use std::sync::Arc;
 
+#[derive(MongoRepository)]
 pub struct MongoExperienceRepository {
     base: MongoBaseRepository<ExperienceEntity, ExperienceSchema>,
 }
@@ -21,8 +23,6 @@ impl MongoExperienceRepository {
         MongoExperienceRepository { base: MongoBaseRepository::new(collection) }
     }
 }
-
-impl_mongo_base_repository!(MongoExperienceRepository, ExperienceEntity, ExperienceSchema);
 
 #[async_trait]
 impl ExperienceRepository for MongoExperienceRepository {

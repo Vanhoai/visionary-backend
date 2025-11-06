@@ -1,16 +1,19 @@
 use mongodb::Collection;
 use std::sync::Arc;
 
-use crate::secondary::repositories::mongodb::mongo_work_repository::MongoExperienceRepository;
-use crate::secondary::repositories::mongodb::schemas::experience_schema::ExperienceSchema;
 use crate::secondary::{
     apis::auth_api_impl::AuthApiImpl,
     repositories::mongodb::{
         mongo_account_repository::MongoAccountRepository,
+        mongo_experience_repository::MongoExperienceRepository,
         mongo_notification_repository::MongoNotificationRepository,
         mongo_provider_repository::MongoProviderRepository,
+        mongo_role_repository::MongoRoleRepository,
         mongo_session_repository::MongoSessionRepository,
-        schemas::{account_schema::AccountSchema, provider_schema::ProviderSchema, session_schema::SessionSchema},
+        schemas::{
+            account_schema::AccountSchema, experience_schema::ExperienceSchema, provider_schema::ProviderSchema,
+            role_schema::RoleSchema, session_schema::SessionSchema,
+        },
     },
 };
 use crate::shared::utilities::databases;
@@ -23,7 +26,7 @@ use domain::{
     repositories::{
         account_repository::AccountRepository, experience_repository::ExperienceRepository,
         notification_repository::NotificationRepository, provider_repository::ProviderRepository,
-        session_repository::SessionRepository,
+        role_repository::RoleRepository, session_repository::SessionRepository,
     },
     services::{
         account_service::{AccountService, AccountServiceImpl},
@@ -31,10 +34,10 @@ use domain::{
         experience_service::{ExperienceService, ExperienceServiceImpl},
         notification_service::{NotificationService, NotificationServiceImpl},
         provider_service::{ProviderService, ProviderServiceImpl},
+        role_service::{RoleService, RoleServiceImpl},
         session_service::{SessionService, SessionServiceImpl},
     },
 };
-use shared::models::filters::MongoFilter;
 
 #[derive(Clone)]
 pub struct AppState {
@@ -53,14 +56,16 @@ impl AppState {
         let account_collection = Arc::new(mongodb_connection.collection(databases::ACCOUNT_TABLE));
         let provider_collection = Arc::new(mongodb_connection.collection(databases::PROVIDER_TABLE));
         let session_collection = Arc::new(mongodb_connection.collection(databases::SESSION_TABLE));
-        let work_collection = Arc::new(mongodb_connection.collection(databases::WORK_TABLE));
+        let experience_collection = Arc::new(mongodb_connection.collection(databases::EXPERIENCE_TABLE));
+        let role_collection = Arc::new(mongodb_connection.collection(databases::ROLE_TABLE));
 
         // Initialize repositories
         let account_repository = Self::create_account_repository(account_collection.clone());
         let provider_repository = Self::create_provider_repository(provider_collection.clone());
         let session_repository = Self::create_session_repository(session_collection.clone());
         let notification_repository = Self::create_notification_repository();
-        let work_repository = Self::create_work_repository(work_collection.clone());
+        let work_repository = Self::create_work_repository(experience_collection.clone());
+        let role_repository = Self::create_role_repository(role_collection.clone());
 
         // Initialize apis
         let auth_api = Self::create_auth_api();
@@ -72,6 +77,7 @@ impl AppState {
         let notification_service = Self::create_notification_service(notification_repository.clone());
         let session_service = Self::create_session_service(session_repository.clone());
         let experience_service = Self::create_experience_service(work_repository.clone());
+        let role_service = Self::create_role_service(role_repository.clone());
 
         // Initialize application services
         let auth_app_service = Self::create_auth_app_service(
@@ -79,12 +85,14 @@ impl AppState {
             account_service.clone(),
             provider_service.clone(),
             session_service.clone(),
+            role_service.clone(),
             auth_api.clone(),
         );
 
         let notification_app_service = Self::create_notification_app_service(notification_service.clone());
         let session_app_service = Self::create_session_app_service(session_service.clone());
-        let account_app_service = Self::create_account_app_service(account_service.clone(), experience_service.clone());
+        let account_app_service =
+            Self::create_account_app_service(account_service.clone(), experience_service.clone(), role_service.clone());
 
         // Return AppState
         Ok(AppState { auth_app_service, account_app_service, notification_app_service, session_app_service })
@@ -109,6 +117,10 @@ impl AppState {
 
     fn create_work_repository(collection: Arc<Collection<ExperienceSchema>>) -> Arc<dyn ExperienceRepository> {
         Arc::new(MongoExperienceRepository::new(collection))
+    }
+
+    fn create_role_repository(collection: Arc<Collection<RoleSchema>>) -> Arc<dyn RoleRepository> {
+        Arc::new(MongoRoleRepository::new(collection))
     }
 
     // Apis factories
@@ -141,15 +153,27 @@ impl AppState {
         Arc::new(ExperienceServiceImpl::new(repository))
     }
 
+    fn create_role_service(repository: Arc<dyn RoleRepository>) -> Arc<dyn RoleService> {
+        Arc::new(RoleServiceImpl::new(repository))
+    }
+
     // Application service factories
     fn create_auth_app_service(
         auth_service: Arc<dyn AuthService>,
         account_service: Arc<dyn AccountService>,
         provider_service: Arc<dyn ProviderService>,
         session_service: Arc<dyn SessionService>,
+        role_service: Arc<dyn RoleService>,
         auth_api: Arc<dyn AuthApi>,
     ) -> Arc<AuthAppService> {
-        Arc::new(AuthAppService::new(auth_service, account_service, provider_service, session_service, auth_api))
+        Arc::new(AuthAppService::new(
+            auth_service,
+            account_service,
+            provider_service,
+            session_service,
+            role_service,
+            auth_api,
+        ))
     }
 
     fn create_notification_app_service(
@@ -165,7 +189,8 @@ impl AppState {
     fn create_account_app_service(
         account_service: Arc<dyn AccountService>,
         experience_service: Arc<dyn ExperienceService>,
+        role_service: Arc<dyn RoleService>,
     ) -> Arc<AccountAppService> {
-        Arc::new(AccountAppService::new(account_service, experience_service))
+        Arc::new(AccountAppService::new(account_service, experience_service, role_service))
     }
 }

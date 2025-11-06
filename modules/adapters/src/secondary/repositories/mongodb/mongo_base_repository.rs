@@ -7,7 +7,6 @@ use mongodb::bson::{doc, to_document};
 use serde::Serialize;
 use serde::de::DeserializeOwned;
 use shared::models::failure::Failure;
-use shared::models::filters::{MongoFilter, MongoFilterConverter};
 use shared::models::paginate::Paginate;
 use shared::types::DomainResponse;
 use std::marker::PhantomData;
@@ -42,11 +41,11 @@ macro_rules! impl_mongo_base_repository {
     ($repository:ty, $entity:ty, $schema:ty) => {
         #[async_trait::async_trait]
         impl domain::repositories::base_repository::BaseRepository<$entity> for $repository {
-            async fn create(&self, entity: $entity) -> shared::types::DomainResponse<$entity> {
+            async fn create(&self, entity: &$entity) -> shared::types::DomainResponse<$entity> {
                 self.base.create(entity).await
             }
 
-            async fn update(&self, id: &str, entity: $entity) -> shared::types::DomainResponse<$entity> {
+            async fn update(&self, id: &str, entity: &$entity) -> shared::types::DomainResponse<$entity> {
                 self.base.update(id, entity).await
             }
 
@@ -83,7 +82,7 @@ where
     E: Send + Sync + Clone,
     S: EntitySchema<E>,
 {
-    async fn create(&self, entity: E) -> DomainResponse<E> {
+    async fn create(&self, entity: &E) -> DomainResponse<E> {
         let schema = S::from_entity(entity.clone());
         let inserted_result = self
             .collection
@@ -113,7 +112,7 @@ where
         Ok(schema.to_entity())
     }
 
-    async fn update(&self, id: &str, entity: E) -> DomainResponse<E> {
+    async fn update(&self, id: &str, entity: &E) -> DomainResponse<E> {
         let object_id =
             ObjectId::parse_str(id).map_err(|_| Failure::BadRequest(format!("Invalid ID format: {}", id)))?;
 

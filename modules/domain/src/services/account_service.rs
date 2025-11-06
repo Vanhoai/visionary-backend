@@ -39,7 +39,7 @@ impl AccountService for AccountServiceImpl {
 
     async fn create_account(&self, username: &str, email: &str) -> DomainResponse<AccountEntity> {
         let account = AccountEntity::new(false, username.to_string(), email.to_string())?;
-        self.repository.create(account).await
+        self.repository.create(&account).await
     }
 
     async fn find_by_email(&self, email: &str) -> DomainResponse<Option<AccountEntity>> {

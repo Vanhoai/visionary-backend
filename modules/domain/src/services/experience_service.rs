@@ -67,6 +67,6 @@ impl ExperienceService for ExperienceServiceImpl {
             is_current,
         )?;
 
-        self.repository.create(experience_entity).await
+        self.repository.create(&experience_entity).await
     }
 }

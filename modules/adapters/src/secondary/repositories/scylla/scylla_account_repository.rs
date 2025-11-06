@@ -15,11 +15,11 @@ impl ScyllaAccountRepository {
 
 #[async_trait]
 impl BaseRepository<AccountEntity> for ScyllaAccountRepository {
-    async fn create(&self, _entity: AccountEntity) -> DomainResponse<AccountEntity> {
+    async fn create(&self, _entity: &AccountEntity) -> DomainResponse<AccountEntity> {
         todo!()
     }
 
-    async fn update(&self, _id: &str, _entity: AccountEntity) -> DomainResponse<AccountEntity> {
+    async fn update(&self, _id: &str, _entity: &AccountEntity) -> DomainResponse<AccountEntity> {
         todo!()
     }
 
@@ -39,7 +39,7 @@ impl BaseRepository<AccountEntity> for ScyllaAccountRepository {
         todo!()
     }
 
-    async fn finds_paginated(&self, page: u32, page_size: u32) -> DomainResponse<(Paginate, Vec<AccountEntity>)> {
+    async fn finds_paginated(&self, _page: u32, _page_size: u32) -> DomainResponse<(Paginate, Vec<AccountEntity>)> {
         todo!()
     }
 }

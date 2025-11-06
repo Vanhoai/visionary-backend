@@ -35,7 +35,7 @@ impl ProviderService for ProviderServiceImpl {
         let auth_provider = AuthProvider::from_string(provider)?;
         let provider = ProviderEntity::new(false, account_id.to_string(), auth_provider, identify.to_string());
 
-        self.repository.create(provider).await
+        self.repository.create(&provider).await
     }
 
     async fn find_by_account_id(&self, account_id: &str) -> DomainResponse<Vec<ProviderEntity>> {

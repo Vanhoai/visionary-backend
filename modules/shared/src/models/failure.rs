@@ -1,5 +1,3 @@
-use std::error::Error;
-
 #[derive(Debug)]
 pub enum Failure {
     BadRequest(String),

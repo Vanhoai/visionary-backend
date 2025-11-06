@@ -10,7 +10,8 @@ use tokio::sync::OnceCell;
 pub static ACCOUNT_TABLE: &str = "accounts";
 pub static SESSION_TABLE: &str = "sessions";
 pub static PROVIDER_TABLE: &str = "providers";
-pub static WORK_TABLE: &str = "experiences";
+pub static EXPERIENCE_TABLE: &str = "experiences";
+pub static ROLE_TABLE: &str = "roles";
 
 pub static MONGO_CLIENT: OnceCell<Arc<Database>> = OnceCell::const_new();
 pub async fn mongo_client() -> Arc<Database> {

@@ -2,7 +2,7 @@ use crate::shared::di::state::AppState;
 use crate::shared::models::failure::HttpFailure;
 use crate::shared::models::response::HttpResponse;
 use crate::shared::types::AxumResponse;
-use crate::shared::utilities::{request_extractor, validated_payload::ValidatedPayload};
+use crate::shared::utilities::request_extractor;
 use axum::extract::{Query, State};
 use axum::http::{HeaderMap, StatusCode};
 use domain::usecases::auth_usecases::{AuthResponse, OAuth2CallbackParams, OAuth2UseCase, SessionMetadata};

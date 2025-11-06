@@ -113,14 +113,14 @@ impl ExperienceEntity {
 
     fn validate_dates(start_date: i64, end_date: Option<i64>) -> DomainResponse<()> {
         if let Some(end) = end_date {
-            if end < start_date {
+            if end <= start_date {
                 return Err(Failure::ValidationError("End date cannot be earlier than start date".to_string()));
             }
-        }
 
-        let now = chrono::Utc::now().timestamp_millis();
-        if end_date.unwrap_or(now) > now {
-            return Err(Failure::ValidationError("Dates cannot be in the future".to_string()));
+            let now = chrono::Utc::now().timestamp_millis();
+            if start_date > now || end > now {
+                return Err(Failure::ValidationError("Dates cannot be in the future".to_string()));
+            }
         }
 
         Ok(())

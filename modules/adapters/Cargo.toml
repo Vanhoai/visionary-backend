@@ -9,7 +9,8 @@ workspace = true
 [dependencies]
 shared = { path = "../shared" }
 domain = { path = "../domain" }
-tokio = { workspace = true, features = ["sync"] }
+processors = { path = "../processors" }
+tokio = { workspace = true, features = ["full"] }
 axum = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }

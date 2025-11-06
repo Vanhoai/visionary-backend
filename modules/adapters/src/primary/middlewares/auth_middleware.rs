@@ -1,0 +1,52 @@
+use crate::shared::models::failure::HttpFailure;
+use axum::extract::{FromRequestParts, Request};
+use axum::http::HeaderMap;
+use axum::http::request::Parts;
+use axum::middleware::Next;
+use axum::response::Response;
+use shared::jwt::service::JwtService;
+use shared::models::failure::Failure;
+
+#[derive(Debug, Clone)]
+pub struct AuthClaims {
+    pub account_id: String,
+    pub jit: String,
+}
+
+impl AuthClaims {
+    pub fn from_headers(headers: &HeaderMap) -> Result<Self, HttpFailure> {
+        let token = headers
+            .get("Authorization")
+            .and_then(|value| value.to_str().ok())
+            .and_then(|auth| if auth.starts_with("Bearer ") { Some(&auth[7..]) } else { None })
+            .ok_or_else(|| {
+                HttpFailure::new(Failure::Unauthorized("Missing or invalid Authorization header".to_string()))
+            })?;
+
+        let claims_wrapped = JwtService::verify_access_token(token).map_err(|e| HttpFailure::new(e))?;
+        Ok(AuthClaims { account_id: claims_wrapped.claims.sub, jit: claims_wrapped.claims.jit })
+    }
+}
+
+impl<S> FromRequestParts<S> for AuthClaims
+where
+    S: Send + Sync,
+{
+    type Rejection = HttpFailure;
+    async fn from_request_parts(parts: &mut Parts, _state: &S) -> Result<Self, Self::Rejection> {
+        parts.extensions.get::<AuthClaims>().cloned().ok_or_else(|| {
+            HttpFailure::new(Failure::Unauthorized(
+                "Authentication required. Please ensure auth_middleware is applied.".to_string(),
+            ))
+        })
+    }
+}
+
+pub async fn auth_middleware(mut req: Request, next: Next) -> Result<Response, HttpFailure> {
+    let headers = req.headers();
+    let claims = AuthClaims::from_headers(headers)?;
+
+    // Store claims in request extensions for later use
+    req.extensions_mut().insert(claims);
+    Ok(next.run(req).await)
+}

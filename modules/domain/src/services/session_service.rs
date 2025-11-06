@@ -57,7 +57,7 @@ impl SessionService for SessionServiceImpl {
             device_type.to_string(),
         );
 
-        self.repository.create(session).await
+        self.repository.create(&session).await
     }
 
     async fn find_by_jit(&self, jit: &str) -> DomainResponse<Option<SessionEntity>> {

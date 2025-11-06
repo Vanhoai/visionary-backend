@@ -7,7 +7,8 @@ members = [
     "modules/adapters",
     "modules/application",
     "modules/shared",
-    "modules/domain"
+    "modules/domain",
+    "modules/processors"
 ]
 
 [workspace.lints.rust]
@@ -40,3 +41,6 @@ regex = "1.12.2"
 reqwest = "0.12.24"
 base64 = "0.22.1"
 oauth2 = "5.0.0"
+proc-macro2 = "1.0.103"
+quote = "1.0.41"
+syn = "2.0.109"

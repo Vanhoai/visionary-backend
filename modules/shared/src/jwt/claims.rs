@@ -6,4 +6,5 @@ pub struct Claims {
     pub jit: String, // JWT ID
     pub exp: i64,
     pub iat: i64,
+    pub role: Option<String>,
 }

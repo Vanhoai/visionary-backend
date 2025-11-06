@@ -5,6 +5,7 @@ use uuid::Uuid;
 
 use crate::apis::auth_api::AuthApi;
 use crate::entities::account_entity::AccountEntity;
+use crate::services::role_service::RoleService;
 use crate::services::{
     account_service::AccountService, auth_service::AuthService, provider_service::ProviderService,
     session_service::SessionService,
@@ -26,6 +27,7 @@ pub struct AuthAppService {
     account_service: Arc<dyn AccountService>,
     provider_service: Arc<dyn ProviderService>,
     session_service: Arc<dyn SessionService>,
+    role_service: Arc<dyn RoleService>,
 
     // apis
     auth_api: Arc<dyn AuthApi>,
@@ -37,9 +39,10 @@ impl AuthAppService {
         account_service: Arc<dyn AccountService>,
         provider_service: Arc<dyn ProviderService>,
         session_service: Arc<dyn SessionService>,
+        role_service: Arc<dyn RoleService>,
         auth_api: Arc<dyn AuthApi>,
     ) -> Self {
-        Self { auth_service, account_service, provider_service, session_service, auth_api }
+        Self { auth_service, account_service, provider_service, session_service, role_service, auth_api }
     }
 }
 
@@ -71,7 +74,7 @@ impl ManageSessionAuthUseCase for AuthAppService {
     }
 
     async fn sign_in(&self, params: &AuthParams, metadata: &SessionMetadata) -> Result<AuthResponse, Failure> {
-        // 1. Retrieve account and providers
+        // 1. Retrieve account by email
         let account_entity = self
             .account_service
             .find_by_email(&params.email)
@@ -84,9 +87,12 @@ impl ManageSessionAuthUseCase for AuthAppService {
             .clone()
             .ok_or(Failure::InternalServerError("Account ID should be present".to_string()))?;
 
-        let provider_entities = self.provider_service.find_by_account_id(&account_id).await?;
+        // 2. Retrieve account's providers and roles concurrently
+        let (provider_entities, role_entity) = tokio::try_join!(
+            self.provider_service.find_by_account_id(&account_id),
+            self.role_service.find_role_by_account_id(&account_id)
+        )?;
 
-        // 2. Find password provider
         let password_provider = provider_entities
             .into_iter()
             .find(|provider| provider.auth_provider == "PASSWORD".to_string())
@@ -98,9 +104,10 @@ impl ManageSessionAuthUseCase for AuthAppService {
         }
 
         // 4. Generate tokens and create session
+        let role = if let Some(role_entity) = role_entity { Some(role_entity.role_name) } else { None };
         let jit = Uuid::now_v7().to_string();
-        let access_token = JwtService::generate_access_token(&account_id, &jit)?;
-        let refresh_token = JwtService::generate_refresh_token(&account_id, &jit)?;
+        let access_token = JwtService::generate_access_token(&account_id, &jit, role.clone())?;
+        let refresh_token = JwtService::generate_refresh_token(&account_id, &jit, role)?;
 
         // 5. Calculate session expiry (same as refresh token expiry)
         let expires_at = (Utc::now().timestamp()) + APP_CONFIG.jwt.refresh_token_expiry;
@@ -131,6 +138,7 @@ impl ManageSessionAuthUseCase for AuthAppService {
         let token_data = JwtService::verify_access_token(&params.refresh_token)?;
         let account_id = token_data.claims.sub;
         let jit = token_data.claims.jit;
+        let role = token_data.claims.role;
 
         // 2. Verify session exists
         let session_entity = self
@@ -145,8 +153,8 @@ impl ManageSessionAuthUseCase for AuthAppService {
 
         // 3. Generate new tokens
         let jit = Uuid::now_v7().to_string();
-        let access_token = JwtService::generate_access_token(&account_id, &jit)?;
-        let refresh_token = JwtService::generate_refresh_token(&account_id, &jit)?;
+        let access_token = JwtService::generate_access_token(&account_id, &jit, role.clone())?;
+        let refresh_token = JwtService::generate_refresh_token(&account_id, &jit, role)?;
 
         // 4. Calculate new session expiry
         let expires_at = (Utc::now().timestamp()) + APP_CONFIG.jwt.refresh_token_expiry;
@@ -218,13 +226,18 @@ impl OAuth2UseCase for AuthAppService {
                 .ok_or(Failure::InternalServerError("Account ID should be present".to_string()))?,
         };
 
-        // 4. Generate JWT tokens
-        let jit = Uuid::now_v7().to_string();
-        let access_token = JwtService::generate_access_token(&account_id, &jit)?;
-        let refresh_token = JwtService::generate_refresh_token(&account_id, &jit)?;
+        // 4. Retrieve roles (if any)
+        let role_entity = self.role_service.find_role_by_account_id(&account_id).await?;
+        let role = if let Some(role_entity) = role_entity { Some(role_entity.role_name) } else { None };
 
-        // 5. Create session
+        // 5. Generate JWT tokens
+        let jit = Uuid::now_v7().to_string();
+        let access_token = JwtService::generate_access_token(&account_id, &jit, role.clone())?;
+        let refresh_token = JwtService::generate_refresh_token(&account_id, &jit, role)?;
+
+        // 6. Clean and create new session
         let expires_at = Utc::now().timestamp() + APP_CONFIG.jwt.refresh_token_expiry;
+        self.session_service.clean_session_by_account_id(&account_id).await?;
         self.session_service
             .create_session(
                 &account_id,

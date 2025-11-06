@@ -1,24 +1,34 @@
 use crate::entities::account_entity::AccountEntity;
 use crate::entities::experience_entity::ExperienceEntity;
+use crate::entities::role_entity::RoleEntity;
 use crate::services::account_service::AccountService;
 use crate::services::experience_service::ExperienceService;
+use crate::services::role_service::RoleService;
 use crate::usecases::account_usecases::{
-    AddExperienceToAccountParams, FindAccountsQuery, ManageAccountsUseCase, ManageExperienceAccountUseCase,
+    AddExperienceToAccountParams, AddRoleToAccountParams, FindAccountsQuery, ManageAccountsUseCase,
+    ManageExperienceAccountUseCase, ManageRoleAccountUseCase, UpdateRoleToAccountParams,
 };
+use crate::values::roles::Role;
 use async_trait::async_trait;
 use shared::models::failure::Failure;
 use shared::models::paginate::Paginate;
 use shared::types::DomainResponse;
 use std::sync::Arc;
+use validator::ValidateRequired;
 
 pub struct AccountAppService {
     account_service: Arc<dyn AccountService>,
     experience_service: Arc<dyn ExperienceService>,
+    role_service: Arc<dyn RoleService>,
 }
 
 impl AccountAppService {
-    pub fn new(account_service: Arc<dyn AccountService>, experience_service: Arc<dyn ExperienceService>) -> Self {
-        Self { account_service, experience_service }
+    pub fn new(
+        account_service: Arc<dyn AccountService>,
+        experience_service: Arc<dyn ExperienceService>,
+        role_service: Arc<dyn RoleService>,
+    ) -> Self {
+        Self { account_service, experience_service, role_service }
     }
 }
 
@@ -75,3 +85,45 @@ impl ManageExperienceAccountUseCase for AccountAppService {
 }
 
 // endregion =================================== MANAGE WORKS ACCOUNT USE CASE ===================================
+
+// region =================================== MANAGE ROLES ACCOUNT USE CASE ===================================
+#[async_trait]
+impl ManageRoleAccountUseCase for AccountAppService {
+    async fn add_role_to_account(
+        &self,
+        account_id: &str,
+        params: &AddRoleToAccountParams,
+    ) -> DomainResponse<RoleEntity> {
+        // 1. Verify account exists
+        let account = self.account_service.find_account_by_id(account_id).await?;
+        if account.is_none() {
+            return Err(Failure::NotFound(format!("Account with id {} not found", account_id)));
+        }
+
+        // 2. Check for existing role
+        let existing_role = self.role_service.find_role_by_account_id(account_id).await?;
+        if existing_role.is_some() {
+            return Err(Failure::Conflict(format!("Role for account id {} already exists", account_id)));
+        }
+
+        // 3. Create role
+        Ok(self.role_service.create_role(account_id, &params.role_name).await?)
+    }
+
+    async fn update_role_for_account(
+        &self,
+        account_id: &str,
+        params: &UpdateRoleToAccountParams,
+    ) -> DomainResponse<RoleEntity> {
+        // 1. Verify account exists
+        let account = self.account_service.find_account_by_id(account_id).await?;
+        if account.is_none() {
+            return Err(Failure::NotFound(format!("Account with id {} not found", account_id)));
+        }
+
+        // 2. Find and update role
+        let role_updated = self.role_service.find_and_update_role_by_account_id(account_id, &params.role_name).await?;
+        Ok(role_updated)
+    }
+}
+// endregion =================================== MANAGE ROLES ACCOUNT USE CASE ===================================

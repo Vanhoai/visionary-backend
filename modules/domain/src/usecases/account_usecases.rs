@@ -1,5 +1,6 @@
 use crate::entities::account_entity::AccountEntity;
 use crate::entities::experience_entity::ExperienceEntity;
+use crate::entities::role_entity::RoleEntity;
 use async_trait::async_trait;
 use serde::Deserialize;
 use shared::{
@@ -21,6 +22,37 @@ pub trait ManageAccountsUseCase: Send + Sync {
     async fn find_accounts(&self, query: &FindAccountsQuery) -> DomainResponse<(Paginate, Vec<AccountEntity>)>;
 }
 // endregion =================================== MANAGE ACCOUNT USE CASE ===================================
+
+// region =================================== MANAGE ROLE ACCOUNT USE CASE ===================================
+#[derive(Debug, Deserialize, Validate)]
+#[serde(rename_all = "camelCase")]
+pub struct AddRoleToAccountParams {
+    #[validate(length(min = 1, message = "Role name must not be empty"))]
+    pub role_name: String,
+}
+
+#[derive(Debug, Deserialize, Validate)]
+#[serde(rename_all = "camelCase")]
+pub struct UpdateRoleToAccountParams {
+    #[validate(length(min = 1, message = "Role name must not be empty"))]
+    pub role_name: String,
+}
+
+#[async_trait]
+pub trait ManageRoleAccountUseCase: Send + Sync {
+    async fn add_role_to_account(
+        &self,
+        account_id: &str,
+        params: &AddRoleToAccountParams,
+    ) -> DomainResponse<RoleEntity>;
+
+    async fn update_role_for_account(
+        &self,
+        account_id: &str,
+        params: &UpdateRoleToAccountParams,
+    ) -> DomainResponse<RoleEntity>;
+}
+// endregion =================================== MANAGE ROLE ACCOUNT USE CASE ===================================
 
 // region =================================== MANAGE WORKS ACCOUNT USE CASE ===================================
 
