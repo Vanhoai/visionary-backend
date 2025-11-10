@@ -1,4 +1,3 @@
-use crate::impl_mongo_base_repository;
 use crate::secondary::repositories::mongodb::mongo_base_repository::{EntitySchema, MongoBaseRepository};
 use crate::secondary::repositories::mongodb::schemas::experience_schema::ExperienceSchema;
 use async_trait::async_trait;

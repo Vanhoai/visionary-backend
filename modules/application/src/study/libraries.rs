@@ -2,13 +2,14 @@ use crossbeam::deque::{Injector, Stealer, Worker};
 use crossbeam::{channel, thread};
 use rayon::prelude::*;
 
+#[allow(dead_code)]
 fn study_rayon() {
     // Parallel iteration
     let sum: i32 = (0..1000).into_par_iter().sum();
     println!("Sum: {}", sum);
 
     // Parallel map
-    let squares: Vec<i32> = (0..100).into_par_iter().map(|x| x * x).collect();
+    // let squares: Vec<i32> = (0..100).into_par_iter().map(|x| x * x).collect();
 
     // Parallel sort
     let mut data = vec![3, 1, 4, 1, 5, 9, 2, 6];
@@ -29,6 +30,7 @@ fn study_rayon() {
     });
 }
 
+#[allow(dead_code)]
 fn study_crossbeam() {
     // Unbounded channel
     let (s, r) = channel::unbounded();
@@ -62,6 +64,7 @@ fn study_crossbeam() {
     .unwrap();
 }
 
+#[allow(dead_code)]
 fn work_stealing() {
     let injector: Injector<i32> = Injector::new();
     let worker: Worker<i32> = Worker::new_fifo();
@@ -86,6 +89,7 @@ fn work_stealing() {
     .unwrap();
 }
 
+#[allow(dead_code)]
 pub fn study() {
     work_stealing();
 }

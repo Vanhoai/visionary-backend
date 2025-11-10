@@ -8,13 +8,11 @@ use crate::usecases::account_usecases::{
     AddExperienceToAccountParams, AddRoleToAccountParams, FindAccountsQuery, ManageAccountsUseCase,
     ManageExperienceAccountUseCase, ManageRoleAccountUseCase, UpdateRoleToAccountParams,
 };
-use crate::values::roles::Role;
 use async_trait::async_trait;
 use shared::models::failure::Failure;
 use shared::models::paginate::Paginate;
 use shared::types::DomainResponse;
 use std::sync::Arc;
-use validator::ValidateRequired;
 
 pub struct AccountAppService {
     account_service: Arc<dyn AccountService>,

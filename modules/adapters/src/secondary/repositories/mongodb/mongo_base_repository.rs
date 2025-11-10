@@ -61,6 +61,14 @@ macro_rules! impl_mongo_base_repository {
                 self.base.find(id).await
             }
 
+            async fn find_and_delete(&self, id: &str) -> shared::types::DomainResponse<$entity> {
+                self.base.find_and_delete(id).await
+            }
+
+            async fn find_and_remove(&self, id: &str) -> shared::types::DomainResponse<$entity> {
+                self.base.find_and_remove(id).await
+            }
+
             async fn finds(&self) -> shared::types::DomainResponse<Vec<$entity>> {
                 self.base.finds().await
             }
@@ -116,8 +124,7 @@ where
         let object_id =
             ObjectId::parse_str(id).map_err(|_| Failure::BadRequest(format!("Invalid ID format: {}", id)))?;
 
-        let filter = doc! { "_id": object_id };
-
+        let query = doc! { "_id": object_id };
         let schema = S::from_entity(entity.clone());
 
         let update = doc! {
@@ -125,14 +132,17 @@ where
                 .map_err(|e| Failure::DatabaseError(format!("Failed to serialize entity for update: {}", e)))?,
         };
 
-        let updated_schema = self
+        let updated_result = self
             .collection
-            .find_one_and_update(filter, update)
+            .update_one(query, update)
             .await
-            .map_err(|e| Failure::DatabaseError(format!("Failed to update entity: {}", e)))?
-            .ok_or_else(|| Failure::NotFound(format!("Entity with id {} not found", id)))?;
+            .map_err(|e| Failure::DatabaseError(format!("Failed to update entity: {}", e)))?;
 
-        Ok(updated_schema.to_entity())
+        if updated_result.matched_count == 0 {
+            return Err(Failure::NotFound(format!("Entity with id {} not found", id)));
+        }
+
+        Ok(schema.to_entity())
     }
 
     async fn delete(&self, id: &str) -> DomainResponse<E> {
@@ -188,6 +198,45 @@ where
             Ok(None) => Ok(None),
             Err(e) => Err(Failure::DatabaseError(format!("Failed to find entity by ID: {}", e))),
         }
+    }
+
+    async fn find_and_delete(&self, id: &str) -> DomainResponse<E> {
+        let object_id =
+            ObjectId::parse_str(id).map_err(|_| Failure::BadRequest(format!("Invalid ID format: {}", id)))?;
+
+        let filter = doc! { "_id": object_id };
+
+        // Soft delete by setting deleted_at timestamp
+        let update = doc! {
+            "$set": {
+                "deleted_at": chrono::Utc::now().timestamp(),
+            }
+        };
+
+        let schema = self
+            .collection
+            .find_one_and_update(filter, update)
+            .await
+            .map_err(|e| Failure::DatabaseError(format!("Failed to find and delete entity: {}", e)))?
+            .ok_or_else(|| Failure::NotFound(format!("Entity with id {} not found", id)))?;
+
+        Ok(schema.to_entity())
+    }
+
+    async fn find_and_remove(&self, id: &str) -> DomainResponse<E> {
+        let object_id =
+            ObjectId::parse_str(id).map_err(|_| Failure::BadRequest(format!("Invalid ID format: {}", id)))?;
+
+        let filter = doc! { "_id": object_id };
+
+        let schema = self
+            .collection
+            .find_one_and_delete(filter)
+            .await
+            .map_err(|e| Failure::DatabaseError(format!("Failed to find and remove entity: {}", e)))?
+            .ok_or_else(|| Failure::NotFound(format!("Entity with id {} not found", id)))?;
+
+        Ok(schema.to_entity())
     }
 
     async fn finds(&self) -> DomainResponse<Vec<E>> {

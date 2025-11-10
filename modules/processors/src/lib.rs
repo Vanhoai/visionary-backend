@@ -8,7 +8,7 @@ pub fn mongo_repository_derive(input: TokenStream) -> TokenStream {
     let struct_name = &input.ident;
 
     // Extract entity and schema types from attributes or struct fields
-    let (entity_type, schema_type) = match extract_types(&input) {
+    let (entity_type, _schema_type) = match extract_types(&input) {
         Ok(types) => types,
         Err(err) => return err.to_compile_error().into(),
     };
@@ -34,6 +34,14 @@ pub fn mongo_repository_derive(input: TokenStream) -> TokenStream {
 
             async fn find(&self, id: &str) -> shared::types::DomainResponse<Option<#entity_type>> {
                 self.base.find(id).await
+            }
+
+            async fn find_and_delete(&self, id: &str) -> shared::types::DomainResponse<#entity_type> {
+                self.base.find_and_delete(id).await
+            }
+
+            async fn find_and_remove(&self, id: &str) -> shared::types::DomainResponse<#entity_type> {
+                self.base.find_and_remove(id).await
             }
 
             async fn finds(&self) -> shared::types::DomainResponse<Vec<#entity_type>> {

@@ -9,6 +9,8 @@ pub trait BaseRepository<E>: Send + Sync {
     async fn delete(&self, id: &str) -> DomainResponse<E>;
     async fn remove(&self, id: &str) -> DomainResponse<E>;
     async fn find(&self, id: &str) -> DomainResponse<Option<E>>;
+    async fn find_and_delete(&self, id: &str) -> DomainResponse<E>;
+    async fn find_and_remove(&self, id: &str) -> DomainResponse<E>;
     async fn finds(&self) -> DomainResponse<Vec<E>>;
     async fn finds_paginated(&self, page: u32, page_size: u32) -> DomainResponse<(Paginate, Vec<E>)>;
 }

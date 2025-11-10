@@ -66,5 +66,5 @@ pub struct AppConfig {
     pub redis: RedisConfig,
     pub crypto: CryptoConfig,
     pub jwt: JwtConfig,
-    pub oauth2: OAuth2Config
+    pub oauth2: OAuth2Config,
 }

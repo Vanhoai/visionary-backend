@@ -21,6 +21,7 @@ use shared::oauth2::oauth2_providers::OAuth2Provider;
 use shared::oauth2::oauth2_service::OAuth2Service;
 use shared::types::DomainResponse;
 
+#[allow(dead_code)]
 pub struct AuthAppService {
     // services
     auth_service: Arc<dyn AuthService>,

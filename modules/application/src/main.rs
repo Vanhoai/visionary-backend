@@ -1,5 +1,4 @@
 use crate::initialize::initialize_app;
-use crate::study::study;
 use shared::configs::APP_CONFIG;
 use tokio::signal;
 
@@ -7,7 +6,7 @@ mod initialize;
 mod study;
 
 #[tokio::main]
-async fn server() {
+async fn main() {
     let app = initialize_app().await.expect("Error initializing app");
 
     let host = APP_CONFIG.server.host.clone();
@@ -16,10 +15,6 @@ async fn server() {
 
     let listener = tokio::net::TcpListener::bind(address).await.unwrap();
     axum::serve(listener, app).with_graceful_shutdown(shutdown_signal()).await.expect("Failed to start server 🐧");
-}
-
-fn main() {
-    study();
 }
 
 async fn shutdown_signal() {

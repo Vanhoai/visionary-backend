@@ -1,10 +1,9 @@
 use crate::primary::middlewares::auth_middleware::auth_middleware;
-use crate::primary::middlewares::role_middleware::{require_admin, require_roles, role_middleware};
+use crate::primary::middlewares::role_middleware::{require_admin, require_roles};
 use crate::shared::di::state::AppState;
 use axum::Router;
 use axum::middleware;
 use axum::routing::{get, post, put};
-use domain::values::roles::Role;
 use std::sync::Arc;
 
 pub fn execute() -> Router<Arc<AppState>> {

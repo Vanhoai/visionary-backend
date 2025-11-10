@@ -1,6 +1,7 @@
 use crate::services::notification_service::NotificationService;
 use std::sync::Arc;
 
+#[allow(dead_code)]
 pub struct NotificationAppService {
     notification_service: Arc<dyn NotificationService>,
 }

@@ -5,6 +5,7 @@ use std::time::Duration;
 use tokio::sync::{Barrier, Notify, RwLock, Semaphore, broadcast};
 use tokio::task::JoinSet;
 
+#[allow(dead_code)]
 async fn pure_thread() {
     // Spawn a new thread
     let handle = thread::spawn(|| {
@@ -23,6 +24,7 @@ async fn pure_thread() {
     handle.join().unwrap();
 }
 
+#[allow(dead_code)]
 async fn message_passing() {
     let (tx, rx) = mpsc::channel();
 
@@ -40,6 +42,7 @@ async fn message_passing() {
     }
 }
 
+#[allow(dead_code)]
 async fn shared_state() {
     // Arc: Atomic Reference Counting
     // Mutex: Mutual Exclusion
@@ -64,6 +67,7 @@ async fn shared_state() {
     println!("Final counter value: {}", *counter.lock().unwrap());
 }
 
+#[allow(dead_code)]
 async fn readers_writer() {
     use std::sync::{Arc, RwLock};
     use std::thread;
@@ -98,11 +102,13 @@ async fn readers_writer() {
     }
 }
 
+#[allow(dead_code)]
 async fn async_function() -> String {
     tokio::time::sleep(Duration::from_secs(1)).await;
     String::from("Async Function Result")
 }
 
+#[allow(dead_code)]
 fn async_await_future() -> impl Future<Output = String> {
     async {
         let result = async_function().await;
@@ -111,6 +117,7 @@ fn async_await_future() -> impl Future<Output = String> {
     }
 }
 
+#[allow(dead_code)]
 fn custom_runtime() {
     // Single-threaded runtime
     let rt = tokio::runtime::Builder::new_current_thread().enable_all().build().unwrap();
@@ -126,6 +133,7 @@ fn custom_runtime() {
     });
 }
 
+#[allow(dead_code)]
 async fn tokio_tasks() {
     let handle = tokio::spawn(async {
         println!("Task running");
@@ -150,6 +158,7 @@ async fn tokio_tasks() {
     }
 }
 
+#[allow(dead_code)]
 async fn tokio_selects() {
     let mut interval = tokio::time::interval(Duration::from_secs(1));
     let mut counter = 0;
@@ -173,6 +182,7 @@ async fn tokio_selects() {
     }
 }
 
+#[allow(dead_code)]
 async fn tokio_channels() {
     // MPSC: Multi-producer, single-consumer channel
     let (tx, mut rx) = tokio::sync::mpsc::channel(100); // buffer size 100
@@ -209,6 +219,7 @@ async fn tokio_channels() {
     }
 }
 
+#[allow(dead_code)]
 async fn broadcast_channel() {
     let (tx, mut rx1) = broadcast::channel(16);
     let mut rx2 = tx.subscribe();
@@ -237,6 +248,7 @@ async fn broadcast_channel() {
     }
 }
 
+#[allow(dead_code)]
 async fn oneshot_channel() {
     let (tx, rx) = tokio::sync::oneshot::channel();
     tokio::spawn(async move {
@@ -250,6 +262,7 @@ async fn oneshot_channel() {
     }
 }
 
+#[allow(dead_code)]
 async fn watch_channel() {
     let (tx, mut rx) = tokio::sync::watch::channel(String::from("initial"));
 
@@ -265,6 +278,7 @@ async fn watch_channel() {
     }
 }
 
+#[allow(dead_code)]
 async fn read_write_lock() {
     let data = Arc::new(RwLock::new(vec![1, 2, 3]));
 
@@ -292,6 +306,7 @@ async fn read_write_lock() {
     }
 }
 
+#[allow(dead_code)]
 async fn tokio_semaphore() {
     let semaphore = Arc::new(Semaphore::new(2)); // Max 2 concurrent permits
     let mut handles = vec![];
@@ -312,6 +327,7 @@ async fn tokio_semaphore() {
     }
 }
 
+#[allow(dead_code)]
 async fn tokio_barrier() {
     let barrier = Arc::new(Barrier::new(5));
     let mut handles = vec![];
@@ -331,6 +347,7 @@ async fn tokio_barrier() {
     }
 }
 
+#[allow(dead_code)]
 async fn tokio_notify() {
     let notify = Arc::new(Notify::new());
     let notify2 = notify.clone();
@@ -348,11 +365,13 @@ async fn tokio_notify() {
     tokio::time::sleep(Duration::from_secs(1)).await;
 }
 
+#[allow(dead_code)]
 async fn long_operation() -> String {
     tokio::time::sleep(Duration::from_secs(5)).await;
     String::from("Done")
 }
 
+#[allow(dead_code)]
 async fn tokio_time() {
     // Sleep
     println!("Sleeping...");
@@ -379,6 +398,7 @@ async fn tokio_time() {
     println!("Elapsed: {:?}", elapsed);
 }
 
+#[allow(dead_code)]
 async fn tokio_join_set() {
     let mut set = JoinSet::new();
     for i in 0..10 {
@@ -402,6 +422,7 @@ fn expensive_computation() -> i32 {
     42
 }
 
+#[allow(dead_code)]
 async fn avoid_operation_blocking() {
     // ❌ Bad - blocks the executor
     // std::thread::sleep(Duration::from_secs(1));
@@ -417,6 +438,7 @@ async fn avoid_operation_blocking() {
     println!("Computation result: {}", result);
 }
 
+#[allow(dead_code)]
 pub fn study_concurrency() {
     let rt = tokio::runtime::Builder::new_multi_thread().worker_threads(4).enable_all().build().unwrap();
     rt.block_on(async {

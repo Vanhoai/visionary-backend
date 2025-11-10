@@ -1,5 +1,7 @@
 pub mod account_repository;
 pub mod base_repository;
+pub mod blog_repository;
+pub mod category_repository;
 pub mod experience_repository;
 pub mod notification_repository;
 pub mod provider_repository;

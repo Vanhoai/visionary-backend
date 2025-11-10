@@ -5,14 +5,15 @@ use crate::secondary::{
     apis::auth_api_impl::AuthApiImpl,
     repositories::mongodb::{
         mongo_account_repository::MongoAccountRepository,
+        mongo_category_repository::MongoCategoryRepository,
         mongo_experience_repository::MongoExperienceRepository,
         mongo_notification_repository::MongoNotificationRepository,
         mongo_provider_repository::MongoProviderRepository,
         mongo_role_repository::MongoRoleRepository,
         mongo_session_repository::MongoSessionRepository,
         schemas::{
-            account_schema::AccountSchema, experience_schema::ExperienceSchema, provider_schema::ProviderSchema,
-            role_schema::RoleSchema, session_schema::SessionSchema,
+            account_schema::AccountSchema, category_schema::CategorySchema, experience_schema::ExperienceSchema,
+            provider_schema::ProviderSchema, role_schema::RoleSchema, session_schema::SessionSchema,
         },
     },
 };
@@ -21,16 +22,19 @@ use domain::{
     apis::auth_api::AuthApi,
     applications::{
         account_app_service::AccountAppService, auth_app_service::AuthAppService,
-        notification_app_service::NotificationAppService, session_app_service::SessionAppService,
+        category_app_service::CategoryAppService, notification_app_service::NotificationAppService,
+        session_app_service::SessionAppService,
     },
     repositories::{
-        account_repository::AccountRepository, experience_repository::ExperienceRepository,
-        notification_repository::NotificationRepository, provider_repository::ProviderRepository,
-        role_repository::RoleRepository, session_repository::SessionRepository,
+        account_repository::AccountRepository, category_repository::CategoryRepository,
+        experience_repository::ExperienceRepository, notification_repository::NotificationRepository,
+        provider_repository::ProviderRepository, role_repository::RoleRepository,
+        session_repository::SessionRepository,
     },
     services::{
         account_service::{AccountService, AccountServiceImpl},
         auth_service::{AuthService, AuthServiceImpl},
+        category_service::{CategoryService, CategoryServiceImpl},
         experience_service::{ExperienceService, ExperienceServiceImpl},
         notification_service::{NotificationService, NotificationServiceImpl},
         provider_service::{ProviderService, ProviderServiceImpl},
@@ -45,6 +49,7 @@ pub struct AppState {
     pub account_app_service: Arc<AccountAppService>,
     pub notification_app_service: Arc<NotificationAppService>,
     pub session_app_service: Arc<SessionAppService>,
+    pub category_app_service: Arc<CategoryAppService>,
 }
 
 impl AppState {
@@ -58,6 +63,7 @@ impl AppState {
         let session_collection = Arc::new(mongodb_connection.collection(databases::SESSION_TABLE));
         let experience_collection = Arc::new(mongodb_connection.collection(databases::EXPERIENCE_TABLE));
         let role_collection = Arc::new(mongodb_connection.collection(databases::ROLE_TABLE));
+        let category_collection = Arc::new(mongodb_connection.collection(databases::CATEGORY_TABLE));
 
         // Initialize repositories
         let account_repository = Self::create_account_repository(account_collection.clone());
@@ -66,6 +72,7 @@ impl AppState {
         let notification_repository = Self::create_notification_repository();
         let work_repository = Self::create_work_repository(experience_collection.clone());
         let role_repository = Self::create_role_repository(role_collection.clone());
+        let category_repository = Self::create_category_repository(category_collection.clone());
 
         // Initialize apis
         let auth_api = Self::create_auth_api();
@@ -78,6 +85,7 @@ impl AppState {
         let session_service = Self::create_session_service(session_repository.clone());
         let experience_service = Self::create_experience_service(work_repository.clone());
         let role_service = Self::create_role_service(role_repository.clone());
+        let category_service = Self::create_category_service(category_repository.clone());
 
         // Initialize application services
         let auth_app_service = Self::create_auth_app_service(
@@ -93,9 +101,16 @@ impl AppState {
         let session_app_service = Self::create_session_app_service(session_service.clone());
         let account_app_service =
             Self::create_account_app_service(account_service.clone(), experience_service.clone(), role_service.clone());
+        let category_app_service = Self::create_category_app_service(category_service.clone());
 
         // Return AppState
-        Ok(AppState { auth_app_service, account_app_service, notification_app_service, session_app_service })
+        Ok(AppState {
+            auth_app_service,
+            account_app_service,
+            notification_app_service,
+            session_app_service,
+            category_app_service,
+        })
     }
 
     // Repository factories
@@ -121,6 +136,10 @@ impl AppState {
 
     fn create_role_repository(collection: Arc<Collection<RoleSchema>>) -> Arc<dyn RoleRepository> {
         Arc::new(MongoRoleRepository::new(collection))
+    }
+
+    fn create_category_repository(collection: Arc<Collection<CategorySchema>>) -> Arc<dyn CategoryRepository> {
+        Arc::new(MongoCategoryRepository::new(collection))
     }
 
     // Apis factories
@@ -155,6 +174,10 @@ impl AppState {
 
     fn create_role_service(repository: Arc<dyn RoleRepository>) -> Arc<dyn RoleService> {
         Arc::new(RoleServiceImpl::new(repository))
+    }
+
+    fn create_category_service(repository: Arc<dyn CategoryRepository>) -> Arc<dyn CategoryService> {
+        Arc::new(CategoryServiceImpl::new(repository))
     }
 
     // Application service factories
@@ -192,5 +215,9 @@ impl AppState {
         role_service: Arc<dyn RoleService>,
     ) -> Arc<AccountAppService> {
         Arc::new(AccountAppService::new(account_service, experience_service, role_service))
+    }
+
+    fn create_category_app_service(category_service: Arc<dyn CategoryService>) -> Arc<CategoryAppService> {
+        Arc::new(CategoryAppService::new(category_service))
     }
 }

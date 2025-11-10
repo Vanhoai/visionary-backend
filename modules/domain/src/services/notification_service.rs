@@ -5,6 +5,7 @@ use std::sync::Arc;
 #[async_trait]
 pub trait NotificationService: Send + Sync {}
 
+#[allow(dead_code)]
 pub struct NotificationServiceImpl {
     repository: Arc<dyn NotificationRepository>,
 }

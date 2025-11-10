@@ -1,7 +1,6 @@
 use crate::primary::middlewares::auth_middleware::AuthClaims;
 use crate::shared::models::failure::HttpFailure;
-use axum::Extension;
-use axum::extract::{Request, State};
+use axum::extract::Request;
 use axum::middleware::Next;
 use axum::response::Response;
 use shared::models::failure::Failure;
@@ -25,7 +24,7 @@ pub async fn role_middleware(required_roles: Vec<String>, req: Request, next: Ne
                 required_roles, account_role
             ))));
         }
-        
+
         println!("Access granted for role: {}", account_role);
     }
 
