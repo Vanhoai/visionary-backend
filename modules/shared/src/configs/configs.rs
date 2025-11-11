@@ -31,8 +31,13 @@ pub struct RedisConfig {
 
 #[derive(Debug, Deserialize)]
 pub struct DatabaseConfig {
+    pub database_type: String,
     pub mongo_uri: String,
     pub mongo_database: String,
+    #[serde(deserialize_with = "deserialize_comma_separated")]
+    pub scylla_nodes: Vec<String>,
+    pub scylla_keyspace: String,
+    pub scylla_replication_factor: u8,
 }
 
 #[derive(Debug, Deserialize)]

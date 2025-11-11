@@ -67,7 +67,6 @@ impl AuthAppService {
         self.session_service
             .create_session(
                 account_id,
-                &refresh_token,
                 &jit,
                 expires_at,
                 &metadata.ip_address,
@@ -160,7 +159,7 @@ impl ManageSessionAuthUseCase for AuthAppService {
             .await?
             .ok_or(Failure::Unauthorized("Session not found for the provided refresh token".to_string()))?;
 
-        if session_entity.account_id != account_id || session_entity.refresh_token != params.refresh_token {
+        if session_entity.account_id != account_id || session_entity.jit != jit {
             return Err(Failure::Unauthorized("Session does not belong to the account".to_string()));
         }
 
@@ -176,7 +175,6 @@ impl ManageSessionAuthUseCase for AuthAppService {
         self.session_service
             .create_session(
                 &account_id,
-                &refresh_token,
                 &jit,
                 expires_at,
                 &metadata.ip_address,

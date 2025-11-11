@@ -2,6 +2,8 @@ use mongodb::{
     Client, Database,
     options::{ClientOptions, ServerApi, ServerApiVersion},
 };
+use scylla::client::{session::Session, session_builder::SessionBuilder};
+use scylla_migrate::Migrator;
 use std::{sync::Arc, time::Duration};
 use tokio::sync::OnceCell;
 
@@ -17,6 +19,8 @@ pub static CATEGORY_TABLE: &str = "categories";
 pub static BLOG_TABLE: &str = "blogs";
 
 pub static MONGO_CLIENT: OnceCell<Arc<Database>> = OnceCell::const_new();
+pub static SCYLLA_SESSION: OnceCell<Arc<Session>> = OnceCell::const_new();
+
 pub async fn mongo_client() -> Arc<Database> {
     MONGO_CLIENT
         .get_or_init(|| async {
@@ -34,6 +38,24 @@ pub async fn mongo_client() -> Arc<Database> {
 
             let client = Client::with_options(client_options).unwrap();
             Arc::new(client.database(&APP_CONFIG.database.mongo_database))
+        })
+        .await
+        .clone()
+}
+
+pub async fn scylla_session() -> Arc<Session> {
+    SCYLLA_SESSION
+        .get_or_init(|| async {
+            let mut session_builder = SessionBuilder::new();
+            for node in &APP_CONFIG.database.scylla_nodes {
+                session_builder = session_builder.known_node(node);
+            }
+
+            let session = session_builder.build().await.expect("Failed to create ScyllaDB session");
+            let runner = Migrator::new(&session, "migrations");
+            runner.run().await.expect("Failed to run ScyllaDB migrations");
+
+            Arc::new(session)
         })
         .await
         .clone()

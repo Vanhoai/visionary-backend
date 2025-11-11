@@ -20,7 +20,7 @@ pub struct BlogSchema {
     pub markdown: String,
     pub stars: i32,
     pub views: i32,
-    pub estimate_read_time: i32,
+    pub estimated_read_time: i32,
 }
 
 impl EntitySchema<BlogEntity> for BlogSchema {
@@ -35,7 +35,7 @@ impl EntitySchema<BlogEntity> for BlogSchema {
             markdown: entity.markdown,
             stars: entity.stars,
             views: entity.views,
-            estimate_read_time: entity.estimate_read_time,
+            estimated_read_time: entity.estimated_read_time,
         }
     }
 
@@ -50,7 +50,7 @@ impl EntitySchema<BlogEntity> for BlogSchema {
             markdown: self.markdown.clone(),
             stars: self.stars,
             views: self.views,
-            estimate_read_time: self.estimate_read_time,
+            estimated_read_time: self.estimated_read_time,
         }
     }
 }

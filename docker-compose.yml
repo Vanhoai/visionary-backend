@@ -29,7 +29,7 @@ services:
         networks:
             - visionary-network
 
-    # Scylla Database
+    # Scylla Database - Node 1 (Seed Node)
     scylla-node01:
         image: scylladb/scylla:latest
         container_name: scylla-node01
@@ -44,11 +44,13 @@ services:
             - visionary-network
         command: --smp 1 --memory 1G --overprovisioned 1 --api-address 0.0.0.0
         healthcheck:
-            test: ["CMD", "cqlsh", "-e", "describe keyspaces"]
+            test: ["CMD-SHELL", "cqlsh -e 'describe cluster' || exit 1"]
             interval: 30s
             timeout: 10s
             retries: 5
+            start_period: 60s
 
+    # Scylla Database - Node 2
     scylla-node02:
         image: scylladb/scylla:latest
         container_name: scylla-node02
@@ -57,10 +59,12 @@ services:
             - scylla_data02:/var/lib/scylla
         networks:
             - visionary-network
-        command: --smp 1 --memory 1G --overprovisioned 1 --seeds=scylla-node01
+        command: --smp 1 --memory 1G --overprovisioned 1 --seeds=scylla-node01 --api-address 0.0.0.0
         depends_on:
-            - scylla-node01
+            scylla-node01:
+                condition: service_healthy
 
+    # Scylla Database - Node 3
     scylla-node03:
         image: scylladb/scylla:latest
         container_name: scylla-node03
@@ -69,9 +73,10 @@ services:
             - scylla_data03:/var/lib/scylla
         networks:
             - visionary-network
-        command: --smp 1 --memory 1G --overprovisioned 1 --seeds=scylla-node01
+        command: --smp 1 --memory 1G --overprovisioned 1 --seeds=scylla-node01 --api-address 0.0.0.0
         depends_on:
-            - scylla-node01
+            scylla-node01:
+                condition: service_healthy
 
     scylla-manager:
         image: scylladb/scylla-manager

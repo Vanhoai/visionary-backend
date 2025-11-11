@@ -16,7 +16,6 @@ pub trait SessionService: Send + Sync {
         &self,
         account_id: &str,
         jit: &str,
-        refresh_token: &str,
         expires_at: i64,
         ip_address: &str,
         user_agent: &str,
@@ -44,7 +43,6 @@ impl SessionService for SessionServiceImpl {
         &self,
         account_id: &str,
         jit: &str,
-        refresh_token: &str,
         expires_at: i64,
         ip_address: &str,
         user_agent: &str,
@@ -53,7 +51,6 @@ impl SessionService for SessionServiceImpl {
         let session = SessionEntity::new(
             false,
             account_id.to_string(),
-            refresh_token.to_string(),
             jit.to_string(),
             expires_at,
             ip_address.to_string(),

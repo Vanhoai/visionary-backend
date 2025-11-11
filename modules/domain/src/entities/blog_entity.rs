@@ -19,7 +19,7 @@ pub struct BlogEntity {
     pub markdown: String,
     pub stars: i32,
     pub views: i32,
-    pub estimate_read_time: i32,
+    pub estimated_read_time: i32,
 }
 
 impl BlogEntity {
@@ -31,7 +31,7 @@ impl BlogEntity {
         description: String,
         is_published: bool,
         markdown: String,
-        estimate_read_time: i32,
+        estimated_read_time: i32,
     ) -> DomainResponse<Self> {
         // add validation logic here if needed
 
@@ -45,7 +45,7 @@ impl BlogEntity {
             markdown,
             stars: 0,
             views: 0,
-            estimate_read_time,
+            estimated_read_time,
         })
     }
 }

@@ -1,15 +1,21 @@
+use std::sync::Arc;
+
 use async_trait::async_trait;
 use domain::entities::account_entity::AccountEntity;
 use domain::repositories::account_repository::AccountRepository;
 use domain::repositories::base_repository::BaseRepository;
+use scylla::client::session::Session;
 use shared::models::paginate::Paginate;
 use shared::types::DomainResponse;
 
-pub struct ScyllaAccountRepository {}
+#[allow(dead_code)]
+pub struct ScyllaAccountRepository {
+    session: Arc<Session>,
+}
 
 impl ScyllaAccountRepository {
-    pub fn new() -> Self {
-        ScyllaAccountRepository {}
+    pub fn new(session: Arc<Session>) -> Self {
+        ScyllaAccountRepository { session }
     }
 }
 
