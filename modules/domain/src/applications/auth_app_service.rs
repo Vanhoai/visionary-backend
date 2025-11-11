@@ -3,23 +3,26 @@ use chrono::Utc;
 use std::sync::Arc;
 use uuid::Uuid;
 
-use crate::apis::auth_api::AuthApi;
-use crate::entities::account_entity::AccountEntity;
-use crate::services::role_service::RoleService;
-use crate::services::{
-    account_service::AccountService, auth_service::AuthService, provider_service::ProviderService,
-    session_service::SessionService,
-};
-use crate::usecases::auth_usecases::{
-    AuthParams, AuthResponse, ManageSessionAuthUseCase, OAuth2CallbackParams, OAuth2InitParams, OAuth2InitResponse,
-    OAuth2UseCase, RefreshTokenParams, SessionMetadata,
-};
+// shared modules
 use shared::configs::APP_CONFIG;
 use shared::jwt::service::JwtService;
 use shared::models::failure::Failure;
 use shared::oauth2::oauth2_providers::OAuth2Provider;
 use shared::oauth2::oauth2_service::OAuth2Service;
 use shared::types::DomainResponse;
+
+// internal modules
+use crate::apis::auth_api::AuthApi;
+use crate::entities::account_entity::AccountEntity;
+use crate::services::account_service::AccountService;
+use crate::services::auth_service::AuthService;
+use crate::services::provider_service::ProviderService;
+use crate::services::role_service::RoleService;
+use crate::services::session_service::SessionService;
+use crate::usecases::auth_usecases::{
+    AuthParams, AuthResponse, ManageSessionAuthUseCase, OAuth2CallbackParams, OAuth2InitParams, OAuth2InitResponse,
+    OAuth2UseCase, RefreshTokenParams, SessionMetadata,
+};
 
 #[allow(dead_code)]
 pub struct AuthAppService {
@@ -44,6 +47,36 @@ impl AuthAppService {
         auth_api: Arc<dyn AuthApi>,
     ) -> Self {
         Self { auth_service, account_service, provider_service, session_service, role_service, auth_api }
+    }
+
+    async fn generate_tokens_and_create_session(
+        &self,
+        account_id: &str,
+        role: Option<String>,
+        metadata: &SessionMetadata,
+    ) -> Result<AuthResponse, Failure> {
+        let jit = Uuid::now_v7().to_string();
+        let access_token = JwtService::generate_access_token(account_id, &jit, role.clone())?;
+        let refresh_token = JwtService::generate_refresh_token(account_id, &jit, role)?;
+
+        // Calculate session expiry (same as refresh token expiry)
+        let expires_at = (Utc::now().timestamp()) + APP_CONFIG.jwt.refresh_token_expiry;
+
+        // Clean old sessions and create a new session with metadata
+        self.session_service.clean_session_by_account_id(account_id).await?;
+        self.session_service
+            .create_session(
+                account_id,
+                &refresh_token,
+                &jit,
+                expires_at,
+                &metadata.ip_address,
+                &metadata.user_agent,
+                &metadata.device_type,
+            )
+            .await?;
+
+        Ok(AuthResponse { access_token, refresh_token })
     }
 }
 
@@ -106,28 +139,7 @@ impl ManageSessionAuthUseCase for AuthAppService {
 
         // 4. Generate tokens and create session
         let role = if let Some(role_entity) = role_entity { Some(role_entity.role_name) } else { None };
-        let jit = Uuid::now_v7().to_string();
-        let access_token = JwtService::generate_access_token(&account_id, &jit, role.clone())?;
-        let refresh_token = JwtService::generate_refresh_token(&account_id, &jit, role)?;
-
-        // 5. Calculate session expiry (same as refresh token expiry)
-        let expires_at = (Utc::now().timestamp()) + APP_CONFIG.jwt.refresh_token_expiry;
-
-        // 6. Clean old sessions and create a new session with metadata
-        self.session_service.clean_session_by_account_id(&account_id).await?;
-        self.session_service
-            .create_session(
-                &account_id,
-                &refresh_token,
-                &jit,
-                expires_at,
-                &metadata.ip_address,
-                &metadata.user_agent,
-                &metadata.device_type,
-            )
-            .await?;
-
-        Ok(AuthResponse { access_token, refresh_token })
+        self.generate_tokens_and_create_session(&account_id, role, metadata).await
     }
 
     async fn refresh_token(
@@ -231,27 +243,8 @@ impl OAuth2UseCase for AuthAppService {
         let role_entity = self.role_service.find_role_by_account_id(&account_id).await?;
         let role = if let Some(role_entity) = role_entity { Some(role_entity.role_name) } else { None };
 
-        // 5. Generate JWT tokens
-        let jit = Uuid::now_v7().to_string();
-        let access_token = JwtService::generate_access_token(&account_id, &jit, role.clone())?;
-        let refresh_token = JwtService::generate_refresh_token(&account_id, &jit, role)?;
-
-        // 6. Clean and create new session
-        let expires_at = Utc::now().timestamp() + APP_CONFIG.jwt.refresh_token_expiry;
-        self.session_service.clean_session_by_account_id(&account_id).await?;
-        self.session_service
-            .create_session(
-                &account_id,
-                &refresh_token,
-                &jit,
-                expires_at,
-                &metadata.ip_address,
-                &metadata.user_agent,
-                &metadata.device_type,
-            )
-            .await?;
-
-        Ok(AuthResponse { access_token, refresh_token })
+        // 5. Generate tokens and create session
+        self.generate_tokens_and_create_session(&account_id, role, metadata).await
     }
 }
 // endregion ============================== OAUTH2 USE CASES ==============================

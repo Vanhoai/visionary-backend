@@ -1,7 +1,10 @@
 use async_trait::async_trait;
-use shared::{models::failure::Failure, types::DomainResponse};
 use std::sync::Arc;
 
+// shared modules
+use shared::{models::failure::Failure, types::DomainResponse};
+
+// internal modules
 use crate::{
     entities::category_entity::CategoryEntity,
     services::category_service::CategoryService,

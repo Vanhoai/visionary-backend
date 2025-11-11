@@ -2,9 +2,11 @@ use axum::extract::State;
 use axum::http::StatusCode;
 use std::sync::Arc;
 
+// shared modules
 use domain::entities::account_entity::AccountEntity;
 use domain::usecases::auth_usecases::{AuthParams, ManageSessionAuthUseCase};
 
+// internal modules
 use crate::shared::di::state::AppState;
 use crate::shared::models::failure::HttpFailure;
 use crate::shared::models::response::HttpResponse;

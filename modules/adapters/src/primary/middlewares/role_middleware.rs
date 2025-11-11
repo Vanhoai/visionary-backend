@@ -1,9 +1,13 @@
-use crate::primary::middlewares::auth_middleware::AuthClaims;
-use crate::shared::models::failure::HttpFailure;
 use axum::extract::Request;
 use axum::middleware::Next;
 use axum::response::Response;
+
+// shared modules
 use shared::models::failure::Failure;
+
+// internal modules
+use crate::primary::middlewares::auth_middleware::AuthClaims;
+use crate::shared::models::failure::HttpFailure;
 
 pub async fn role_middleware(required_roles: Vec<String>, req: Request, next: Next) -> Result<Response, HttpFailure> {
     let claims = req.extensions().get::<AuthClaims>().cloned().ok_or_else(|| {

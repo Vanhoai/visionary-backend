@@ -1,6 +1,10 @@
-use crate::{entities::category_entity::CategoryEntity, repositories::base_repository::BaseRepository};
 use async_trait::async_trait;
+
+// shared modules
 use shared::types::DomainResponse;
+
+// internal modules
+use crate::{entities::category_entity::CategoryEntity, repositories::base_repository::BaseRepository};
 
 #[async_trait]
 pub trait CategoryRepository: BaseRepository<CategoryEntity> {

@@ -1,23 +1,7 @@
 use mongodb::Collection;
 use std::sync::Arc;
 
-use crate::secondary::{
-    apis::auth_api_impl::AuthApiImpl,
-    repositories::mongodb::{
-        mongo_account_repository::MongoAccountRepository,
-        mongo_category_repository::MongoCategoryRepository,
-        mongo_experience_repository::MongoExperienceRepository,
-        mongo_notification_repository::MongoNotificationRepository,
-        mongo_provider_repository::MongoProviderRepository,
-        mongo_role_repository::MongoRoleRepository,
-        mongo_session_repository::MongoSessionRepository,
-        schemas::{
-            account_schema::AccountSchema, category_schema::CategorySchema, experience_schema::ExperienceSchema,
-            provider_schema::ProviderSchema, role_schema::RoleSchema, session_schema::SessionSchema,
-        },
-    },
-};
-use crate::shared::utilities::databases;
+// shared modules
 use domain::{
     apis::auth_api::AuthApi,
     applications::{
@@ -42,6 +26,25 @@ use domain::{
         session_service::{SessionService, SessionServiceImpl},
     },
 };
+
+// internal modules
+use crate::secondary::{
+    apis::auth_api_impl::AuthApiImpl,
+    repositories::mongodb::{
+        mongo_account_repository::MongoAccountRepository,
+        mongo_category_repository::MongoCategoryRepository,
+        mongo_experience_repository::MongoExperienceRepository,
+        mongo_notification_repository::MongoNotificationRepository,
+        mongo_provider_repository::MongoProviderRepository,
+        mongo_role_repository::MongoRoleRepository,
+        mongo_session_repository::MongoSessionRepository,
+        schemas::{
+            account_schema::AccountSchema, category_schema::CategorySchema, experience_schema::ExperienceSchema,
+            provider_schema::ProviderSchema, role_schema::RoleSchema, session_schema::SessionSchema,
+        },
+    },
+};
+use crate::shared::utilities::databases;
 
 #[derive(Clone)]
 pub struct AppState {

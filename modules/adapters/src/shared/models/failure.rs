@@ -1,7 +1,8 @@
-use shared::models::failure::Failure;
-
 use axum::{Json, http::StatusCode, response::IntoResponse};
 use serde_json::json;
+
+// shared modules
+use shared::models::failure::Failure;
 
 pub struct HttpFailure {
     code: String,

@@ -1,8 +1,12 @@
+use async_trait::async_trait;
+use std::sync::Arc;
+
+// shared modules
+use shared::types::DomainResponse;
+
+// internal modules
 use crate::entities::experience_entity::ExperienceEntity;
 use crate::repositories::experience_repository::ExperienceRepository;
-use async_trait::async_trait;
-use shared::types::DomainResponse;
-use std::sync::Arc;
 
 #[async_trait]
 pub trait ExperienceService: Send + Sync {

@@ -5,8 +5,11 @@ use axum::{
 use serde::de::DeserializeOwned;
 use validator::Validate;
 
-use crate::shared::models::failure::HttpFailure;
+// shared modules
 use shared::models::failure::Failure;
+
+// internal modules
+use crate::shared::models::failure::HttpFailure;
 
 #[derive(Debug, Clone, Copy, Default)]
 pub struct ValidatedPayload<T>(pub T);

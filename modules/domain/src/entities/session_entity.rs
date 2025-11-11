@@ -1,5 +1,7 @@
-use crate::entities::base_entity::BaseEntity;
 use serde::{Deserialize, Serialize};
+
+// internal modules
+use crate::entities::base_entity::BaseEntity;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]

@@ -1,6 +1,8 @@
-use crate::shared::di::state::AppState;
 use axum::{Router, routing::get};
 use std::sync::Arc;
+
+// internal modules
+use crate::shared::di::state::AppState;
 
 pub fn execute() -> Router<Arc<AppState>> {
     let public_routes = Router::new().route("/", get(super::find_blogs_function::execute));

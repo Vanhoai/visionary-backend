@@ -1,6 +1,10 @@
-use crate::secondary::repositories::mongodb::{mongo_base_repository::EntitySchema, schemas::base_schema::BaseSchema};
-use domain::entities::category_entity::CategoryEntity;
 use serde::{Deserialize, Serialize};
+
+// shared modules
+use domain::entities::category_entity::CategoryEntity;
+
+// internal modules
+use crate::secondary::repositories::mongodb::{mongo_base_repository::EntitySchema, schemas::base_schema::BaseSchema};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct CategorySchema {

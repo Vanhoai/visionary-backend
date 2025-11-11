@@ -1,12 +1,16 @@
-use crate::secondary::repositories::mongodb::mongo_base_repository::{EntitySchema, MongoBaseRepository};
-use crate::secondary::repositories::mongodb::schemas::category_schema::CategorySchema;
 use async_trait::async_trait;
+use mongodb::Collection;
+use std::sync::Arc;
+
+// shared modules
 use domain::entities::category_entity::CategoryEntity;
 use domain::repositories::category_repository::CategoryRepository;
-use mongodb::Collection;
 use processors::MongoRepository;
 use shared::types::DomainResponse;
-use std::sync::Arc;
+
+// internal modules
+use crate::secondary::repositories::mongodb::mongo_base_repository::{EntitySchema, MongoBaseRepository};
+use crate::secondary::repositories::mongodb::schemas::category_schema::CategorySchema;
 
 #[derive(MongoRepository)]
 pub struct MongoCategoryRepository {
@@ -30,10 +34,9 @@ impl CategoryRepository for MongoCategoryRepository {
         match self.base.collection.find_one(filter).await {
             Ok(Some(schema)) => Ok(Some(schema.to_entity())),
             Ok(None) => Ok(None),
-            Err(e) => Err(shared::models::failure::Failure::DatabaseError(format!(
-                "Failed to find category by name: {}",
-                e
-            ))),
+            Err(e) => {
+                Err(shared::models::failure::Failure::DatabaseError(format!("Failed to find category by name: {}", e)))
+            },
         }
     }
 }

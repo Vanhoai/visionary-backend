@@ -1,10 +1,14 @@
+use async_trait::async_trait;
+use std::sync::Arc;
+
+// shared modules
+use shared::types::DomainResponse;
+
+// internal modules
 use crate::{
     entities::session_entity::SessionEntity, repositories::session_repository::SessionRepository,
     usecases::session_usecases::FindSessionsQuery,
 };
-use async_trait::async_trait;
-use shared::types::DomainResponse;
-use std::sync::Arc;
 
 #[async_trait]
 pub trait SessionService: Send + Sync {

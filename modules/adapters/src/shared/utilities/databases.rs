@@ -1,11 +1,12 @@
-use std::{sync::Arc, time::Duration};
-
 use mongodb::{
     Client, Database,
     options::{ClientOptions, ServerApi, ServerApiVersion},
 };
-use shared::configs::APP_CONFIG;
+use std::{sync::Arc, time::Duration};
 use tokio::sync::OnceCell;
+
+// shared modules
+use shared::configs::APP_CONFIG;
 
 pub static ACCOUNT_TABLE: &str = "accounts";
 pub static SESSION_TABLE: &str = "sessions";

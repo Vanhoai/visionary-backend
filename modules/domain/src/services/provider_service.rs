@@ -1,10 +1,14 @@
+use async_trait::async_trait;
+use std::sync::Arc;
+
+// shared modules
+use shared::types::DomainResponse;
+
+// internal modules
 use crate::{
     entities::provider_entity::ProviderEntity, repositories::provider_repository::ProviderRepository,
     values::auth_provider::AuthProvider,
 };
-use async_trait::async_trait;
-use shared::types::DomainResponse;
-use std::sync::Arc;
 
 #[async_trait]
 pub trait ProviderService: Send + Sync {

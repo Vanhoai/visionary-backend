@@ -1,5 +1,7 @@
-use crate::services::notification_service::NotificationService;
 use std::sync::Arc;
+
+// internal modules
+use crate::services::notification_service::NotificationService;
 
 #[allow(dead_code)]
 pub struct NotificationAppService {

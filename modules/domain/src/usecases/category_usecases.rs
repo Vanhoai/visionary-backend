@@ -1,8 +1,12 @@
-use crate::entities::category_entity::CategoryEntity;
 use async_trait::async_trait;
 use serde::Deserialize;
-use shared::types::DomainResponse;
 use validator::Validate;
+
+// shared modules
+use shared::types::DomainResponse;
+
+// internal modules
+use crate::entities::category_entity::CategoryEntity;
 
 #[derive(Debug, Deserialize, Validate)]
 pub struct CreateCategoryParams {

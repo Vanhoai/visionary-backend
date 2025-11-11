@@ -1,11 +1,15 @@
-use crate::shared::models::failure::HttpFailure;
 use axum::extract::{FromRequestParts, Request};
 use axum::http::HeaderMap;
 use axum::http::request::Parts;
 use axum::middleware::Next;
 use axum::response::Response;
+
+// shared modules
 use shared::jwt::service::JwtService;
 use shared::models::failure::Failure;
+
+// internal modules
+use crate::shared::models::failure::HttpFailure;
 
 #[derive(Debug, Clone)]
 pub struct AuthClaims {

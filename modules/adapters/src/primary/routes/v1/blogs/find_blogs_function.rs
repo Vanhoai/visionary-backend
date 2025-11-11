@@ -1,5 +1,6 @@
-use reqwest::StatusCode;
+use axum::http::StatusCode;
 
+// internal modules
 use crate::shared::{models::response::HttpResponse, types::AxumResponse};
 
 pub async fn execute() -> AxumResponse<()> {

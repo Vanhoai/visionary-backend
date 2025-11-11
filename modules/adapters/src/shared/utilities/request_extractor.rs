@@ -1,6 +1,8 @@
-use crate::shared::models::failure::HttpFailure;
 use axum::extract::{FromRequest, Request};
 use axum::http::HeaderMap;
+
+// internal modules
+use crate::shared::models::failure::HttpFailure;
 
 pub struct RequestMetadata {
     pub id_address: String,

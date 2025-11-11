@@ -1,6 +1,10 @@
-use crate::entities::base_entity::BaseEntity;
 use serde::{Deserialize, Serialize};
+
+// shared modules
 use shared::{models::failure::Failure, types::DomainResponse};
+
+// internal modules
+use crate::entities::base_entity::BaseEntity;
 
 static MAX_CATEGORY_NAME_LENGTH: usize = 50;
 

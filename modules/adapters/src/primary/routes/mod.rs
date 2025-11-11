@@ -1,8 +1,10 @@
-use crate::shared::di::state::AppState;
 use axum::Router;
 use std::sync::Arc;
 
-pub mod v1;
+// internal modules
+use crate::shared::di::state::AppState;
+
+mod v1;
 
 pub fn execute() -> Router<Arc<AppState>> {
     let v1 = Router::new()

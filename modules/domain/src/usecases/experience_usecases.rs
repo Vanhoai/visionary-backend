@@ -1,8 +1,12 @@
-use crate::entities::experience_entity::ExperienceEntity;
 use async_trait::async_trait;
 use serde::Deserialize;
+
+// shared modules
 use shared::models::paginate::Paginate;
 use shared::types::DomainResponse;
+
+// internal modules
+use crate::entities::experience_entity::ExperienceEntity;
 
 // region ============================= MANAGE EXPERIENCE USE CASE =============================
 #[derive(Debug, Clone, Deserialize)]

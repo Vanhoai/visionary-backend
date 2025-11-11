@@ -1,6 +1,8 @@
+use serde::{Deserialize, Serialize};
+
+// internal modules
 use crate::entities::base_entity::BaseEntity;
 use crate::values::auth_provider::AuthProvider;
-use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]

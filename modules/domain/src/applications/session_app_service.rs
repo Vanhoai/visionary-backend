@@ -1,11 +1,15 @@
+use async_trait::async_trait;
+use std::sync::Arc;
+
+// shared modules
+use shared::types::DomainResponse;
+
+// internal modules
 use crate::{
     entities::session_entity::SessionEntity,
     services::session_service::SessionService,
     usecases::session_usecases::{FindSessionsQuery, ManageSessionUseCase},
 };
-use async_trait::async_trait;
-use shared::types::DomainResponse;
-use std::sync::Arc;
 
 pub struct SessionAppService {
     session_service: Arc<dyn SessionService>,

@@ -1,18 +1,20 @@
-use crate::entities::account_entity::AccountEntity;
-use crate::entities::experience_entity::ExperienceEntity;
-use crate::entities::role_entity::RoleEntity;
-use crate::services::account_service::AccountService;
-use crate::services::experience_service::ExperienceService;
-use crate::services::role_service::RoleService;
+use async_trait::async_trait;
+use std::sync::Arc;
+
+// shared modules
+use shared::models::failure::Failure;
+use shared::models::paginate::Paginate;
+use shared::types::DomainResponse;
+
+// internal modules
+use crate::entities::{account_entity::AccountEntity, experience_entity::ExperienceEntity, role_entity::RoleEntity};
+use crate::services::{
+    account_service::AccountService, experience_service::ExperienceService, role_service::RoleService,
+};
 use crate::usecases::account_usecases::{
     AddExperienceToAccountParams, AddRoleToAccountParams, FindAccountsQuery, ManageAccountsUseCase,
     ManageExperienceAccountUseCase, ManageRoleAccountUseCase, UpdateRoleToAccountParams,
 };
-use async_trait::async_trait;
-use shared::models::failure::Failure;
-use shared::models::paginate::Paginate;
-use shared::types::DomainResponse;
-use std::sync::Arc;
 
 pub struct AccountAppService {
     account_service: Arc<dyn AccountService>,

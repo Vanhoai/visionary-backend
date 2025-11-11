@@ -1,6 +1,8 @@
-use crate::functions::deserialize_functions::deserialize_number_from_string;
 use serde::{Deserialize, Serialize};
 use validator::Validate;
+
+// internal modules
+use crate::functions::deserialize_functions::deserialize_number_from_string;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]

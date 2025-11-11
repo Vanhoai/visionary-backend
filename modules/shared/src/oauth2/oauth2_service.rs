@@ -1,9 +1,11 @@
-use crate::models::failure::Failure;
-use crate::oauth2::models::GoogleAccountInformation;
-use crate::oauth2::oauth2_clients::OAUTH2_CLIENTS;
 use oauth2::{AuthorizationCode, TokenResponse};
 use reqwest::Client;
 use uuid::Uuid;
+
+// internal modules
+use crate::models::failure::Failure;
+use crate::oauth2::models::GoogleAccount;
+use crate::oauth2::oauth2_clients::OAUTH2_CLIENTS;
 
 pub struct OAuth2Service;
 
@@ -51,7 +53,7 @@ impl OAuth2Service {
         Ok(token_result.access_token().secret().to_string())
     }
 
-    pub async fn get_google_account_information(access_token: &str) -> Result<GoogleAccountInformation, Failure> {
+    pub async fn get_google_account_information(access_token: &str) -> Result<GoogleAccount, Failure> {
         let client = Client::new();
         let response = client
             .get("https://www.googleapis.com/oauth2/v2/userinfo")
@@ -65,7 +67,7 @@ impl OAuth2Service {
         }
 
         response
-            .json::<GoogleAccountInformation>()
+            .json::<GoogleAccount>()
             .await
             .map_err(|e| Failure::ExternalServiceError(format!("Failed to parse Google user info: {}", e)))
     }

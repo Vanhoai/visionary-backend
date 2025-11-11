@@ -1,7 +1,10 @@
 use async_trait::async_trait;
 use serde::Deserialize;
+
+// shared modules
 use shared::types::DomainResponse;
 
+// internal modules
 use crate::entities::session_entity::SessionEntity;
 
 #[derive(Debug, Deserialize)]

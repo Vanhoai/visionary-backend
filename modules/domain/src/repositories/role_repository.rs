@@ -1,7 +1,11 @@
+use async_trait::async_trait;
+
+// shared modules
+use shared::types::DomainResponse;
+
+// internal modules
 use crate::entities::role_entity::RoleEntity;
 use crate::repositories::base_repository::BaseRepository;
-use async_trait::async_trait;
-use shared::types::DomainResponse;
 
 #[async_trait]
 pub trait RoleRepository: BaseRepository<RoleEntity> {

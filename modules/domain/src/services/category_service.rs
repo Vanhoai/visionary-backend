@@ -1,8 +1,11 @@
 use std::sync::Arc;
-
-use crate::{entities::category_entity::CategoryEntity, repositories::category_repository::CategoryRepository};
 use async_trait::async_trait;
-use shared::{models::failure::Failure, types::DomainResponse};
+
+// shared modules
+use shared::types::DomainResponse;
+
+// internal modules
+use crate::{entities::category_entity::CategoryEntity, repositories::category_repository::CategoryRepository};
 
 #[async_trait]
 pub trait CategoryService: Send + Sync {

@@ -1,6 +1,8 @@
-use crate::initialize::initialize_app;
 use shared::configs::APP_CONFIG;
 use tokio::signal;
+
+// internal modules
+use crate::initialize::initialize_app;
 
 mod initialize;
 mod study;

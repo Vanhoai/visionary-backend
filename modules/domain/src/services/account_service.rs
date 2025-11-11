@@ -1,9 +1,13 @@
-use crate::entities::account_entity::AccountEntity;
-use crate::repositories::account_repository::AccountRepository;
 use async_trait::async_trait;
+use std::sync::Arc;
+
+// shared modules
 use shared::models::paginate::Paginate;
 use shared::types::DomainResponse;
-use std::sync::Arc;
+
+// internal modules
+use crate::entities::account_entity::AccountEntity;
+use crate::repositories::account_repository::AccountRepository;
 
 #[async_trait]
 pub trait AccountService: Send + Sync {

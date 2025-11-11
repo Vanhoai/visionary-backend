@@ -1,14 +1,18 @@
+use axum::extract::{Query, State};
+use axum::http::{HeaderMap, StatusCode};
+use std::sync::Arc;
+use validator::Validate;
+
+// shared modules
+use domain::usecases::auth_usecases::{AuthResponse, OAuth2CallbackParams, OAuth2UseCase, SessionMetadata};
+use shared::models::failure::Failure;
+
+// internal modules
 use crate::shared::di::state::AppState;
 use crate::shared::models::failure::HttpFailure;
 use crate::shared::models::response::HttpResponse;
 use crate::shared::types::AxumResponse;
 use crate::shared::utilities::request_extractor;
-use axum::extract::{Query, State};
-use axum::http::{HeaderMap, StatusCode};
-use domain::usecases::auth_usecases::{AuthResponse, OAuth2CallbackParams, OAuth2UseCase, SessionMetadata};
-use shared::models::failure::Failure;
-use std::sync::Arc;
-use validator::Validate;
 
 pub async fn execute(
     State(state): State<Arc<AppState>>,

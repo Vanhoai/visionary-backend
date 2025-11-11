@@ -1,12 +1,16 @@
+use axum::extract::{Query, State};
+use axum::http::StatusCode;
+use std::sync::Arc;
+
+// shared modules
+use domain::entities::session_entity::SessionEntity;
+use domain::usecases::session_usecases::{FindSessionsQuery, ManageSessionUseCase};
+
+// internal modules
 use crate::shared::di::state::AppState;
 use crate::shared::models::failure::HttpFailure;
 use crate::shared::models::response::HttpResponse;
 use crate::shared::types::AxumResponse;
-use axum::extract::{Query, State};
-use axum::http::StatusCode;
-use domain::entities::session_entity::SessionEntity;
-use domain::usecases::session_usecases::{FindSessionsQuery, ManageSessionUseCase};
-use std::sync::Arc;
 
 pub async fn execute(
     State(state): State<Arc<AppState>>,

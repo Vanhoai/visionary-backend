@@ -1,8 +1,12 @@
-use crate::secondary::repositories::mongodb::mongo_base_repository::EntitySchema;
-use crate::secondary::repositories::mongodb::schemas::base_schema::BaseSchema;
-use domain::entities::blog_entity::BlogEntity;
 use mongodb::bson::oid::ObjectId;
 use serde::{Deserialize, Serialize};
+
+// shared modules
+use domain::entities::blog_entity::BlogEntity;
+
+// internal modules
+use crate::secondary::repositories::mongodb::mongo_base_repository::EntitySchema;
+use crate::secondary::repositories::mongodb::schemas::base_schema::BaseSchema;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BlogSchema {

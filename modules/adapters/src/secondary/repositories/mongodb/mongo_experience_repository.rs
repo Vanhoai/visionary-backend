@@ -1,16 +1,20 @@
-use crate::secondary::repositories::mongodb::mongo_base_repository::{EntitySchema, MongoBaseRepository};
-use crate::secondary::repositories::mongodb::schemas::experience_schema::ExperienceSchema;
 use async_trait::async_trait;
-use domain::entities::experience_entity::ExperienceEntity;
-use domain::repositories::experience_repository::ExperienceRepository;
 use futures::TryStreamExt;
 use mongodb::Collection;
 use mongodb::bson::doc;
 use mongodb::bson::oid::ObjectId;
+use std::sync::Arc;
+
+// shared modules
+use domain::entities::experience_entity::ExperienceEntity;
+use domain::repositories::experience_repository::ExperienceRepository;
 use processors::MongoRepository;
 use shared::models::failure::Failure;
 use shared::types::DomainResponse;
-use std::sync::Arc;
+
+// internal modules
+use crate::secondary::repositories::mongodb::mongo_base_repository::{EntitySchema, MongoBaseRepository};
+use crate::secondary::repositories::mongodb::schemas::experience_schema::ExperienceSchema;
 
 #[derive(MongoRepository)]
 pub struct MongoExperienceRepository {

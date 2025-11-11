@@ -1,8 +1,12 @@
-use crate::secondary::repositories::mongodb::mongo_base_repository::EntitySchema;
-use domain::entities::provider_entity::ProviderEntity;
 use mongodb::bson::oid::ObjectId;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
+
+// shared modules
+use domain::entities::provider_entity::ProviderEntity;
+
+// internal modules
+use crate::secondary::repositories::mongodb::mongo_base_repository::EntitySchema;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ProviderSchema {

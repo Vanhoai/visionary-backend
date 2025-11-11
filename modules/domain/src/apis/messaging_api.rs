@@ -1,5 +1,9 @@
 use async_trait::async_trait;
+
+// shared modules
 use shared::types::DomainResponse;
+
+// internal modules
 use crate::usecases::notification_usecases::PushNotification;
 
 #[async_trait]

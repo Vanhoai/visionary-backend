@@ -1,7 +1,11 @@
+use serde::{Deserialize, Serialize};
+
+// shared modules
+use shared::models::failure::Failure;
+
+// internal modules
 use crate::entities::base_entity::BaseEntity;
 use crate::values::roles::Role;
-use serde::{Deserialize, Serialize};
-use shared::models::failure::Failure;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]

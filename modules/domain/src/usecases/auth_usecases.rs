@@ -1,9 +1,13 @@
-use crate::entities::account_entity::AccountEntity;
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
+use validator::Validate;
+
+// shared modules
 use shared::models::failure::Failure;
 use shared::types::DomainResponse;
-use validator::Validate;
+
+// internal modules
+use crate::entities::account_entity::AccountEntity;
 
 #[derive(Debug, Clone)]
 pub struct SessionMetadata {

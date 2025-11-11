@@ -1,4 +1,6 @@
 use async_trait::async_trait;
+
+// shared modules
 use shared::models::paginate::Paginate;
 use shared::types::DomainResponse;
 

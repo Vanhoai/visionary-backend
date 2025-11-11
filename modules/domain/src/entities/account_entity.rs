@@ -1,7 +1,11 @@
-use crate::entities::base_entity::BaseEntity;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
+
+// shared modules
 use shared::models::failure::Failure;
+
+// internal modules
+use crate::entities::base_entity::BaseEntity;
 
 const MAX_USERNAME_LENGTH: usize = 20;
 const EMAIL_REGEX: &str = r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}$";

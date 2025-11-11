@@ -1,9 +1,11 @@
+use chrono::Duration;
+use jsonwebtoken::{Header, TokenData, Validation, decode, encode};
+
+// internal modules
 use crate::configs::APP_CONFIG;
 use crate::jwt::claims::Claims;
 use crate::jwt::keys::KEY_MANAGER;
 use crate::models::failure::Failure;
-use chrono::Duration;
-use jsonwebtoken::{Header, TokenData, Validation, decode, encode};
 
 pub struct JwtService;
 

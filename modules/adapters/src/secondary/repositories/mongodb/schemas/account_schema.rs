@@ -1,7 +1,11 @@
+use serde::{Deserialize, Serialize};
+
+// shared modules
+use domain::entities::account_entity::AccountEntity;
+
+// internal modules
 use crate::secondary::repositories::mongodb::mongo_base_repository::EntitySchema;
 use crate::secondary::repositories::mongodb::schemas::base_schema::BaseSchema;
-use domain::entities::account_entity::AccountEntity;
-use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AccountSchema {

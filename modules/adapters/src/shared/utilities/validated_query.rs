@@ -1,9 +1,13 @@
-use crate::shared::models::failure::HttpFailure;
 use axum::extract::{FromRequestParts, Query};
 use axum::http::request::Parts;
 use serde::de::DeserializeOwned;
-use shared::models::failure::Failure;
 use validator::Validate;
+
+// shared modules
+use shared::models::failure::Failure;
+
+// internal modules
+use crate::shared::models::failure::HttpFailure;
 
 pub struct ValidatedQuery<T>(pub T);
 

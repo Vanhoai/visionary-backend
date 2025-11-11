@@ -1,13 +1,15 @@
-use adapters::primary::routes;
-use adapters::shared::di::state::AppState;
 use axum::Router;
 use axum::http::{HeaderName, HeaderValue, Method};
-use shared::configs::APP_CONFIG;
 use std::sync::Arc;
 use tower_http::cors::CorsLayer;
 use tower_http::trace;
 use tower_http::trace::TraceLayer;
 use tracing::Level;
+
+// shared modules
+use adapters::primary::routes;
+use adapters::shared::di::state::AppState;
+use shared::configs::APP_CONFIG;
 
 fn allow_method_from_string(method: &str) -> Result<Method, Box<dyn std::error::Error>> {
     match method.to_uppercase().as_str() {
@@ -70,7 +72,7 @@ pub async fn initialize_app() -> Result<Router, Box<dyn std::error::Error>> {
         .make_span_with(trace::DefaultMakeSpan::new().level(Level::INFO))
         .on_request(trace::DefaultOnRequest::new().level(Level::INFO))
         .on_response(trace::DefaultOnResponse::new().level(Level::INFO));
-    
+
     let state = AppState::new().await?;
     match APP_CONFIG.cors.enabled {
         true => {

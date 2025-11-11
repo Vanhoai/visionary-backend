@@ -1,7 +1,11 @@
-use crate::entities::base_entity::BaseEntity;
 use serde::{Deserialize, Serialize};
+
+// shared modules
 use shared::models::failure::Failure;
 use shared::types::DomainResponse;
+
+// internal modules
+use crate::entities::base_entity::BaseEntity;
 
 static MAX_TECHNOLOGIES_LENGTH: usize = 255;
 static MAX_POSITION_LENGTH: usize = 100;

@@ -1,16 +1,18 @@
 use async_trait::async_trait;
-use domain::repositories::base_repository::BaseRepository;
 use futures::stream::TryStreamExt;
 use mongodb::Collection;
 use mongodb::bson::oid::ObjectId;
 use mongodb::bson::{doc, to_document};
 use serde::Serialize;
 use serde::de::DeserializeOwned;
+use std::marker::PhantomData;
+use std::sync::Arc;
+
+// shared modules
+use domain::repositories::base_repository::BaseRepository;
 use shared::models::failure::Failure;
 use shared::models::paginate::Paginate;
 use shared::types::DomainResponse;
-use std::marker::PhantomData;
-use std::sync::Arc;
 
 pub trait EntitySchema<S>: Serialize + DeserializeOwned + Unpin + Send + Sync {
     fn from_entity(entity: S) -> Self;

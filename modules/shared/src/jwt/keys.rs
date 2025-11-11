@@ -1,13 +1,15 @@
-use crate::configs::APP_CONFIG;
-use crate::cryptography::asymmetric::{AsymmetricKeyGenerator, CurveAlgorithms};
-use crate::cryptography::keypair::Keypair;
-use crate::functions::path_functions::PathFunctions;
 use jsonwebtoken::{Algorithm, DecodingKey, EncodingKey};
+use once_cell::sync::Lazy;
 use rand::Rng;
 use std::fs;
 use std::path::Path;
 use std::sync::Arc;
-use once_cell::sync::Lazy;
+
+// internal modules
+use crate::configs::APP_CONFIG;
+use crate::cryptography::asymmetric::{AsymmetricKeyGenerator, CurveAlgorithms};
+use crate::cryptography::keypair::Keypair;
+use crate::functions::path_functions::PathFunctions;
 
 pub enum TokenType {
     Access,

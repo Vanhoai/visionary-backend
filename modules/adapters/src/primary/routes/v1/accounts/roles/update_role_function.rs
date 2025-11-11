@@ -1,13 +1,17 @@
+use axum::extract::{Path, State};
+use axum::http::StatusCode;
+use std::sync::Arc;
+
+// shared modules
+use domain::entities::role_entity::RoleEntity;
+use domain::usecases::account_usecases::{ManageRoleAccountUseCase, UpdateRoleToAccountParams};
+
+// internal modules
 use crate::shared::di::state::AppState;
 use crate::shared::models::failure::HttpFailure;
 use crate::shared::models::response::HttpResponse;
 use crate::shared::types::AxumResponse;
 use crate::shared::utilities::validated_payload::ValidatedPayload;
-use axum::extract::{Path, State};
-use axum::http::StatusCode;
-use domain::entities::role_entity::RoleEntity;
-use domain::usecases::account_usecases::{ManageRoleAccountUseCase, UpdateRoleToAccountParams};
-use std::sync::Arc;
 
 pub async fn execute(
     State(state): State<Arc<AppState>>,

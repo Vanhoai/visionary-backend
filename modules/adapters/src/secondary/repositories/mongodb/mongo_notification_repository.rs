@@ -1,4 +1,6 @@
 use async_trait::async_trait;
+
+// shared modules
 use domain::repositories::notification_repository::NotificationRepository;
 
 pub struct MongoNotificationRepository {}

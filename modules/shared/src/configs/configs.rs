@@ -1,5 +1,7 @@
-use crate::functions::deserialize_functions::deserialize_comma_separated;
 use serde::Deserialize;
+
+// internal modules
+use crate::functions::deserialize_functions::deserialize_comma_separated;
 
 #[derive(Debug, Deserialize)]
 pub struct ServerConfig {

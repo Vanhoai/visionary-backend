@@ -1,7 +1,9 @@
-use domain::entities::base_entity::BaseEntity;
 use mongodb::bson::oid::ObjectId;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
+
+// shared modules
+use domain::entities::base_entity::BaseEntity;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BaseSchema {

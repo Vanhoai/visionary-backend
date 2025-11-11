@@ -1,9 +1,10 @@
-use async_trait::async_trait;
-use shared::models::failure::Failure;
-
 use argon2::password_hash::SaltString;
 use argon2::password_hash::rand_core::OsRng;
 use argon2::{Argon2, PasswordHash, PasswordVerifier, password_hash::PasswordHasher};
+use async_trait::async_trait;
+
+// shared modules
+use shared::models::failure::Failure;
 
 #[async_trait]
 pub trait AuthService: Send + Sync {

@@ -1,13 +1,17 @@
-use crate::entities::account_entity::AccountEntity;
-use crate::entities::experience_entity::ExperienceEntity;
-use crate::entities::role_entity::RoleEntity;
 use async_trait::async_trait;
 use serde::Deserialize;
+use validator::Validate;
+
+// shared modules
 use shared::{
     models::paginate::{BasePaginateQuery, Paginate},
     types::DomainResponse,
 };
-use validator::Validate;
+
+// internal modules
+use crate::entities::account_entity::AccountEntity;
+use crate::entities::experience_entity::ExperienceEntity;
+use crate::entities::role_entity::RoleEntity;
 
 // region =================================== MANAGE ACCOUNT USE CASE ===================================
 #[derive(Debug, Clone, Deserialize, Validate)]
@@ -51,7 +55,7 @@ pub trait ManageRoleAccountUseCase: Send + Sync {
         account_id: &str,
         params: &UpdateRoleToAccountParams,
     ) -> DomainResponse<RoleEntity>;
-    
+
     async fn find_role_by_account_id(&self, account_id: &str) -> DomainResponse<RoleEntity>;
 }
 // endregion =================================== MANAGE ROLE ACCOUNT USE CASE ===================================

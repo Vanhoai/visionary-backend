@@ -1,6 +1,8 @@
 use async_trait::async_trait;
-use domain::apis::auth_api::AuthApi;
 use reqwest::Client;
+
+// shared modules
+use domain::apis::auth_api::AuthApi;
 use shared::models::failure::Failure;
 use shared::types::DomainResponse;
 

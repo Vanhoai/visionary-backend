@@ -1,4 +1,3 @@
-use crate::configs::APP_CONFIG;
 use config::Map;
 use oauth2::basic::{BasicClient, BasicErrorResponseType, BasicTokenType};
 use oauth2::{
@@ -10,6 +9,9 @@ use oauth2::{
 };
 use once_cell::sync::Lazy;
 use std::sync::{Arc, Mutex};
+
+// internal modules
+use crate::configs::APP_CONFIG;
 
 type OAuth2Client = Client<
     StandardErrorResponse<BasicErrorResponseType>,
@@ -57,7 +59,7 @@ impl OAuth2Clients {
         let verifiers = PKCE_VERIFIERS.lock().unwrap();
         verifiers.get(state).map(|v| PkceCodeVerifier::new(v.to_string()))
     }
-    
+
     pub fn remove_pkce_verifier(&self, state: &str) {
         let mut verifiers = PKCE_VERIFIERS.lock().unwrap();
         verifiers.remove(state);

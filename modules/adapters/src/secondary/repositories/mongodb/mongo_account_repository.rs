@@ -1,14 +1,18 @@
+use async_trait::async_trait;
+use mongodb::Collection;
+use mongodb::bson::doc;
+use std::sync::Arc;
+
+// shared modules
+use domain::entities::account_entity::AccountEntity;
+use domain::repositories::account_repository::AccountRepository;
+use shared::models::failure::Failure;
+use shared::types::DomainResponse;
+
+// internal modules
 use crate::impl_mongo_base_repository;
 use crate::secondary::repositories::mongodb::mongo_base_repository::{EntitySchema, MongoBaseRepository};
 use crate::secondary::repositories::mongodb::schemas::account_schema::AccountSchema;
-use async_trait::async_trait;
-use domain::entities::account_entity::AccountEntity;
-use domain::repositories::account_repository::AccountRepository;
-use mongodb::Collection;
-use mongodb::bson::doc;
-use shared::models::failure::Failure;
-use shared::types::DomainResponse;
-use std::sync::Arc;
 
 pub struct MongoAccountRepository {
     base: MongoBaseRepository<AccountEntity, AccountSchema>,

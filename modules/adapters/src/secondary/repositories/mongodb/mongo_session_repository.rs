@@ -1,14 +1,18 @@
-use crate::impl_mongo_base_repository;
-use crate::secondary::repositories::mongodb::mongo_base_repository::{EntitySchema, MongoBaseRepository};
-use crate::secondary::repositories::mongodb::schemas::session_schema::SessionSchema;
 use async_trait::async_trait;
-use domain::{entities::session_entity::SessionEntity, repositories::session_repository::SessionRepository};
 use mongodb::{
     Collection,
     bson::{doc, oid::ObjectId},
 };
-use shared::{models::failure::Failure, types::DomainResponse};
 use std::sync::Arc;
+
+// shared modules
+use domain::{entities::session_entity::SessionEntity, repositories::session_repository::SessionRepository};
+use shared::{models::failure::Failure, types::DomainResponse};
+
+// internal modules
+use crate::impl_mongo_base_repository;
+use crate::secondary::repositories::mongodb::mongo_base_repository::{EntitySchema, MongoBaseRepository};
+use crate::secondary::repositories::mongodb::schemas::session_schema::SessionSchema;
 
 pub struct MongoSessionRepository {
     base: MongoBaseRepository<SessionEntity, SessionSchema>,

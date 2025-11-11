@@ -1,7 +1,9 @@
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
-use shared::types::DomainResponse;
 use std::collections::HashMap;
+
+// shared modules
+use shared::types::DomainResponse;
 
 // ================================ PUSH NOTIFICATION ================================
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -26,11 +28,7 @@ pub trait PushNotificationUseCase: Send + Sync {
         params: &PushNotification,
     ) -> DomainResponse<SendNotificationResponse>;
 
-    async fn send_to_topic(
-        &self,
-        topic: &str,
-        params: &PushNotification,
-    ) -> DomainResponse<SendNotificationResponse>;
+    async fn send_to_topic(&self, topic: &str, params: &PushNotification) -> DomainResponse<SendNotificationResponse>;
 }
 // ================================ PUSH NOTIFICATION ================================
 

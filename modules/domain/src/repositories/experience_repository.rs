@@ -1,7 +1,11 @@
+use async_trait::async_trait;
+
+// shared modules
+use shared::types::DomainResponse;
+
+// internal modules
 use crate::entities::experience_entity::ExperienceEntity;
 use crate::repositories::base_repository::BaseRepository;
-use async_trait::async_trait;
-use shared::types::DomainResponse;
 
 #[async_trait]
 pub trait ExperienceRepository: BaseRepository<ExperienceEntity> {

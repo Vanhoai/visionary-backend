@@ -1,7 +1,10 @@
-use domain::entities::session_entity::SessionEntity;
 use mongodb::bson::oid::ObjectId;
 use serde::{Deserialize, Serialize};
 
+// shared modules
+use domain::entities::session_entity::SessionEntity;
+
+// internal modules
 use crate::secondary::repositories::mongodb::{mongo_base_repository::EntitySchema, schemas::base_schema::BaseSchema};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

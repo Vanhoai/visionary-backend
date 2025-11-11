@@ -1,7 +1,7 @@
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
-pub struct GoogleAccountInformation {
+pub struct GoogleAccount {
     pub id: String,
     pub email: String,
     pub verified_email: bool,

@@ -1,9 +1,11 @@
-use crate::primary::middlewares::auth_middleware::auth_middleware;
-use crate::primary::middlewares::role_middleware::require_admin;
-use crate::shared::di::state::AppState;
 use axum::routing::{get, post, put};
 use axum::{Router, middleware};
 use std::sync::Arc;
+
+// internal modules
+use crate::primary::middlewares::auth_middleware::auth_middleware;
+use crate::primary::middlewares::role_middleware::require_admin;
+use crate::shared::di::state::AppState;
 
 pub fn execute() -> Router<Arc<AppState>> {
     let public_routes = Router::new();
