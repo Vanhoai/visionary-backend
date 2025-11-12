@@ -1,66 +1,54 @@
+use async_trait::async_trait;
+use scylla::client::session::Session;
 use std::sync::Arc;
 
-use async_trait::async_trait;
+// shared modules
 use domain::entities::account_entity::AccountEntity;
 use domain::repositories::account_repository::AccountRepository;
-use domain::repositories::base_repository::BaseRepository;
-use scylla::client::session::Session;
-use shared::models::paginate::Paginate;
+use shared::models::failure::Failure;
 use shared::types::DomainResponse;
+
+// internal modules
+use crate::impl_scylla_base_repository;
+use crate::secondary::repositories::models::account_schema::ScyllaAccountSchema;
+use crate::secondary::repositories::scylla::scylla_base_repository::ScyllaBaseRepository;
 
 #[allow(dead_code)]
 pub struct ScyllaAccountRepository {
-    session: Arc<Session>,
+    base: ScyllaBaseRepository<AccountEntity, ScyllaAccountSchema>,
 }
 
 impl ScyllaAccountRepository {
-    pub fn new(session: Arc<Session>) -> Self {
-        ScyllaAccountRepository { session }
+    pub fn new(session: Arc<Session>, keyspace: &str) -> Self {
+        ScyllaAccountRepository { base: ScyllaBaseRepository::new(session, keyspace) }
     }
 }
 
-#[async_trait]
-impl BaseRepository<AccountEntity> for ScyllaAccountRepository {
-    async fn create(&self, _entity: &AccountEntity) -> DomainResponse<AccountEntity> {
-        todo!()
-    }
-
-    async fn update(&self, _id: &str, _entity: &AccountEntity) -> DomainResponse<AccountEntity> {
-        todo!()
-    }
-
-    async fn delete(&self, _: &str) -> DomainResponse<AccountEntity> {
-        todo!()
-    }
-
-    async fn remove(&self, _: &str) -> DomainResponse<AccountEntity> {
-        todo!()
-    }
-
-    async fn find(&self, _: &str) -> DomainResponse<Option<AccountEntity>> {
-        todo!()
-    }
-
-    async fn find_and_delete(&self, _id: &str) -> DomainResponse<AccountEntity> {
-        todo!()
-    }
-
-    async fn find_and_remove(&self, _id: &str) -> DomainResponse<AccountEntity> {
-        todo!()
-    }
-
-    async fn finds(&self) -> DomainResponse<Vec<AccountEntity>> {
-        todo!()
-    }
-
-    async fn finds_paginated(&self, _page: u32, _page_size: u32) -> DomainResponse<(Paginate, Vec<AccountEntity>)> {
-        todo!()
-    }
-}
+impl_scylla_base_repository!(ScyllaAccountRepository, AccountEntity, ScyllaAccountSchema);
 
 #[async_trait]
 impl AccountRepository for ScyllaAccountRepository {
-    async fn find_by_email(&self, _: &str) -> DomainResponse<Option<AccountEntity>> {
-        todo!()
+    async fn find_by_email(&self, email: &str) -> DomainResponse<Option<AccountEntity>> {
+        let query = r#"
+            SELECT id, avatar, bio, username, email, email_verified, is_active, created_at, updated_at, deleted_at
+            FROM visionary.accounts
+            WHERE email = ?
+            ALLOW FILTERING
+        "#;
+
+        let prepared = self
+            .base
+            .session
+            .prepare(query)
+            .await
+            .map_err(|e| Failure::DatabaseError(format!("Failed to prepare query: {}", e)))?;
+
+        self.base
+            .session
+            .execute_unpaged(&prepared, (email,))
+            .await
+            .map_err(|e| Failure::DatabaseError(format!("Failed to find account by email: {}", e)))?;
+
+        Ok(None)
     }
 }

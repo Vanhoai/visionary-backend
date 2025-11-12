@@ -4,7 +4,6 @@ use tokio::time::{Duration, Instant};
 
 /// Token Bucket Rate Limiter
 /// Allows a certain number of tokens to be consumed over a time period.
-
 struct TokenBucket {
     tokens: Arc<Mutex<f64>>,          // current tokens
     capacity: f64,                    // maximum tokens

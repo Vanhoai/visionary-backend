@@ -6,6 +6,7 @@ pub mod course_entity;
 pub mod enrollment_entity;
 pub mod experience_entity;
 pub mod lesson_entity;
+pub mod notification_entity;
 pub mod provider_entity;
 pub mod role_entity;
 pub mod session_entity;

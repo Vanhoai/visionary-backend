@@ -21,8 +21,8 @@ where
 
     async fn from_request(req: Request, _state: &S) -> Result<Self, Self::Rejection> {
         let header = req.headers();
-        let ip_address = extract_ip(&header);
-        let user_agent = extract_user_agent(&header);
+        let ip_address = extract_ip(header);
+        let user_agent = extract_user_agent(header);
         let device_type = detect_device_type(&user_agent);
 
         let metadata = RequestMetadata { id_address: ip_address, user_agent, device_type };
@@ -32,20 +32,18 @@ where
 
 pub fn extract_ip(headers: &HeaderMap) -> String {
     // Try to get IP from X-Forwarded-For header (for proxied requests)
-    if let Some(forwarded_for) = headers.get("x-forwarded-for") {
-        if let Ok(value) = forwarded_for.to_str() {
-            // Take the first IP if there are multiple
-            if let Some(ip) = value.split(',').next() {
-                return ip.trim().to_string();
-            }
-        }
+    if let Some(forwarded_for) = headers.get("x-forwarded-for")
+        && let Ok(value) = forwarded_for.to_str()
+        && let Some(ip) = value.split(',').next()
+    {
+        return ip.trim().to_string();
     }
 
     // Try X-Real-IP header
-    if let Some(real_ip) = headers.get("x-real-ip") {
-        if let Ok(value) = real_ip.to_str() {
-            return value.to_string();
-        }
+    if let Some(real_ip) = headers.get("x-real-ip")
+        && let Ok(value) = real_ip.to_str()
+    {
+        return value.to_string();
     }
 
     // Fallback to unknown

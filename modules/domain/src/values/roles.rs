@@ -14,7 +14,7 @@ impl Role {
         }
     }
 
-    pub fn from_str(role_str: &str) -> Result<Self, Failure> {
+    pub fn from_string(role_str: &str) -> Result<Self, Failure> {
         match role_str.to_uppercase().as_str() {
             "ADMIN" => Ok(Role::Admin),
             "NORMAL" => Ok(Role::Normal),

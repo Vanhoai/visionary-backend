@@ -12,20 +12,20 @@ use shared::types::DomainResponse;
 
 // internal modules
 use crate::impl_mongo_base_repository;
+use crate::secondary::repositories::models::role_schema::MongoRoleSchema;
 use crate::secondary::repositories::mongodb::mongo_base_repository::{EntitySchema, MongoBaseRepository};
-use crate::secondary::repositories::mongodb::schemas::role_schema::RoleSchema;
 
 pub struct MongoRoleRepository {
-    base: MongoBaseRepository<RoleEntity, RoleSchema>,
+    base: MongoBaseRepository<RoleEntity, MongoRoleSchema>,
 }
 
 impl MongoRoleRepository {
-    pub fn new(collection: Arc<Collection<RoleSchema>>) -> Self {
+    pub fn new(collection: Arc<Collection<MongoRoleSchema>>) -> Self {
         MongoRoleRepository { base: MongoBaseRepository::new(collection) }
     }
 }
 
-impl_mongo_base_repository!(MongoRoleRepository, RoleEntity, RoleSchema);
+impl_mongo_base_repository!(MongoRoleRepository, RoleEntity, MongoRoleSchema);
 
 #[async_trait]
 impl RoleRepository for MongoRoleRepository {

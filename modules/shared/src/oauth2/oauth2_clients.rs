@@ -31,6 +31,12 @@ pub struct OAuth2Clients {
     pub github: OAuth2Client,
 }
 
+impl Default for OAuth2Clients {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl OAuth2Clients {
     pub fn new() -> Self {
         println!("Google Redirect URL: {}", APP_CONFIG.oauth2.google_redirect_url);

@@ -8,7 +8,7 @@ use std::{sync::Arc, time::Duration};
 use tokio::sync::OnceCell;
 
 // shared modules
-use shared::configs::APP_CONFIG;
+use shared::{configs::APP_CONFIG, functions::path_functions::PathFunctions};
 
 pub static ACCOUNT_TABLE: &str = "accounts";
 pub static SESSION_TABLE: &str = "sessions";
@@ -17,9 +17,25 @@ pub static EXPERIENCE_TABLE: &str = "experiences";
 pub static ROLE_TABLE: &str = "roles";
 pub static CATEGORY_TABLE: &str = "categories";
 pub static BLOG_TABLE: &str = "blogs";
+pub static NOTIFICATION_TABLE: &str = "notifications";
 
 pub static MONGO_CLIENT: OnceCell<Arc<Database>> = OnceCell::const_new();
 pub static SCYLLA_SESSION: OnceCell<Arc<Session>> = OnceCell::const_new();
+
+pub enum DatabaseType {
+    Mongo,
+    Scylla,
+}
+
+impl DatabaseType {
+    pub fn from_string(database_type: &str) -> Result<Self, Box<dyn std::error::Error>> {
+        match database_type.to_uppercase().as_str() {
+            "MONGO" => Ok(DatabaseType::Mongo),
+            "SCYLLA" => Ok(DatabaseType::Scylla),
+            _ => Err(format!("Unsupported database type: {}", database_type).into()),
+        }
+    }
+}
 
 pub async fn mongo_client() -> Arc<Database> {
     MONGO_CLIENT
@@ -52,7 +68,10 @@ pub async fn scylla_session() -> Arc<Session> {
             }
 
             let session = session_builder.build().await.expect("Failed to create ScyllaDB session");
-            let runner = Migrator::new(&session, "migrations");
+            let root = PathFunctions::root_path();
+            let migrations_path = format!("{}/migrations", root.as_str());
+
+            let runner = Migrator::new(&session, &migrations_path);
             runner.run().await.expect("Failed to run ScyllaDB migrations");
 
             Arc::new(session)

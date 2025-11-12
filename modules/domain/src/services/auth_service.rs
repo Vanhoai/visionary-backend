@@ -20,6 +20,12 @@ impl AuthServiceImpl {
     }
 }
 
+impl Default for AuthServiceImpl {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 #[async_trait]
 impl AuthService for AuthServiceImpl {
     fn hash_password(&self, password: &str) -> Result<String, Failure> {

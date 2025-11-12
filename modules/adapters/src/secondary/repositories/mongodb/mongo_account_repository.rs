@@ -11,21 +11,21 @@ use shared::types::DomainResponse;
 
 // internal modules
 use crate::impl_mongo_base_repository;
+use crate::secondary::repositories::models::account_schema::AccountMongoSchema;
 use crate::secondary::repositories::mongodb::mongo_base_repository::{EntitySchema, MongoBaseRepository};
-use crate::secondary::repositories::mongodb::schemas::account_schema::AccountSchema;
 
 pub struct MongoAccountRepository {
-    base: MongoBaseRepository<AccountEntity, AccountSchema>,
+    base: MongoBaseRepository<AccountEntity, AccountMongoSchema>,
 }
 
 impl MongoAccountRepository {
-    pub fn new(collection: Arc<Collection<AccountSchema>>) -> Self {
+    pub fn new(collection: Arc<Collection<AccountMongoSchema>>) -> Self {
         Self { base: MongoBaseRepository::new(collection) }
     }
 }
 
 // Delegate base methods to MongoBaseRepository
-impl_mongo_base_repository!(MongoAccountRepository, AccountEntity, AccountSchema);
+impl_mongo_base_repository!(MongoAccountRepository, AccountEntity, AccountMongoSchema);
 
 #[async_trait]
 impl AccountRepository for MongoAccountRepository {

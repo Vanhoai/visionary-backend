@@ -14,7 +14,7 @@ pub struct NotificationServiceImpl {
 
 impl NotificationServiceImpl {
     pub fn new(repository: Arc<dyn NotificationRepository>) -> Self {
-        Self { repository: repository }
+        Self { repository }
     }
 }
 

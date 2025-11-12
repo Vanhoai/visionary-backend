@@ -128,7 +128,7 @@ impl ManageSessionAuthUseCase for AuthAppService {
 
         let password_provider = provider_entities
             .into_iter()
-            .find(|provider| provider.auth_provider == "PASSWORD".to_string())
+            .find(|provider| provider.auth_provider == "PASSWORD")
             .ok_or(Failure::Unauthorized("Password provider not found for this account".to_string()))?;
 
         // 3. Verify password

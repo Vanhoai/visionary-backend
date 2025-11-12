@@ -1,5 +1,5 @@
-use std::sync::Arc;
 use async_trait::async_trait;
+use std::sync::Arc;
 
 // shared modules
 use shared::types::DomainResponse;
@@ -48,7 +48,7 @@ impl CategoryService for CategoryServiceImpl {
     }
 
     async fn update_category(&self, category_id: &str, entity: &CategoryEntity) -> DomainResponse<CategoryEntity> {
-        self.repository.update(&category_id.to_string(), entity).await
+        self.repository.update(category_id, entity).await
     }
 
     async fn find_and_delete_category(&self, category_id: &str) -> DomainResponse<CategoryEntity> {

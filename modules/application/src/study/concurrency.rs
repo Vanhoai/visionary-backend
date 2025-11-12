@@ -109,12 +109,10 @@ async fn async_function() -> String {
 }
 
 #[allow(dead_code)]
-fn async_await_future() -> impl Future<Output = String> {
-    async {
-        let result = async_function().await;
-        println!("{}", result);
-        result
-    }
+async fn async_await_future() -> String {
+    let result = async_function().await;
+    println!("{}", result);
+    result
 }
 
 #[allow(dead_code)]
@@ -417,11 +415,6 @@ async fn tokio_join_set() {
     }
 }
 
-fn expensive_computation() -> i32 {
-    // Heavy computation
-    42
-}
-
 #[allow(dead_code)]
 async fn avoid_operation_blocking() {
     // ❌ Bad - blocks the executor
@@ -434,7 +427,7 @@ async fn avoid_operation_blocking() {
     // let result = expensive_computation();
 
     // ✅ Good - offload to blocking thread pool
-    let result = tokio::task::spawn_blocking(|| expensive_computation()).await.unwrap();
+    let result = tokio::task::spawn_blocking(|| 42).await.unwrap();
     println!("Computation result: {}", result);
 }
 

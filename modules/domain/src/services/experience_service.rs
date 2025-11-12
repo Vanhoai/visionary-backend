@@ -12,12 +12,13 @@ use crate::repositories::experience_repository::ExperienceRepository;
 pub trait ExperienceService: Send + Sync {
     async fn find_by_account_id(&self, account_id: &str) -> DomainResponse<Vec<ExperienceEntity>>;
     async fn find_by_company(&self, company: &str) -> DomainResponse<Option<ExperienceEntity>>;
+    #[allow(clippy::too_many_arguments)]
     async fn create_experience(
         &self,
         account_id: &str,
-        technologies: &Vec<String>,
+        technologies: &'life0 [String],
         position: &str,
-        responsibility: &Vec<String>,
+        responsibility: &'life1 [String],
         company: &str,
         location: &str,
         start_date: i64,
@@ -46,12 +47,13 @@ impl ExperienceService for ExperienceServiceImpl {
         self.repository.find_by_company(company).await
     }
 
+    #[allow(clippy::too_many_arguments)]
     async fn create_experience(
         &self,
         account_id: &str,
-        technologies: &Vec<String>,
+        technologies: &'life0 [String],
         position: &str,
-        responsibility: &Vec<String>,
+        responsibility: &'life1 [String],
         company: &str,
         location: &str,
         start_date: i64,

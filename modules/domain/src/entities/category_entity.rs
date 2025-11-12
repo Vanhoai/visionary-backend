@@ -18,7 +18,7 @@ pub struct CategoryEntity {
 
 impl CategoryEntity {
     pub fn new(include_id: bool, name: &str) -> DomainResponse<Self> {
-        Self::validate_name(&name)?;
+        Self::validate_name(name)?;
         Ok(CategoryEntity { base: BaseEntity::new(include_id), name: name.to_string() })
     }
 

@@ -63,30 +63,25 @@ pub fn mongo_repository_derive(input: TokenStream) -> TokenStream {
 
 fn extract_types(input: &DeriveInput) -> syn::Result<(syn::Type, syn::Type)> {
     // Try to extract from struct fields
-    if let Data::Struct(data_struct) = &input.data {
-        if let Fields::Named(fields) = &data_struct.fields {
-            for field in &fields.named {
-                if field.ident.as_ref().map_or(false, |i| i == "base") {
-                    // Extract generic parameters from MongoBaseRepository<E, S>
-                    if let syn::Type::Path(type_path) = &field.ty {
-                        if let Some(segment) = type_path.path.segments.last() {
-                            if segment.ident == "MongoBaseRepository" {
-                                if let syn::PathArguments::AngleBracketed(args) = &segment.arguments {
-                                    if args.args.len() == 2 {
-                                        let entity = &args.args[0];
-                                        let schema = &args.args[1];
+    if let Data::Struct(data_struct) = &input.data
+        && let Fields::Named(fields) = &data_struct.fields
+    {
+        for field in &fields.named {
+            if field.ident.as_ref().is_some_and(|i| i == "base") {
+                // Extract generic parameters from MongoBaseRepository<E, S>
+                if let syn::Type::Path(type_path) = &field.ty
+                    && let Some(segment) = type_path.path.segments.last()
+                    && segment.ident == "MongoBaseRepository"
+                    && let syn::PathArguments::AngleBracketed(args) = &segment.arguments
+                    && args.args.len() == 2
+                {
+                    let entity = &args.args[0];
+                    let schema = &args.args[1];
 
-                                        if let (
-                                            syn::GenericArgument::Type(entity_type),
-                                            syn::GenericArgument::Type(schema_type),
-                                        ) = (entity, schema)
-                                        {
-                                            return Ok((entity_type.clone(), schema_type.clone()));
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                    if let (syn::GenericArgument::Type(entity_type), syn::GenericArgument::Type(schema_type)) =
+                        (entity, schema)
+                    {
+                        return Ok((entity_type.clone(), schema_type.clone()));
                     }
                 }
             }

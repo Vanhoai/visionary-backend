@@ -12,7 +12,7 @@ fn study_rayon() {
     // let squares: Vec<i32> = (0..100).into_par_iter().map(|x| x * x).collect();
 
     // Parallel sort
-    let mut data = vec![3, 1, 4, 1, 5, 9, 2, 6];
+    let mut data = [3, 1, 4, 1, 5, 9, 2, 6];
     data.par_sort();
 
     // Parallel for_each

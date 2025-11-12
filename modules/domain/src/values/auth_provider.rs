@@ -1,3 +1,6 @@
+use std::fmt::Display;
+
+// shared modules
 use shared::models::failure::Failure;
 
 pub enum AuthProvider {
@@ -15,12 +18,15 @@ impl AuthProvider {
             _ => Err(Failure::BadRequest(format!("Invalid auth provider: {}", s))),
         }
     }
+}
 
-    pub fn to_string(&self) -> String {
-        match self {
-            AuthProvider::Password => "PASSWORD".to_string(),
-            AuthProvider::Google => "GOOGLE".to_string(),
-            AuthProvider::Github => "GITHUB".to_string(),
-        }
+impl Display for AuthProvider {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let s = match self {
+            AuthProvider::Password => "PASSWORD",
+            AuthProvider::Google => "GOOGLE",
+            AuthProvider::Github => "GITHUB",
+        };
+        write!(f, "{}", s)
     }
 }

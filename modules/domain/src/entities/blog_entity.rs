@@ -23,6 +23,7 @@ pub struct BlogEntity {
 }
 
 impl BlogEntity {
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         include_id: bool,
         author_id: String,
@@ -32,7 +33,7 @@ impl BlogEntity {
         is_published: bool,
         markdown: String,
         estimated_read_time: i32,
-    ) -> DomainResponse<Self> {
+    ) -> DomainResponse<BlogEntity> {
         // add validation logic here if needed
 
         Ok(BlogEntity {

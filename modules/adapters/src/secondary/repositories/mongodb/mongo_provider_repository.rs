@@ -13,20 +13,20 @@ use shared::types::DomainResponse;
 
 // internal modules
 use crate::impl_mongo_base_repository;
+use crate::secondary::repositories::models::provider_schema::MongoProviderSchema;
 use crate::secondary::repositories::mongodb::mongo_base_repository::{EntitySchema, MongoBaseRepository};
-use crate::secondary::repositories::mongodb::schemas::provider_schema::ProviderSchema;
 
 pub struct MongoProviderRepository {
-    base: MongoBaseRepository<ProviderEntity, ProviderSchema>,
+    base: MongoBaseRepository<ProviderEntity, MongoProviderSchema>,
 }
 
 impl MongoProviderRepository {
-    pub fn new(collection: Arc<Collection<ProviderSchema>>) -> Self {
+    pub fn new(collection: Arc<Collection<MongoProviderSchema>>) -> Self {
         MongoProviderRepository { base: MongoBaseRepository::new(collection) }
     }
 }
 
-impl_mongo_base_repository!(MongoProviderRepository, ProviderEntity, ProviderSchema);
+impl_mongo_base_repository!(MongoProviderRepository, ProviderEntity, MongoProviderSchema);
 
 #[async_trait]
 impl ProviderRepository for MongoProviderRepository {
@@ -43,7 +43,7 @@ impl ProviderRepository for MongoProviderRepository {
             .map_err(|e| Failure::BadRequest(format!("Mongo search error: {}", e)))?;
 
         let entities = cursor
-            .try_collect::<Vec<ProviderSchema>>()
+            .try_collect::<Vec<MongoProviderSchema>>()
             .await
             .map_err(|e| Failure::BadRequest(format!("Failed to collect documents: {}", e)))?
             .into_iter()

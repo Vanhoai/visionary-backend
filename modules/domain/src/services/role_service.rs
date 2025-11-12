@@ -34,7 +34,7 @@ impl RoleService for RoleServiceImpl {
     }
 
     async fn create_role(&self, account_id: &str, role_name: &str) -> DomainResponse<RoleEntity> {
-        let role = Role::from_str(role_name)?;
+        let role = Role::from_string(role_name)?;
         let role_entity = RoleEntity::new(false, account_id.to_string(), role)?;
         self.repository.create(&role_entity).await
     }
@@ -44,7 +44,7 @@ impl RoleService for RoleServiceImpl {
         account_id: &str,
         role_name: &str,
     ) -> DomainResponse<RoleEntity> {
-        let role = Role::from_str(role_name)?;
-        self.repository.find_and_update_role_by_account_id(account_id, &role.as_str().to_string()).await
+        let role = Role::from_string(role_name)?;
+        self.repository.find_and_update_role_by_account_id(account_id, role.as_str()).await
     }
 }

@@ -10,6 +10,7 @@ workspace = true
 shared = { path = "../shared" }
 domain = { path = "../domain" }
 processors = { path = "../processors" }
+uuid = { workspace = true, features = ["v4", "v7"] }
 tokio = { workspace = true, features = ["full"] }
 axum = { workspace = true }
 serde = { workspace = true }

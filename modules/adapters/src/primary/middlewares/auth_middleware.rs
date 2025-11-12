@@ -23,12 +23,12 @@ impl AuthClaims {
         let token = headers
             .get("Authorization")
             .and_then(|value| value.to_str().ok())
-            .and_then(|auth| if auth.starts_with("Bearer ") { Some(&auth[7..]) } else { None })
+            .and_then(|auth| auth.strip_prefix("Bearer "))
             .ok_or_else(|| {
                 HttpFailure::new(Failure::Unauthorized("Missing or invalid Authorization header".to_string()))
             })?;
 
-        let claims_wrapped = JwtService::verify_access_token(token).map_err(|e| HttpFailure::new(e))?;
+        let claims_wrapped = JwtService::verify_access_token(token).map_err(HttpFailure::new)?;
         Ok(AuthClaims {
             account_id: claims_wrapped.claims.sub,
             jit: claims_wrapped.claims.jit,

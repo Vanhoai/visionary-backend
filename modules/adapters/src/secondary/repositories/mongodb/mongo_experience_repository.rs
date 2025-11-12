@@ -13,16 +13,18 @@ use shared::models::failure::Failure;
 use shared::types::DomainResponse;
 
 // internal modules
-use crate::secondary::repositories::mongodb::mongo_base_repository::{EntitySchema, MongoBaseRepository};
-use crate::secondary::repositories::mongodb::schemas::experience_schema::ExperienceSchema;
+use crate::secondary::repositories::{
+    models::experience_schema::MongoExperienceSchema,
+    mongodb::mongo_base_repository::{EntitySchema, MongoBaseRepository},
+};
 
 #[derive(MongoRepository)]
 pub struct MongoExperienceRepository {
-    base: MongoBaseRepository<ExperienceEntity, ExperienceSchema>,
+    base: MongoBaseRepository<ExperienceEntity, MongoExperienceSchema>,
 }
 
 impl MongoExperienceRepository {
-    pub fn new(collection: Arc<Collection<ExperienceSchema>>) -> Self {
+    pub fn new(collection: Arc<Collection<MongoExperienceSchema>>) -> Self {
         MongoExperienceRepository { base: MongoBaseRepository::new(collection) }
     }
 }
@@ -42,7 +44,7 @@ impl ExperienceRepository for MongoExperienceRepository {
             .map_err(|e| Failure::BadRequest(format!("Mongo search error: {}", e)))?;
 
         let entities = cursor
-            .try_collect::<Vec<ExperienceSchema>>()
+            .try_collect::<Vec<MongoExperienceSchema>>()
             .await
             .map_err(|e| Failure::BadRequest(format!("Failed to collect documents: {}", e)))?
             .into_iter()

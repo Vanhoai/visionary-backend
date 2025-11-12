@@ -4,7 +4,6 @@ use tokio::time::{Duration, Instant, interval};
 
 /// Leaky Bucket Rate Limiter
 /// Allows a fixed rate of requests by processing them at a constant rate.
-
 pub struct LeakyBucket {
     tx: mpsc::Sender<Request>,
 }

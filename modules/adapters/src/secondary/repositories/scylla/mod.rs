@@ -1,2 +1,9 @@
 pub mod scylla_account_repository;
-mod scylla_base_repository;
+pub mod scylla_base_repository;
+pub mod scylla_blog_repository;
+pub mod scylla_category_repository;
+pub mod scylla_experience_repository;
+pub mod scylla_notification_repository;
+pub mod scylla_provider_repository;
+pub mod scylla_role_repository;
+pub mod scylla_session_repository;

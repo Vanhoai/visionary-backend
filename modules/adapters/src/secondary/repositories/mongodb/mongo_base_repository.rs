@@ -15,7 +15,7 @@ use shared::models::paginate::Paginate;
 use shared::types::DomainResponse;
 
 pub trait EntitySchema<S>: Serialize + DeserializeOwned + Unpin + Send + Sync {
-    fn from_entity(entity: S) -> Self;
+    fn from_entity(entity: &S) -> Self;
     fn to_entity(&self) -> S;
 }
 
@@ -93,7 +93,7 @@ where
     S: EntitySchema<E>,
 {
     async fn create(&self, entity: &E) -> DomainResponse<E> {
-        let schema = S::from_entity(entity.clone());
+        let schema = S::from_entity(entity);
         let inserted_result = self
             .collection
             .insert_one(&schema)
@@ -127,7 +127,7 @@ where
             ObjectId::parse_str(id).map_err(|_| Failure::BadRequest(format!("Invalid ID format: {}", id)))?;
 
         let query = doc! { "_id": object_id };
-        let schema = S::from_entity(entity.clone());
+        let schema = S::from_entity(entity);
 
         let update = doc! {
             "$set": to_document(&schema)

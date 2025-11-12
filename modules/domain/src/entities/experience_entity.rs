@@ -30,21 +30,22 @@ pub struct ExperienceEntity {
 }
 
 impl ExperienceEntity {
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         include_id: bool,
         account_id: &str,
-        technologies: &Vec<String>,
+        technologies: &[String],
         position: &str,
-        responsibility: &Vec<String>,
+        responsibility: &[String],
         company: &str,
         location: &str,
         start_date: i64,
         end_date: Option<i64>,
         is_current: bool,
-    ) -> DomainResponse<Self> {
-        Self::validate_technologies(technologies.clone())?;
+    ) -> DomainResponse<ExperienceEntity> {
+        Self::validate_technologies(technologies.to_owned())?;
         Self::validate_position(position)?;
-        Self::validate_responsibility(responsibility.clone())?;
+        Self::validate_responsibility(responsibility.to_owned())?;
         Self::validate_company(company)?;
         Self::validate_location(location)?;
         Self::validate_dates(start_date, end_date)?;
@@ -52,9 +53,9 @@ impl ExperienceEntity {
         Ok(ExperienceEntity {
             base: BaseEntity::new(include_id),
             account_id: account_id.to_string(),
-            technologies: technologies.clone(),
+            technologies: technologies.to_owned(),
             position: position.to_string(),
-            responsibility: responsibility.clone(),
+            responsibility: responsibility.to_owned(),
             company: company.to_string(),
             location: location.to_string(),
             start_date,

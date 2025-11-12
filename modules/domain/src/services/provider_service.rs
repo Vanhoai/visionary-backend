@@ -43,6 +43,6 @@ impl ProviderService for ProviderServiceImpl {
     }
 
     async fn find_by_account_id(&self, account_id: &str) -> DomainResponse<Vec<ProviderEntity>> {
-        self.repository.find_by_account_id(&account_id).await
+        self.repository.find_by_account_id(account_id).await
     }
 }

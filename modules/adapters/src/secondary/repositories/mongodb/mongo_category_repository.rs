@@ -9,16 +9,18 @@ use processors::MongoRepository;
 use shared::types::DomainResponse;
 
 // internal modules
-use crate::secondary::repositories::mongodb::mongo_base_repository::{EntitySchema, MongoBaseRepository};
-use crate::secondary::repositories::mongodb::schemas::category_schema::CategorySchema;
+use crate::secondary::repositories::{
+    models::category_schema::MongoCategorySchema,
+    mongodb::mongo_base_repository::{EntitySchema, MongoBaseRepository},
+};
 
 #[derive(MongoRepository)]
 pub struct MongoCategoryRepository {
-    base: MongoBaseRepository<CategoryEntity, CategorySchema>,
+    base: MongoBaseRepository<CategoryEntity, MongoCategorySchema>,
 }
 
 impl MongoCategoryRepository {
-    pub fn new(collection: Arc<Collection<CategorySchema>>) -> Self {
+    pub fn new(collection: Arc<Collection<MongoCategorySchema>>) -> Self {
         MongoCategoryRepository { base: MongoBaseRepository::new(collection) }
     }
 }

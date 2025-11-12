@@ -10,21 +10,20 @@ use domain::{entities::session_entity::SessionEntity, repositories::session_repo
 use shared::{models::failure::Failure, types::DomainResponse};
 
 // internal modules
-use crate::impl_mongo_base_repository;
 use crate::secondary::repositories::mongodb::mongo_base_repository::{EntitySchema, MongoBaseRepository};
-use crate::secondary::repositories::mongodb::schemas::session_schema::SessionSchema;
+use crate::{impl_mongo_base_repository, secondary::repositories::models::session_schema::MongoSessionSchema};
 
 pub struct MongoSessionRepository {
-    base: MongoBaseRepository<SessionEntity, SessionSchema>,
+    base: MongoBaseRepository<SessionEntity, MongoSessionSchema>,
 }
 
 impl MongoSessionRepository {
-    pub fn new(collection: Arc<Collection<SessionSchema>>) -> Self {
+    pub fn new(collection: Arc<Collection<MongoSessionSchema>>) -> Self {
         MongoSessionRepository { base: MongoBaseRepository::new(collection) }
     }
 }
 
-impl_mongo_base_repository!(MongoSessionRepository, SessionEntity, SessionSchema);
+impl_mongo_base_repository!(MongoSessionRepository, SessionEntity, MongoSessionSchema);
 
 #[async_trait]
 impl SessionRepository for MongoSessionRepository {

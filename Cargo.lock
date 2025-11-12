@@ -20,6 +20,7 @@ dependencies = [
  "serde_json",
  "shared",
  "tokio",
+ "uuid",
  "validator",
 ]
 
