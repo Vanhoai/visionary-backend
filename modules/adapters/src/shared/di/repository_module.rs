@@ -24,7 +24,10 @@ use crate::secondary::repositories::{
         scylla_session_repository::ScyllaSessionRepository,
     },
 };
-use crate::shared::utilities::databases::{ACCOUNT_TABLE, CATEGORY_TABLE, DatabaseType, EXPERIENCE_TABLE, PROVIDER_TABLE, ROLE_TABLE, SESSION_TABLE, mongo_client, scylla_session, NOTIFICATION_TABLE};
+use crate::shared::utilities::databases::{
+    ACCOUNT_TABLE, CATEGORY_TABLE, DatabaseType, EXPERIENCE_TABLE, NOTIFICATION_TABLE, PROVIDER_TABLE, ROLE_TABLE,
+    SESSION_TABLE, mongo_client, scylla_session,
+};
 
 pub trait RepositoryModule: Send + Sync {
     fn get_account_repository(&self) -> Arc<dyn AccountRepository>;
@@ -93,7 +96,9 @@ impl MongoRepositoryModule {
             experience_repository: Arc::new(MongoExperienceRepository::new(Arc::new(db.collection(EXPERIENCE_TABLE)))),
             role_repository: Arc::new(MongoRoleRepository::new(Arc::new(db.collection(ROLE_TABLE)))),
             category_repository: Arc::new(MongoCategoryRepository::new(Arc::new(db.collection(CATEGORY_TABLE)))),
-            notification_repository: Arc::new(MongoNotificationRepository::new(Arc::new(db.collection(NOTIFICATION_TABLE)))),
+            notification_repository: Arc::new(MongoNotificationRepository::new(Arc::new(
+                db.collection(NOTIFICATION_TABLE),
+            ))),
         }
     }
 }
@@ -117,13 +122,21 @@ impl ScyllaRepositoryModule {
         let keyspace = APP_CONFIG.database.scylla_keyspace.clone();
 
         Self {
-            account_repository: Arc::new(ScyllaAccountRepository::new(session.clone(), &keyspace)),
-            provider_repository: Arc::new(ScyllaProviderRepository::new(session.clone(), &keyspace)),
-            session_repository: Arc::new(ScyllaSessionRepository::new(session.clone(), &keyspace)),
-            experience_repository: Arc::new(ScyllaExperienceRepository::new(session.clone(), &keyspace)),
-            role_repository: Arc::new(ScyllaRoleRepository::new(session.clone(), &keyspace)),
-            category_repository: Arc::new(ScyllaCategoryRepository::new(session.clone(), &keyspace)),
-            notification_repository: Arc::new(ScyllaNotificationRepository::new(session.clone(), &keyspace)),
+            account_repository: Arc::new(ScyllaAccountRepository::new(session.clone(), &keyspace, ACCOUNT_TABLE)),
+            provider_repository: Arc::new(ScyllaProviderRepository::new(session.clone(), &keyspace, PROVIDER_TABLE)),
+            session_repository: Arc::new(ScyllaSessionRepository::new(session.clone(), &keyspace, SESSION_TABLE)),
+            experience_repository: Arc::new(ScyllaExperienceRepository::new(
+                session.clone(),
+                &keyspace,
+                EXPERIENCE_TABLE,
+            )),
+            role_repository: Arc::new(ScyllaRoleRepository::new(session.clone(), &keyspace, ROLE_TABLE)),
+            category_repository: Arc::new(ScyllaCategoryRepository::new(session.clone(), &keyspace, CATEGORY_TABLE)),
+            notification_repository: Arc::new(ScyllaNotificationRepository::new(
+                session.clone(),
+                &keyspace,
+                NOTIFICATION_TABLE,
+            )),
         }
     }
 }

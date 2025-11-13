@@ -1,12 +1,14 @@
 use mongodb::bson::oid::ObjectId;
+use scylla::SerializeRow;
 use serde::{Deserialize, Serialize};
-
-// shared modules
-use domain::entities::blog_entity::BlogEntity;
 use uuid::Uuid;
 
+// shared modules
+use domain::entities::base_entity::BaseEntity;
+use domain::entities::blog_entity::BlogEntity;
+
 // internal modules
-use crate::secondary::repositories::models::base_schema::{MongoBaseSchema, ScyllaBaseSchema};
+use crate::secondary::repositories::models::base_schema::MongoBaseSchema;
 use crate::secondary::repositories::mongodb::mongo_base_repository;
 use crate::secondary::repositories::scylla::scylla_base_repository;
 
@@ -57,9 +59,9 @@ impl mongo_base_repository::EntitySchema<BlogEntity> for MongoBlogSchema {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, SerializeRow)]
 pub struct ScyllaBlogSchema {
-    pub base: ScyllaBaseSchema,
+    pub id: Option<Uuid>,
     pub author_id: Uuid,
     pub category_id: Uuid,
     pub name: String,
@@ -69,12 +71,18 @@ pub struct ScyllaBlogSchema {
     pub stars: i32,
     pub views: i32,
     pub estimated_read_time: i32,
+    pub created_at: i64,
+    pub updated_at: i64,
+    pub deleted_at: Option<i64>,
 }
 
 impl scylla_base_repository::EntitySchema<BlogEntity> for ScyllaBlogSchema {
     fn from_entity(entity: &BlogEntity) -> Self {
         ScyllaBlogSchema {
-            base: ScyllaBaseSchema::from_entity(&entity.base),
+            id: entity.base.id.as_ref().and_then(|id| Uuid::parse_str(id).ok()),
+            created_at: entity.base.created_at,
+            updated_at: entity.base.updated_at,
+            deleted_at: entity.base.deleted_at,
             author_id: Uuid::parse_str(&entity.author_id).unwrap(),
             category_id: Uuid::parse_str(&entity.category_id).unwrap(),
             name: entity.name.clone(),
@@ -89,7 +97,12 @@ impl scylla_base_repository::EntitySchema<BlogEntity> for ScyllaBlogSchema {
 
     fn to_entity(&self) -> BlogEntity {
         BlogEntity {
-            base: self.base.to_entity(),
+            base: BaseEntity {
+                id: self.id.map(|id| id.to_string()),
+                created_at: self.created_at,
+                updated_at: self.updated_at,
+                deleted_at: self.deleted_at,
+            },
             author_id: self.author_id.to_string(),
             category_id: self.category_id.to_string(),
             name: self.name.clone(),
@@ -100,5 +113,13 @@ impl scylla_base_repository::EntitySchema<BlogEntity> for ScyllaBlogSchema {
             views: self.views,
             estimated_read_time: self.estimated_read_time,
         }
+    }
+
+    fn columns() -> &'static str {
+        "id, author_id, category_id, name, description, is_published, markdown, stars, views, estimated_read_time, created_at, updated_at, deleted_at"
+    }
+
+    fn insert_placeholders() -> &'static str {
+        "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?"
     }
 }

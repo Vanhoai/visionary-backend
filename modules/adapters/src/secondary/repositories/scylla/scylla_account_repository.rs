@@ -19,8 +19,8 @@ pub struct ScyllaAccountRepository {
 }
 
 impl ScyllaAccountRepository {
-    pub fn new(session: Arc<Session>, keyspace: &str) -> Self {
-        ScyllaAccountRepository { base: ScyllaBaseRepository::new(session, keyspace) }
+    pub fn new(session: Arc<Session>, keyspace: &str, table_name: &str) -> Self {
+        ScyllaAccountRepository { base: ScyllaBaseRepository::new(session, keyspace, table_name) }
     }
 }
 

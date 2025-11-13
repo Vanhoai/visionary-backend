@@ -1,14 +1,14 @@
 use mongodb::bson::oid::ObjectId;
+use scylla::SerializeRow;
 use serde::{Deserialize, Serialize};
 
 // shared modules
-use domain::entities::session_entity::SessionEntity;
+use domain::entities::{base_entity::BaseEntity, session_entity::SessionEntity};
+use uuid::Uuid;
 
 // internal modules
 use crate::secondary::repositories::{
-    models::base_schema::{MongoBaseSchema, ScyllaBaseSchema},
-    mongodb::mongo_base_repository,
-    scylla::scylla_base_repository,
+    models::base_schema::MongoBaseSchema, mongodb::mongo_base_repository, scylla::scylla_base_repository,
 };
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -49,21 +49,27 @@ impl mongo_base_repository::EntitySchema<SessionEntity> for MongoSessionSchema {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, SerializeRow)]
 pub struct ScyllaSessionSchema {
-    pub base: ScyllaBaseSchema,
+    pub id: Option<Uuid>,
     pub account_id: String,
     pub jit: String,
     pub expires_at: i64,
     pub ip_address: String,
     pub user_agent: String,
     pub device_type: String,
+    pub created_at: i64,
+    pub updated_at: i64,
+    pub deleted_at: Option<i64>,
 }
 
 impl scylla_base_repository::EntitySchema<SessionEntity> for ScyllaSessionSchema {
     fn from_entity(entity: &SessionEntity) -> Self {
         ScyllaSessionSchema {
-            base: ScyllaBaseSchema::from_entity(&entity.base),
+            id: entity.base.id.as_ref().and_then(|id| Uuid::parse_str(id).ok()),
+            created_at: entity.base.created_at,
+            updated_at: entity.base.updated_at,
+            deleted_at: entity.base.deleted_at,
             account_id: entity.account_id.clone(),
             jit: entity.jit.clone(),
             expires_at: entity.expires_at,
@@ -75,7 +81,12 @@ impl scylla_base_repository::EntitySchema<SessionEntity> for ScyllaSessionSchema
 
     fn to_entity(&self) -> SessionEntity {
         SessionEntity {
-            base: self.base.to_entity(),
+            base: BaseEntity {
+                id: self.id.as_ref().map(|id| id.to_string()),
+                created_at: self.created_at,
+                updated_at: self.updated_at,
+                deleted_at: self.deleted_at,
+            },
             account_id: self.account_id.clone(),
             jit: self.jit.clone(),
             expires_at: self.expires_at,
@@ -83,5 +94,13 @@ impl scylla_base_repository::EntitySchema<SessionEntity> for ScyllaSessionSchema
             user_agent: self.user_agent.clone(),
             device_type: self.device_type.clone(),
         }
+    }
+
+    fn columns() -> &'static str {
+        "id, account_id, jit, expires_at, ip_address, user_agent, device_type, created_at, updated_at, deleted_at"
+    }
+
+    fn insert_placeholders() -> &'static str {
+        "?, ?, ?, ?, ?, ?, ?, ?, ?, ?"
     }
 }

@@ -18,8 +18,8 @@ pub struct ScyllaRoleRepository {
 }
 
 impl ScyllaRoleRepository {
-    pub fn new(session: Arc<Session>, keyspace: &str) -> Self {
-        ScyllaRoleRepository { base: ScyllaBaseRepository::new(session, keyspace) }
+    pub fn new(session: Arc<Session>, keyspace: &str, table_name: &str) -> Self {
+        ScyllaRoleRepository { base: ScyllaBaseRepository::new(session, keyspace, table_name) }
     }
 }
 

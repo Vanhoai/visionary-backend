@@ -17,8 +17,8 @@ pub struct ScyllaNotificationRepository {
 }
 
 impl ScyllaNotificationRepository {
-    pub fn new(session: Arc<Session>, keyspace: &str) -> Self {
-        ScyllaNotificationRepository { base: ScyllaBaseRepository::new(session, keyspace) }
+    pub fn new(session: Arc<Session>, keyspace: &str, table_name: &str) -> Self {
+        ScyllaNotificationRepository { base: ScyllaBaseRepository::new(session, keyspace, table_name) }
     }
 }
 

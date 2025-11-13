@@ -1,15 +1,14 @@
 use mongodb::bson::oid::ObjectId;
+use scylla::SerializeRow;
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 // shared modules
-use domain::entities::experience_entity::ExperienceEntity;
-use uuid::Uuid;
+use domain::entities::{base_entity::BaseEntity, experience_entity::ExperienceEntity};
 
 // internal modules
 use crate::secondary::repositories::{
-    models::base_schema::{MongoBaseSchema, ScyllaBaseSchema},
-    mongodb::mongo_base_repository::EntitySchema,
-    scylla::scylla_base_repository,
+    models::base_schema::MongoBaseSchema, mongodb::mongo_base_repository::EntitySchema, scylla::scylla_base_repository,
 };
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -59,9 +58,9 @@ impl EntitySchema<ExperienceEntity> for MongoExperienceSchema {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, SerializeRow)]
 pub struct ScyllaExperienceSchema {
-    pub base: ScyllaBaseSchema,
+    pub id: Option<Uuid>,
     pub account_id: Uuid,
     pub technologies: Vec<String>,
     pub position: String,
@@ -71,12 +70,15 @@ pub struct ScyllaExperienceSchema {
     pub start_date: i64,
     pub end_date: Option<i64>,
     pub is_current: bool,
+    pub created_at: i64,
+    pub updated_at: i64,
+    pub deleted_at: Option<i64>,
 }
 
 impl scylla_base_repository::EntitySchema<ExperienceEntity> for ScyllaExperienceSchema {
     fn from_entity(entity: &ExperienceEntity) -> Self {
         ScyllaExperienceSchema {
-            base: ScyllaBaseSchema::from_entity(&entity.base),
+            id: entity.base.id.as_ref().and_then(|id| Uuid::parse_str(id).ok()),
             account_id: Uuid::parse_str(&entity.account_id).unwrap(),
             technologies: entity.technologies.clone(),
             position: entity.position.clone(),
@@ -86,12 +88,20 @@ impl scylla_base_repository::EntitySchema<ExperienceEntity> for ScyllaExperience
             start_date: entity.start_date,
             end_date: entity.end_date,
             is_current: entity.is_current,
+            created_at: entity.base.created_at,
+            updated_at: entity.base.updated_at,
+            deleted_at: entity.base.deleted_at,
         }
     }
 
     fn to_entity(&self) -> ExperienceEntity {
         ExperienceEntity {
-            base: self.base.to_entity(),
+            base: BaseEntity {
+                id: self.id.as_ref().map(|id| id.to_string()),
+                created_at: self.created_at,
+                updated_at: self.updated_at,
+                deleted_at: self.deleted_at,
+            },
             account_id: self.account_id.to_string(),
             technologies: self.technologies.clone(),
             position: self.position.clone(),
@@ -102,5 +112,13 @@ impl scylla_base_repository::EntitySchema<ExperienceEntity> for ScyllaExperience
             end_date: self.end_date,
             is_current: self.is_current,
         }
+    }
+
+    fn columns() -> &'static str {
+        "id, account_id, technologies, position, responsibility, company, location, start_date, end_date, is_current, created_at, updated_at, deleted_at"
+    }
+
+    fn insert_placeholders() -> &'static str {
+        "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?"
     }
 }
