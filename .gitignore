@@ -1,4 +1,8 @@
 /target
+.idea/
+.vscode/
+
 *.env.*
-*keys
+*.pem
+
 oauth-client-id.json

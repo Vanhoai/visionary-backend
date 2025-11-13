@@ -296,8 +296,8 @@ where
         let paginate = Paginate {
             page,
             page_size,
-            total_pages: ((total_count as f32) / (page_size as f32)).ceil() as u32,
-            total_records: total_count as u32,
+            total_page: ((total_count as f32) / (page_size as f32)).ceil() as u32,
+            total_record: total_count as u32,
         };
 
         Ok((paginate, entities))

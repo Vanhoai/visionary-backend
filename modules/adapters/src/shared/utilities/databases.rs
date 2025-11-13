@@ -35,6 +35,13 @@ impl DatabaseType {
             _ => Err(format!("Unsupported database type: {}", database_type).into()),
         }
     }
+
+    pub fn as_str(&self) -> &str {
+        match self {
+            DatabaseType::Mongo => "Mongo",
+            DatabaseType::Scylla => "Scylla",
+        }
+    }
 }
 
 pub async fn mongo_client() -> Arc<Database> {
@@ -47,10 +54,14 @@ pub async fn mongo_client() -> Arc<Database> {
             client_options.server_api = Some(server_api);
 
             // Configure connection pool
-            client_options.min_pool_size = Some(10);
-            client_options.max_pool_size = Some(100);
-            client_options.connect_timeout = Some(Duration::from_secs(5));
-            client_options.server_selection_timeout = Some(Duration::from_secs(5));
+            client_options.min_pool_size = Some(20);
+            client_options.max_pool_size = Some(200);
+            client_options.connect_timeout = Some(Duration::from_secs(10));
+            client_options.server_selection_timeout = Some(Duration::from_secs(10));
+
+            // Configure retry logic
+            client_options.retry_writes = Some(true);
+            client_options.retry_reads = Some(true);
 
             let client = Client::with_options(client_options).unwrap();
             Arc::new(client.database(&APP_CONFIG.database.mongo_database))

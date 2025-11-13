@@ -9,8 +9,8 @@ use crate::functions::deserialize_functions::deserialize_number_from_string;
 pub struct Paginate {
     pub page: u32,
     pub page_size: u32,
-    pub total_pages: u32,
-    pub total_records: u32,
+    pub total_page: u32,
+    pub total_record: u32,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Validate)]

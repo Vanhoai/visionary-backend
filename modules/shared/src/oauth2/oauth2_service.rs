@@ -1,4 +1,7 @@
+use std::time::Duration;
+
 use oauth2::{AuthorizationCode, TokenResponse};
+use once_cell::sync::Lazy;
 use reqwest::Client;
 use uuid::Uuid;
 
@@ -8,6 +11,15 @@ use crate::oauth2::models::GoogleAccount;
 use crate::oauth2::oauth2_clients::OAUTH2_CLIENTS;
 
 pub struct OAuth2Service;
+
+static HTTP_CLIENT: Lazy<reqwest::Client> = Lazy::new(|| {
+    reqwest::ClientBuilder::new()
+        .redirect(reqwest::redirect::Policy::none())
+        .timeout(Duration::from_secs(30))
+        .pool_max_idle_per_host(10)
+        .build()
+        .expect("Failed to build HTTP client")
+});
 
 impl OAuth2Service {
     // Generate state token
@@ -30,12 +42,6 @@ impl OAuth2Service {
     }
 
     pub async fn exchange_google_code(code: &str, state: &str) -> Result<String, Failure> {
-        let http_client = reqwest::ClientBuilder::new()
-            // Following redirects opens the client up to SSRF vulnerabilities.
-            .redirect(reqwest::redirect::Policy::none())
-            .build()
-            .expect("Client should build");
-
         let pkce_verifier = OAUTH2_CLIENTS
             .get_pkce_verifier(state)
             .ok_or(Failure::BadRequest("PKCE verifier not found for the provided state".to_string()))?;
@@ -44,7 +50,7 @@ impl OAuth2Service {
             .google
             .exchange_code(AuthorizationCode::new(code.to_string()))
             .set_pkce_verifier(pkce_verifier)
-            .request_async(&http_client)
+            .request_async(&*HTTP_CLIENT)
             .await
             .map_err(|e| Failure::ExternalServiceError(format!("Failed to exchange Google code: {}", e)))?;
 

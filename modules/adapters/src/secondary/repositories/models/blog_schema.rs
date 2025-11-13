@@ -17,7 +17,7 @@ pub struct MongoBlogSchema {
     #[serde(flatten)]
     pub base: MongoBaseSchema,
     pub author_id: ObjectId,
-    pub category_id: ObjectId,
+    pub categories: Vec<String>,
     pub name: String,
     pub description: String,
     pub is_published: bool,
@@ -32,7 +32,7 @@ impl mongo_base_repository::EntitySchema<BlogEntity> for MongoBlogSchema {
         MongoBlogSchema {
             base: MongoBaseSchema::from_entity(&entity.base),
             author_id: ObjectId::parse_str(&entity.author_id).unwrap(),
-            category_id: ObjectId::parse_str(&entity.category_id).unwrap(),
+            categories: entity.categories.clone(),
             name: entity.name.clone(),
             description: entity.description.clone(),
             is_published: entity.is_published,
@@ -47,7 +47,7 @@ impl mongo_base_repository::EntitySchema<BlogEntity> for MongoBlogSchema {
         BlogEntity {
             base: self.base.to_entity(),
             author_id: self.author_id.to_hex(),
-            category_id: self.category_id.to_hex(),
+            categories: self.categories.clone(),
             name: self.name.clone(),
             description: self.description.clone(),
             is_published: self.is_published,
@@ -63,7 +63,7 @@ impl mongo_base_repository::EntitySchema<BlogEntity> for MongoBlogSchema {
 pub struct ScyllaBlogSchema {
     pub id: Option<Uuid>,
     pub author_id: Uuid,
-    pub category_id: Uuid,
+    pub categories: Vec<String>,
     pub name: String,
     pub description: String,
     pub is_published: bool,
@@ -84,7 +84,7 @@ impl scylla_base_repository::EntitySchema<BlogEntity> for ScyllaBlogSchema {
             updated_at: entity.base.updated_at,
             deleted_at: entity.base.deleted_at,
             author_id: Uuid::parse_str(&entity.author_id).unwrap(),
-            category_id: Uuid::parse_str(&entity.category_id).unwrap(),
+            categories: entity.categories.clone(),
             name: entity.name.clone(),
             description: entity.description.clone(),
             is_published: entity.is_published,
@@ -104,7 +104,7 @@ impl scylla_base_repository::EntitySchema<BlogEntity> for ScyllaBlogSchema {
                 deleted_at: self.deleted_at,
             },
             author_id: self.author_id.to_string(),
-            category_id: self.category_id.to_string(),
+            categories: self.categories.clone(),
             name: self.name.clone(),
             description: self.description.clone(),
             is_published: self.is_published,

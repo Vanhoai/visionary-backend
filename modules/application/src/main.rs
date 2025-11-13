@@ -1,5 +1,7 @@
-use shared::configs::APP_CONFIG;
 use tokio::signal;
+
+// shared modules
+use shared::configs::APP_CONFIG;
 
 // internal modules
 use crate::initialize::initialize_app;
