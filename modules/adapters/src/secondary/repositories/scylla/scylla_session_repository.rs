@@ -31,7 +31,7 @@ impl SessionRepository for ScyllaSessionRepository {
         todo!()
     }
 
-    async fn find_by_jit(&self, _jit: &str) -> DomainResponse<Option<SessionEntity>> {
+    async fn find_by_jti(&self, _jti: &str) -> DomainResponse<Option<SessionEntity>> {
         todo!()
     }
 }

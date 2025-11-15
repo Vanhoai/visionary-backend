@@ -15,13 +15,13 @@ pub trait SessionService: Send + Sync {
     async fn create_session(
         &self,
         account_id: &str,
-        jit: &str,
+        jti: &str,
         expires_at: i64,
         ip_address: &str,
         user_agent: &str,
         device_type: &str,
     ) -> DomainResponse<SessionEntity>;
-    async fn find_by_jit(&self, jit: &str) -> DomainResponse<Option<SessionEntity>>;
+    async fn find_by_jti(&self, jti: &str) -> DomainResponse<Option<SessionEntity>>;
     async fn invalidate_session(&self, session_id: &str) -> DomainResponse<()>;
     async fn clean_session_by_account_id(&self, account_id: &str) -> DomainResponse<()>;
     async fn find_sessions(&self, query: &FindSessionsQuery) -> DomainResponse<Vec<SessionEntity>>;
@@ -42,7 +42,7 @@ impl SessionService for SessionServiceImpl {
     async fn create_session(
         &self,
         account_id: &str,
-        jit: &str,
+        jti: &str,
         expires_at: i64,
         ip_address: &str,
         user_agent: &str,
@@ -51,7 +51,7 @@ impl SessionService for SessionServiceImpl {
         let session = SessionEntity::new(
             false,
             account_id.to_string(),
-            jit.to_string(),
+            jti.to_string(),
             expires_at,
             ip_address.to_string(),
             user_agent.to_string(),
@@ -61,8 +61,8 @@ impl SessionService for SessionServiceImpl {
         self.repository.create(&session).await
     }
 
-    async fn find_by_jit(&self, jit: &str) -> DomainResponse<Option<SessionEntity>> {
-        self.repository.find_by_jit(jit).await
+    async fn find_by_jti(&self, jti: &str) -> DomainResponse<Option<SessionEntity>> {
+        self.repository.find_by_jti(jti).await
     }
 
     async fn invalidate_session(&self, session_id: &str) -> DomainResponse<()> {

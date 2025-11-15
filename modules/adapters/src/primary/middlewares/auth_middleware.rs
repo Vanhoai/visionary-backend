@@ -14,7 +14,7 @@ use crate::shared::models::failure::HttpFailure;
 #[derive(Debug, Clone)]
 pub struct AuthClaims {
     pub account_id: String,
-    pub jit: String,
+    pub jti: String,
     pub role: Option<String>,
 }
 
@@ -31,7 +31,7 @@ impl AuthClaims {
         let claims_wrapped = JwtService::verify_access_token(token).map_err(HttpFailure::new)?;
         Ok(AuthClaims {
             account_id: claims_wrapped.claims.sub,
-            jit: claims_wrapped.claims.jit,
+            jti: claims_wrapped.claims.jti,
             role: claims_wrapped.claims.role,
         })
     }

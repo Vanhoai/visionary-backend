@@ -55,9 +55,9 @@ impl AuthAppService {
         role: Option<String>,
         metadata: &SessionMetadata,
     ) -> Result<AuthResponse, Failure> {
-        let jit = Uuid::now_v7().to_string();
-        let access_token = JwtService::generate_access_token(account_id, &jit, role.clone())?;
-        let refresh_token = JwtService::generate_refresh_token(account_id, &jit, role)?;
+        let jti = Uuid::now_v7().to_string();
+        let access_token = JwtService::generate_access_token(account_id, &jti, role.clone())?;
+        let refresh_token = JwtService::generate_refresh_token(account_id, &jti, role)?;
 
         // Calculate session expiry (same as refresh token expiry)
         let expires_at = (Utc::now().timestamp()) + APP_CONFIG.jwt.refresh_token_expiry;
@@ -67,7 +67,7 @@ impl AuthAppService {
         self.session_service
             .create_session(
                 account_id,
-                &jit,
+                &jti,
                 expires_at,
                 &metadata.ip_address,
                 &metadata.user_agent,
@@ -149,24 +149,24 @@ impl ManageSessionAuthUseCase for AuthAppService {
         // 1. Verify refresh token
         let token_data = JwtService::verify_access_token(&params.refresh_token)?;
         let account_id = token_data.claims.sub;
-        let jit = token_data.claims.jit;
+        let jti = token_data.claims.jti;
         let role = token_data.claims.role;
 
         // 2. Verify session exists
         let session_entity = self
             .session_service
-            .find_by_jit(&jit)
+            .find_by_jti(&jti)
             .await?
             .ok_or(Failure::Unauthorized("Session not found for the provided refresh token".to_string()))?;
 
-        if session_entity.account_id != account_id || session_entity.jit != jit {
+        if session_entity.account_id != account_id || session_entity.jti != jti {
             return Err(Failure::Unauthorized("Session does not belong to the account".to_string()));
         }
 
         // 3. Generate new tokens
-        let jit = Uuid::now_v7().to_string();
-        let access_token = JwtService::generate_access_token(&account_id, &jit, role.clone())?;
-        let refresh_token = JwtService::generate_refresh_token(&account_id, &jit, role)?;
+        let jti = Uuid::now_v7().to_string();
+        let access_token = JwtService::generate_access_token(&account_id, &jti, role.clone())?;
+        let refresh_token = JwtService::generate_refresh_token(&account_id, &jti, role)?;
 
         // 4. Calculate new session expiry
         let expires_at = (Utc::now().timestamp()) + APP_CONFIG.jwt.refresh_token_expiry;
@@ -175,7 +175,7 @@ impl ManageSessionAuthUseCase for AuthAppService {
         self.session_service
             .create_session(
                 &account_id,
-                &jit,
+                &jti,
                 expires_at,
                 &metadata.ip_address,
                 &metadata.user_agent,

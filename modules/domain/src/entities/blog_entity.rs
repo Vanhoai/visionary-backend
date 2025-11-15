@@ -32,7 +32,7 @@ impl BlogEntity {
     pub fn new(
         include_id: bool,
         author_id: &str,
-        categories: &Vec<String>,
+        categories: &[String],
         name: &str,
         description: &str,
         is_published: bool,

@@ -39,12 +39,12 @@ impl SessionRepository for MongoSessionRepository {
         Ok(())
     }
 
-    async fn find_by_jit(&self, jit: &str) -> DomainResponse<Option<SessionEntity>> {
-        let query = doc! { "jit": jit };
+    async fn find_by_jti(&self, jti: &str) -> DomainResponse<Option<SessionEntity>> {
+        let query = doc! { "jti": jti };
 
         let result =
             self.base.collection.find_one(query).await.map_err(|e| {
-                Failure::DatabaseError(format!("Failed to find session by jit with {:?}", e).to_string())
+                Failure::DatabaseError(format!("Failed to find session by jti with {:?}", e).to_string())
             })?;
 
         Ok(result.map(|schema| schema.to_entity()))

@@ -16,7 +16,7 @@ pub struct MongoSessionSchema {
     #[serde(flatten)]
     pub base: MongoBaseSchema,
     pub account_id: ObjectId,
-    pub jit: String,
+    pub jti: String,
     pub expires_at: i64,
     pub ip_address: String,
     pub user_agent: String,
@@ -28,7 +28,7 @@ impl mongo_base_repository::EntitySchema<SessionEntity> for MongoSessionSchema {
         MongoSessionSchema {
             base: MongoBaseSchema::from_entity(&entity.base),
             account_id: ObjectId::parse_str(&entity.account_id).unwrap(),
-            jit: entity.jit.clone(),
+            jti: entity.jti.clone(),
             expires_at: entity.expires_at,
             ip_address: entity.ip_address.clone(),
             user_agent: entity.user_agent.clone(),
@@ -40,7 +40,7 @@ impl mongo_base_repository::EntitySchema<SessionEntity> for MongoSessionSchema {
         SessionEntity {
             base: self.base.to_entity(),
             account_id: self.account_id.to_hex(),
-            jit: self.jit.clone(),
+            jti: self.jti.clone(),
             expires_at: self.expires_at,
             ip_address: self.ip_address.clone(),
             user_agent: self.user_agent.clone(),
@@ -53,7 +53,7 @@ impl mongo_base_repository::EntitySchema<SessionEntity> for MongoSessionSchema {
 pub struct ScyllaSessionSchema {
     pub id: Option<Uuid>,
     pub account_id: String,
-    pub jit: String,
+    pub jti: String,
     pub expires_at: i64,
     pub ip_address: String,
     pub user_agent: String,
@@ -71,7 +71,7 @@ impl scylla_base_repository::EntitySchema<SessionEntity> for ScyllaSessionSchema
             updated_at: entity.base.updated_at,
             deleted_at: entity.base.deleted_at,
             account_id: entity.account_id.clone(),
-            jit: entity.jit.clone(),
+            jti: entity.jti.clone(),
             expires_at: entity.expires_at,
             ip_address: entity.ip_address.clone(),
             user_agent: entity.user_agent.clone(),
@@ -88,7 +88,7 @@ impl scylla_base_repository::EntitySchema<SessionEntity> for ScyllaSessionSchema
                 deleted_at: self.deleted_at,
             },
             account_id: self.account_id.clone(),
-            jit: self.jit.clone(),
+            jti: self.jti.clone(),
             expires_at: self.expires_at,
             ip_address: self.ip_address.clone(),
             user_agent: self.user_agent.clone(),
@@ -97,7 +97,7 @@ impl scylla_base_repository::EntitySchema<SessionEntity> for ScyllaSessionSchema
     }
 
     fn columns() -> &'static str {
-        "id, account_id, jit, expires_at, ip_address, user_agent, device_type, created_at, updated_at, deleted_at"
+        "id, account_id, jti, expires_at, ip_address, user_agent, device_type, created_at, updated_at, deleted_at"
     }
 
     fn insert_placeholders() -> &'static str {

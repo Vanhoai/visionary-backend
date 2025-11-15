@@ -10,12 +10,12 @@ use crate::models::failure::Failure;
 pub struct JwtService;
 
 impl JwtService {
-    pub fn generate_access_token(account_id: &str, jit: &str, role: Option<String>) -> Result<String, Failure> {
+    pub fn generate_access_token(account_id: &str, jti: &str, role: Option<String>) -> Result<String, Failure> {
         let now = chrono::Utc::now();
         let expiry = now + Duration::seconds(APP_CONFIG.jwt.access_token_expiry);
         let claims = Claims {
             sub: account_id.to_string(),
-            jit: jit.to_string(),
+            jti: jti.to_string(),
             exp: expiry.timestamp(),
             iat: now.timestamp(),
             role,
@@ -27,12 +27,12 @@ impl JwtService {
             .map_err(|e| Failure::InternalServerError(format!("Failed to generate access token: {}", e)))
     }
 
-    pub fn generate_refresh_token(account_id: &str, jit: &str, role: Option<String>) -> Result<String, Failure> {
+    pub fn generate_refresh_token(account_id: &str, jti: &str, role: Option<String>) -> Result<String, Failure> {
         let now = chrono::Utc::now();
         let expiry = now + Duration::seconds(APP_CONFIG.jwt.refresh_token_expiry);
         let claims = Claims {
             sub: account_id.to_string(),
-            jit: jit.to_string(),
+            jti: jti.to_string(),
             exp: expiry.timestamp(),
             iat: now.timestamp(),
             role,

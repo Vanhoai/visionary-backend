@@ -16,11 +16,12 @@ pub trait BlogService: Send + Sync {
         name: &str,
         description: &str,
         markdown: &str,
-        categories: &Vec<String>,
+        categories: &[String],
         is_published: bool,
         estimated_read_time: i32,
     ) -> DomainResponse<BlogEntity>;
 
+    #[allow(clippy::too_many_arguments)]
     async fn update_blog(
         &self,
         account_id: &str,
@@ -28,7 +29,7 @@ pub trait BlogService: Send + Sync {
         name: &str,
         description: &str,
         markdown: &str,
-        categories: &Vec<String>,
+        categories: &[String],
         estimated_read_time: i32,
     ) -> DomainResponse<BlogEntity>;
 
@@ -54,7 +55,7 @@ impl BlogService for BlogServiceImpl {
         name: &str,
         description: &str,
         markdown: &str,
-        categories: &Vec<String>,
+        categories: &[String],
         is_published: bool,
         estimated_read_time: i32,
     ) -> DomainResponse<BlogEntity> {
@@ -76,6 +77,7 @@ impl BlogService for BlogServiceImpl {
         self.repository.create(&blog_entity).await
     }
 
+    #[allow(clippy::too_many_arguments)]
     async fn update_blog(
         &self,
         _account_id: &str,
@@ -83,7 +85,7 @@ impl BlogService for BlogServiceImpl {
         _name: &str,
         _description: &str,
         _markdown: &str,
-        _categories: &Vec<String>,
+        _categories: &[String],
         _estimated_read_time: i32,
     ) -> DomainResponse<BlogEntity> {
         todo!()

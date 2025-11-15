@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS accounts (
 CREATE TABLE IF NOT EXISTS sessions (
     id                  UUID PRIMARY KEY,
     account_id          UUID,
-    jit                 TEXT,
+    jti                 TEXT,
     expires_at          BIGINT,
     ip_address          TEXT,
     user_agent          TEXT,
