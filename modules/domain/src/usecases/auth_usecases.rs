@@ -33,9 +33,10 @@ pub struct AuthResponse {
     pub refresh_token: String,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Validate)]
 #[serde(rename_all = "camelCase")]
 pub struct RefreshTokenParams {
+    #[validate(length(min = 1, message = "Make sure to provide a valid refresh token"))]
     pub refresh_token: String,
 }
 

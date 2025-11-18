@@ -147,7 +147,7 @@ impl ManageSessionAuthUseCase for AuthAppService {
         metadata: &SessionMetadata,
     ) -> Result<AuthResponse, Failure> {
         // 1. Verify refresh token
-        let token_data = JwtService::verify_access_token(&params.refresh_token)?;
+        let token_data = JwtService::verify_refresh_token(&params.refresh_token)?;
         let account_id = token_data.claims.sub;
         let jti = token_data.claims.jti;
         let role = token_data.claims.role;

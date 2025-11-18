@@ -1,6 +1,7 @@
 /target
 .idea/
 .vscode/
+apis
 
 *.env.*
 *.pem
