@@ -5,7 +5,8 @@ use tracing::info;
 // shared modules
 use domain::applications::{
     account_app_service::AccountAppService, auth_app_service::AuthAppService, category_app_service::CategoryAppService,
-    notification_app_service::NotificationAppService, session_app_service::SessionAppService,
+    global_app_service::GlobalAppService, notification_app_service::NotificationAppService,
+    session_app_service::SessionAppService,
 };
 
 // internal modules
@@ -24,6 +25,7 @@ pub struct AppState {
     pub notification_app_service: Arc<NotificationAppService>,
     pub session_app_service: Arc<SessionAppService>,
     pub category_app_service: Arc<CategoryAppService>,
+    pub global_app_service: Arc<GlobalAppService>,
 }
 
 impl AppState {
@@ -58,12 +60,12 @@ impl AppState {
 
         let account_app_service = Arc::new(AccountAppService::new(
             services.get_account_service(),
-            services.get_experience_service(),
             services.get_role_service(),
             services.get_blog_service(),
         ));
 
         let category_app_service = Arc::new(CategoryAppService::new(services.get_category_service()));
+        let global_app_service = Arc::new(GlobalAppService::new(services.get_experience_service()));
 
         info!("📦 AppState initialized successfully");
         Ok(AppState {
@@ -72,6 +74,7 @@ impl AppState {
             notification_app_service,
             session_app_service,
             category_app_service,
+            global_app_service,
         })
     }
 }

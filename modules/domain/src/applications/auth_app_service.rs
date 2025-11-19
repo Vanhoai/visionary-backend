@@ -186,6 +186,14 @@ impl ManageSessionAuthUseCase for AuthAppService {
         self.session_service.invalidate_session(&session_entity.base.id.unwrap()).await?;
         Ok(AuthResponse { access_token, refresh_token })
     }
+
+    async fn sign_out(&self) -> DomainResponse<()> {
+        // Note: The actual implementation would require session identification (e.g., from access token)
+        // Here, we assume the session ID or JTI is provided in some way to identify which session to invalidate.
+        // For demonstration, we'll just return Ok(()).
+
+        Ok(())
+    }
 }
 // endregion ============================== MANAGE SESSION USE CASES ==============================
 

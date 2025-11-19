@@ -1,4 +1,3 @@
-use mongodb::bson::oid::ObjectId;
 use scylla::SerializeRow;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -15,7 +14,6 @@ use crate::secondary::repositories::{
 pub struct MongoExperienceSchema {
     #[serde(flatten)]
     pub base: MongoBaseSchema,
-    pub account_id: ObjectId,
     pub technologies: Vec<String>,
     pub position: String,
     pub responsibility: Vec<String>,
@@ -30,7 +28,6 @@ impl EntitySchema<ExperienceEntity> for MongoExperienceSchema {
     fn from_entity(entity: &ExperienceEntity) -> Self {
         MongoExperienceSchema {
             base: MongoBaseSchema::from_entity(&entity.base),
-            account_id: ObjectId::parse_str(&entity.account_id).unwrap(),
             technologies: entity.technologies.clone(),
             position: entity.position.clone(),
             responsibility: entity.responsibility.clone(),
@@ -45,7 +42,6 @@ impl EntitySchema<ExperienceEntity> for MongoExperienceSchema {
     fn to_entity(&self) -> ExperienceEntity {
         ExperienceEntity {
             base: self.base.to_entity(),
-            account_id: self.account_id.to_hex(),
             technologies: self.technologies.clone(),
             position: self.position.clone(),
             responsibility: self.responsibility.clone(),
@@ -61,7 +57,6 @@ impl EntitySchema<ExperienceEntity> for MongoExperienceSchema {
 #[derive(Debug, Clone, SerializeRow)]
 pub struct ScyllaExperienceSchema {
     pub id: Option<Uuid>,
-    pub account_id: Uuid,
     pub technologies: Vec<String>,
     pub position: String,
     pub responsibility: Vec<String>,
@@ -79,7 +74,6 @@ impl scylla_base_repository::EntitySchema<ExperienceEntity> for ScyllaExperience
     fn from_entity(entity: &ExperienceEntity) -> Self {
         ScyllaExperienceSchema {
             id: entity.base.id.as_ref().and_then(|id| Uuid::parse_str(id).ok()),
-            account_id: Uuid::parse_str(&entity.account_id).unwrap(),
             technologies: entity.technologies.clone(),
             position: entity.position.clone(),
             responsibility: entity.responsibility.clone(),
@@ -102,7 +96,6 @@ impl scylla_base_repository::EntitySchema<ExperienceEntity> for ScyllaExperience
                 updated_at: self.updated_at,
                 deleted_at: self.deleted_at,
             },
-            account_id: self.account_id.to_string(),
             technologies: self.technologies.clone(),
             position: self.position.clone(),
             responsibility: self.responsibility.clone(),
@@ -115,10 +108,10 @@ impl scylla_base_repository::EntitySchema<ExperienceEntity> for ScyllaExperience
     }
 
     fn columns() -> &'static str {
-        "id, account_id, technologies, position, responsibility, company, location, start_date, end_date, is_current, created_at, updated_at, deleted_at"
+        "id, technologies, position, responsibility, company, location, start_date, end_date, is_current, created_at, updated_at, deleted_at"
     }
 
     fn insert_placeholders() -> &'static str {
-        "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?"
+        "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?"
     }
 }

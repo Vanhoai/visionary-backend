@@ -10,21 +10,21 @@ use crate::repositories::experience_repository::ExperienceRepository;
 
 #[async_trait]
 pub trait ExperienceService: Send + Sync {
-    async fn find_by_account_id(&self, account_id: &str) -> DomainResponse<Vec<ExperienceEntity>>;
     async fn find_by_company(&self, company: &str) -> DomainResponse<Option<ExperienceEntity>>;
     #[allow(clippy::too_many_arguments)]
     async fn create_experience(
         &self,
-        account_id: &str,
-        technologies: &'life0 [String],
+        technologies: &[String],
         position: &str,
-        responsibility: &'life1 [String],
+        responsibility: &[String],
         company: &str,
         location: &str,
         start_date: i64,
         end_date: Option<i64>,
         is_current: bool,
     ) -> DomainResponse<ExperienceEntity>;
+
+    async fn find_experiences(&self) -> DomainResponse<Vec<ExperienceEntity>>;
 }
 
 pub struct ExperienceServiceImpl {
@@ -39,10 +39,6 @@ impl ExperienceServiceImpl {
 
 #[async_trait]
 impl ExperienceService for ExperienceServiceImpl {
-    async fn find_by_account_id(&self, account_id: &str) -> DomainResponse<Vec<ExperienceEntity>> {
-        self.repository.find_by_account_id(account_id).await
-    }
-
     async fn find_by_company(&self, company: &str) -> DomainResponse<Option<ExperienceEntity>> {
         self.repository.find_by_company(company).await
     }
@@ -50,10 +46,9 @@ impl ExperienceService for ExperienceServiceImpl {
     #[allow(clippy::too_many_arguments)]
     async fn create_experience(
         &self,
-        account_id: &str,
-        technologies: &'life0 [String],
+        technologies: &[String],
         position: &str,
-        responsibility: &'life1 [String],
+        responsibility: &[String],
         company: &str,
         location: &str,
         start_date: i64,
@@ -62,7 +57,6 @@ impl ExperienceService for ExperienceServiceImpl {
     ) -> DomainResponse<ExperienceEntity> {
         let experience_entity = ExperienceEntity::new(
             false,
-            account_id,
             technologies,
             position,
             responsibility,
@@ -74,5 +68,9 @@ impl ExperienceService for ExperienceServiceImpl {
         )?;
 
         self.repository.create(&experience_entity).await
+    }
+
+    async fn find_experiences(&self) -> DomainResponse<Vec<ExperienceEntity>> {
+        self.repository.finds().await
     }
 }

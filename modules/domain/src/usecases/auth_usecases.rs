@@ -22,7 +22,7 @@ pub struct SessionMetadata {
 pub struct AuthParams {
     #[validate(email)]
     pub email: String,
-    #[validate(length(min = 8))]
+    #[validate(length(min = 8, message = "Password must be at least 8 characters long"))]
     pub password: String,
 }
 
@@ -49,6 +49,7 @@ pub trait ManageSessionAuthUseCase: Send + Sync {
         params: &RefreshTokenParams,
         metadata: &SessionMetadata,
     ) -> Result<AuthResponse, Failure>;
+    async fn sign_out(&self) -> DomainResponse<()>;
 }
 // endregion ================================= MANAGE SESSION AUTH USE CASES =================================
 

@@ -9,6 +9,7 @@ use tracing::Level;
 // shared modules
 use adapters::primary::routes;
 use adapters::shared::di::state::AppState;
+use adapters::shared::utilities::route_logger;
 use shared::configs::APP_CONFIG;
 
 fn allow_method_from_string(method: &str) -> Result<Method, Box<dyn std::error::Error>> {
@@ -58,7 +59,7 @@ fn build_cors() -> Result<CorsLayer, Box<dyn std::error::Error>> {
 pub async fn initialize_app() -> Result<Router, Box<dyn std::error::Error>> {
     tracing_subscriber::fmt()
         .with_target(false)
-        .with_thread_ids(true)
+        .with_thread_ids(false)
         .with_max_level(Level::INFO)
         .with_line_number(true)
         .with_level(true)
@@ -74,16 +75,23 @@ pub async fn initialize_app() -> Result<Router, Box<dyn std::error::Error>> {
         .on_response(trace::DefaultOnResponse::new().level(Level::INFO));
 
     let state = AppState::new().await?;
+    let routes = routes::execute();
+    route_logger::log_all_routes();
+
     match APP_CONFIG.cors.enabled {
         true => {
-            tracing::info!("🌐 CORS is enabled");
+            tracing::info!("🌐 CORS is enabled:");
+            for origin in &APP_CONFIG.cors.allow_origins {
+                tracing::info!("- Allowed Origin: {}", origin);
+            }
+
             let cors = build_cors()?;
-            Ok(routes::execute().layer(cors).layer(traces).with_state(Arc::new(state)))
+            Ok(routes.layer(cors).layer(traces).with_state(Arc::new(state)))
         },
 
         false => {
             tracing::info!("🌐 CORS is disabled");
-            Ok(routes::execute().layer(traces).with_state(Arc::new(state)))
+            Ok(routes.layer(traces).with_state(Arc::new(state)))
         },
     }
 }

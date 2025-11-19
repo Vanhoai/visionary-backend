@@ -18,7 +18,6 @@ static MAX_LOCATION_LENGTH: usize = 100;
 pub struct ExperienceEntity {
     #[serde(flatten)]
     pub base: BaseEntity,
-    pub account_id: String,
     pub technologies: Vec<String>,
     pub position: String,
     pub responsibility: Vec<String>,
@@ -33,7 +32,6 @@ impl ExperienceEntity {
     #[allow(clippy::too_many_arguments)]
     pub fn new(
         include_id: bool,
-        account_id: &str,
         technologies: &[String],
         position: &str,
         responsibility: &[String],
@@ -52,7 +50,6 @@ impl ExperienceEntity {
 
         Ok(ExperienceEntity {
             base: BaseEntity::new(include_id),
-            account_id: account_id.to_string(),
             technologies: technologies.to_owned(),
             position: position.to_string(),
             responsibility: responsibility.to_owned(),

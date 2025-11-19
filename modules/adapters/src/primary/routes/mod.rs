@@ -11,9 +11,9 @@ pub fn execute() -> Router<Arc<AppState>> {
         .nest("/auth", v1::auth::routes::execute())
         .nest("/accounts", v1::accounts::routes::execute())
         .nest("/sessions", v1::sessions::routes::execute())
-        .nest("/experiences", v1::experiences::routes::execute())
         .nest("/blogs", v1::blogs::routes::execute())
-        .nest("/categories", v1::categories::routes::execute());
+        .nest("/categories", v1::categories::routes::execute())
+        .nest("/globals", v1::globals::routes::execute());
 
     Router::new().nest("/api/v1", v1)
 }

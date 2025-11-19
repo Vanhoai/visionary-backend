@@ -12,6 +12,7 @@ dependencies = [
  "domain",
  "futures",
  "mongodb",
+ "once_cell",
  "processors",
  "reqwest",
  "scylla",
