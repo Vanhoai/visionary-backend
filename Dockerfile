@@ -1,17 +1,12 @@
-FROM scylladb/scylla-manager-agent:latest as agent
-FROM scylladb/scylla:latest
+# Build Stage
+FROM rust:bookworm AS builder
 
-COPY --from=agent /usr/bin/scylla-manager-agent /usr/bin/
-RUN echo "[program:scylla-manager-agent]\n\
-command=/usr/bin/scylla-manager-agent\n\
-autorestart=true\n\
-stdout_logfile=/dev/stdout\n\
-stdout_logfile_maxbytes=0\n\
-stderr_logfile=/dev/stderr\n\
-stderr_logfile_maxbytes=0" > /etc/supervisord.conf.d/scylla-manager-agent.conf
-RUN mkdir -p /etc/scylla-manager-agent && echo "auth_token: token\n\
-s3:\n\
-    access_key_id: minio\n\
-    secret_access_key: hinsun\n\
-    provider: Minio\n\
-    endpoint: http://minio:9000" > /etc/scylla-manager-agent/scylla-manager-agent.yaml
+WORKDIR /app
+COPY . .
+RUN cargo build --release
+
+# Final Stage
+FROM debian:bookworm-slim AS runner
+WORKDIR /app
+COPY --from=builder /app/target/release/application /app/application
+CMD ["/app/application"]
