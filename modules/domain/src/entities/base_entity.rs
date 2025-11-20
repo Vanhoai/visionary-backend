@@ -19,3 +19,19 @@ impl BaseEntity {
         BaseEntity { id, created_at: now, updated_at: now, deleted_at: None }
     }
 }
+
+#[macro_export]
+macro_rules! define_update_struct {
+    (
+        $vis:vis struct $update_name:ident for $original_name:ident {
+            $($field_vis:vis $field_name:ident : $field_type:ty),* $(,)?
+        }
+    ) => {
+        #[derive(Debug, Clone)]
+        $vis struct $update_name {
+            $(
+                $field_vis $field_name: Option<$field_type>,
+            )*
+        }
+    };
+}

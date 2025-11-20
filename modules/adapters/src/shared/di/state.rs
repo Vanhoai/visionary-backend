@@ -65,7 +65,8 @@ impl AppState {
         ));
 
         let category_app_service = Arc::new(CategoryAppService::new(services.get_category_service()));
-        let global_app_service = Arc::new(GlobalAppService::new(services.get_experience_service()));
+        let global_app_service =
+            Arc::new(GlobalAppService::new(services.get_experience_service(), services.get_project_service()));
 
         info!("📦 AppState initialized successfully");
         Ok(AppState {

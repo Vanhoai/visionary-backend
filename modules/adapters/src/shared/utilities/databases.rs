@@ -18,6 +18,7 @@ pub static ROLE_TABLE: &str = "roles";
 pub static CATEGORY_TABLE: &str = "categories";
 pub static BLOG_TABLE: &str = "blogs";
 pub static NOTIFICATION_TABLE: &str = "notifications";
+pub static PROJECT_TABLE: &str = "projects";
 
 pub static MONGO_CLIENT: OnceCell<Arc<Database>> = OnceCell::const_new();
 pub static SCYLLA_SESSION: OnceCell<Arc<Session>> = OnceCell::const_new();

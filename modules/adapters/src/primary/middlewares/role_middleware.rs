@@ -28,8 +28,6 @@ pub async fn role_middleware(required_roles: Vec<String>, req: Request, next: Ne
                 required_roles, account_role
             ))));
         }
-
-        println!("Access granted for role: {}", account_role);
     }
 
     Ok(next.run(req).await)

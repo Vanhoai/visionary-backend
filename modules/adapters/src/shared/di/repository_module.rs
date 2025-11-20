@@ -4,7 +4,8 @@ use std::sync::Arc;
 use domain::repositories::{
     account_repository::AccountRepository, blog_repository::BlogRepository, category_repository::CategoryRepository,
     experience_repository::ExperienceRepository, notification_repository::NotificationRepository,
-    provider_repository::ProviderRepository, role_repository::RoleRepository, session_repository::SessionRepository,
+    project_repository::ProjectRepository, provider_repository::ProviderRepository, role_repository::RoleRepository,
+    session_repository::SessionRepository,
 };
 use shared::configs::APP_CONFIG;
 
@@ -13,20 +14,21 @@ use crate::secondary::repositories::{
     mongodb::{
         mongo_account_repository::MongoAccountRepository, mongo_blog_repository::MongoBlogRepository,
         mongo_category_repository::MongoCategoryRepository, mongo_experience_repository::MongoExperienceRepository,
-        mongo_notification_repository::MongoNotificationRepository, mongo_provider_repository::MongoProviderRepository,
-        mongo_role_repository::MongoRoleRepository, mongo_session_repository::MongoSessionRepository,
+        mongo_notification_repository::MongoNotificationRepository, mongo_project_repository::MongoProjectRepository,
+        mongo_provider_repository::MongoProviderRepository, mongo_role_repository::MongoRoleRepository,
+        mongo_session_repository::MongoSessionRepository,
     },
     scylla::{
         scylla_account_repository::ScyllaAccountRepository, scylla_blog_repository::ScyllaBlogRepository,
         scylla_category_repository::ScyllaCategoryRepository, scylla_experience_repository::ScyllaExperienceRepository,
         scylla_notification_repository::ScyllaNotificationRepository,
-        scylla_provider_repository::ScyllaProviderRepository, scylla_role_repository::ScyllaRoleRepository,
-        scylla_session_repository::ScyllaSessionRepository,
+        scylla_project_repository::ScyllaProjectRepository, scylla_provider_repository::ScyllaProviderRepository,
+        scylla_role_repository::ScyllaRoleRepository, scylla_session_repository::ScyllaSessionRepository,
     },
 };
 use crate::shared::utilities::databases::{
-    ACCOUNT_TABLE, BLOG_TABLE, CATEGORY_TABLE, DatabaseType, EXPERIENCE_TABLE, NOTIFICATION_TABLE, PROVIDER_TABLE,
-    ROLE_TABLE, SESSION_TABLE, mongo_client, scylla_session,
+    ACCOUNT_TABLE, BLOG_TABLE, CATEGORY_TABLE, DatabaseType, EXPERIENCE_TABLE, NOTIFICATION_TABLE, PROJECT_TABLE,
+    PROVIDER_TABLE, ROLE_TABLE, SESSION_TABLE, mongo_client, scylla_session,
 };
 
 pub trait RepositoryModule: Send + Sync {
@@ -38,6 +40,7 @@ pub trait RepositoryModule: Send + Sync {
     fn get_category_repository(&self) -> Arc<dyn CategoryRepository>;
     fn get_notification_repository(&self) -> Arc<dyn NotificationRepository>;
     fn get_blog_repository(&self) -> Arc<dyn BlogRepository>;
+    fn get_project_repository(&self) -> Arc<dyn ProjectRepository>;
 }
 
 #[macro_export]
@@ -68,6 +71,7 @@ struct MongoRepositoryModule {
     category_repository: Arc<dyn CategoryRepository>,
     notification_repository: Arc<dyn NotificationRepository>,
     blog_repository: Arc<dyn BlogRepository>,
+    project_repository: Arc<dyn ProjectRepository>,
 }
 
 impl MongoRepositoryModule {
@@ -85,6 +89,7 @@ impl MongoRepositoryModule {
                 db.collection(NOTIFICATION_TABLE),
             ))),
             blog_repository: Arc::new(MongoBlogRepository::new(Arc::new(db.collection(BLOG_TABLE)))),
+            project_repository: Arc::new(MongoProjectRepository::new(Arc::new(db.collection(PROJECT_TABLE)))),
         }
     }
 }
@@ -99,6 +104,7 @@ impl_repository_module!(
     get_category_repository -> CategoryRepository: category_repository,
     get_notification_repository -> NotificationRepository: notification_repository,
     get_blog_repository -> BlogRepository: blog_repository,
+    get_project_repository -> ProjectRepository: project_repository,
 );
 
 // Scylla Implementation
@@ -111,6 +117,7 @@ struct ScyllaRepositoryModule {
     category_repository: Arc<dyn CategoryRepository>,
     notification_repository: Arc<dyn NotificationRepository>,
     blog_repository: Arc<dyn BlogRepository>,
+    project_repository: Arc<dyn ProjectRepository>,
 }
 
 impl ScyllaRepositoryModule {
@@ -135,6 +142,7 @@ impl ScyllaRepositoryModule {
                 NOTIFICATION_TABLE,
             )),
             blog_repository: Arc::new(ScyllaBlogRepository::new(session.clone(), &keyspace, BLOG_TABLE)),
+            project_repository: Arc::new(ScyllaProjectRepository::new(session.clone(), &keyspace, PROJECT_TABLE)),
         }
     }
 }
@@ -149,6 +157,7 @@ impl_repository_module!(
     get_category_repository -> CategoryRepository: category_repository,
     get_notification_repository -> NotificationRepository: notification_repository,
     get_blog_repository -> BlogRepository: blog_repository,
+    get_project_repository -> ProjectRepository: project_repository,
 );
 
 // Factory function

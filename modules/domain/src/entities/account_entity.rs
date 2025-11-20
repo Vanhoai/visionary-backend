@@ -23,6 +23,17 @@ pub struct AccountEntity {
     pub is_active: bool,
 }
 
+crate::define_update_struct! {
+    pub struct UpdateAccountEntity for AccountEntity {
+        pub username: String,
+        pub avatar: String,
+        pub email: String,
+        pub email_verified: bool,
+        pub bio: String,
+        pub is_active: bool,
+    }
+}
+
 impl AccountEntity {
     pub fn new(include_id: bool, username: String, email: String) -> Result<Self, Failure> {
         Self::validate_username(&username)?;

@@ -6,8 +6,9 @@ use validator::Validate;
 use shared::types::DomainResponse;
 
 // internal modules
-use crate::entities::experience_entity::ExperienceEntity;
+use crate::entities::{experience_entity::ExperienceEntity, project_entity::ProjectEntity};
 
+// region ============================= ManageExperienceUseCase =============================
 #[derive(Debug, Deserialize, Validate)]
 #[serde(rename_all = "camelCase")]
 pub struct AddExperienceParams {
@@ -36,3 +37,50 @@ pub trait ManageExperienceUseCase: Send + Sync {
     async fn add_experience(&self, params: &AddExperienceParams) -> DomainResponse<ExperienceEntity>;
     async fn find_experiences(&self) -> DomainResponse<Vec<ExperienceEntity>>;
 }
+// endregion ============================= ManageExperienceUseCase =============================
+
+// region ============================= ManageProjectUseCase =============================
+#[derive(Debug, Deserialize, Validate)]
+pub struct AddProjectParams {
+    #[validate(url)]
+    pub cover: String,
+
+    #[validate(length(min = 1, message = "Name must not be empty"))]
+    pub name: String,
+
+    #[validate(length(min = 1, message = "Description must not be empty"))]
+    pub description: String,
+
+    #[validate(url)]
+    pub link: String,
+
+    #[validate(url)]
+    pub github: String,
+
+    #[validate(length(min = 1, message = "At least one tag must be provided"))]
+    pub tags: Vec<String>,
+
+    #[validate(length(min = 1, message = "Markdown content must not be empty"))]
+    pub markdown: String,
+}
+
+#[derive(Debug, Deserialize, Validate)]
+pub struct UpdateProjectParams {
+    pub cover: Option<String>,
+    pub name: Option<String>,
+    pub description: Option<String>,
+    pub link: Option<String>,
+    pub github: Option<String>,
+    pub tags: Option<Vec<String>>,
+    pub markdown: Option<String>,
+}
+
+#[async_trait]
+pub trait ManageProjectUseCase: Send + Sync {
+    async fn add_project(&self, params: &AddProjectParams) -> DomainResponse<ProjectEntity>;
+    async fn remove_project_with_id(&self, id: &str) -> DomainResponse<()>;
+    async fn find_project_with_id(&self, id: &str) -> DomainResponse<Option<ProjectEntity>>;
+    async fn find_projects(&self) -> DomainResponse<Vec<ProjectEntity>>;
+    async fn update_project(&self, id: &str, params: &UpdateProjectParams) -> DomainResponse<ProjectEntity>;
+}
+// endregion ============================= ManageProjectUseCase =============================

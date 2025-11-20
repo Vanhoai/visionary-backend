@@ -16,3 +16,4 @@ argon2 = { workspace = true }
 validator = { workspace = true, features = ["derive"] }
 regex = { workspace = true }
 tokio = { workspace = true, features = ["full"] }
+paste = { workspace = true }

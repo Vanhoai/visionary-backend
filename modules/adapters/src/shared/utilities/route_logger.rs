@@ -49,13 +49,13 @@ pub fn log_all_routes() {
             let middleware_info = if !route.middleware.is_empty() {
                 format!("- [{}]", route.middleware.join(", "))
             } else {
-                String::new()
+                "- []".to_string()
             };
 
-            if middleware_info.is_empty() {
-                tracing::info!("🌎 {:7} {}{}", route.method, route.path, middleware_info);
+            if route.middleware.is_empty() {
+                tracing::info!("🌎 {:7} {:16} {}", route.method, middleware_info, route.path);
             } else {
-                tracing::info!("🔐 {:7} {} {}", route.method, route.path, middleware_info);
+                tracing::info!("🔐 {:7} {:16} {}", route.method, middleware_info, route.path);
             }
         }
     }

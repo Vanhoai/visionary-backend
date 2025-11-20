@@ -8,6 +8,7 @@ use domain::services::{
     category_service::{CategoryService, CategoryServiceImpl},
     experience_service::{ExperienceService, ExperienceServiceImpl},
     notification_service::{NotificationService, NotificationServiceImpl},
+    project_service::{ProjectService, ProjectServiceImpl},
     provider_service::{ProviderService, ProviderServiceImpl},
     role_service::{RoleService, RoleServiceImpl},
     session_service::{SessionService, SessionServiceImpl},
@@ -26,6 +27,7 @@ pub trait ServiceModule {
     fn get_category_service(&self) -> Arc<dyn CategoryService>;
     fn get_notification_service(&self) -> Arc<dyn NotificationService>;
     fn get_blog_service(&self) -> Arc<dyn BlogService>;
+    fn get_project_service(&self) -> Arc<dyn ProjectService>;
 }
 
 pub fn build_service_module(repository_module: Arc<dyn RepositoryModule>) -> Arc<dyn ServiceModule> {
@@ -42,6 +44,7 @@ struct ServiceModuleImpl {
     category_service: Arc<dyn CategoryService>,
     notification_service: Arc<dyn NotificationService>,
     blog_service: Arc<dyn BlogService>,
+    project_service: Arc<dyn ProjectService>,
 }
 
 impl ServiceModuleImpl {
@@ -56,6 +59,7 @@ impl ServiceModuleImpl {
         let notification_service =
             Arc::new(NotificationServiceImpl::new(repository_module.get_notification_repository()));
         let blog_service = Arc::new(BlogServiceImpl::new(repository_module.get_blog_repository()));
+        let project_service = Arc::new(ProjectServiceImpl::new(repository_module.get_project_repository()));
 
         ServiceModuleImpl {
             auth_service,
@@ -67,6 +71,7 @@ impl ServiceModuleImpl {
             category_service,
             notification_service,
             blog_service,
+            project_service,
         }
     }
 }
@@ -109,6 +114,10 @@ macro_rules! impl_service_module {
 
             fn get_blog_service(&self) -> Arc<dyn BlogService> {
                 self.blog_service.clone()
+            }
+
+            fn get_project_service(&self) -> Arc<dyn ProjectService> {
+                self.project_service.clone()
             }
         }
     };

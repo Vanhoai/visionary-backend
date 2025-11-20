@@ -51,7 +51,7 @@ macro_rules! impl_mongo_base_repository {
                 self.base.update(id, entity).await
             }
 
-            async fn delete(&self, id: &str) -> shared::types::DomainResponse<$entity> {
+            async fn delete(&self, id: &str) -> shared::types::DomainResponse<usize> {
                 self.base.delete(id).await
             }
 
@@ -147,7 +147,7 @@ where
         Ok(schema.to_entity())
     }
 
-    async fn delete(&self, id: &str) -> DomainResponse<E> {
+    async fn delete(&self, id: &str) -> DomainResponse<usize> {
         let object_id =
             ObjectId::parse_str(id).map_err(|_| Failure::BadRequest(format!("Invalid ID format: {}", id)))?;
 
@@ -160,14 +160,13 @@ where
             }
         };
 
-        let schema = self
+        let updated_result = self
             .collection
-            .find_one_and_update(filter, update)
+            .update_one(filter, update)
             .await
-            .map_err(|e| Failure::DatabaseError(format!("Failed to delete entity: {}", e)))?
-            .ok_or_else(|| Failure::NotFound(format!("Entity with id {} not found", id)))?;
+            .map_err(|e| Failure::DatabaseError(format!("Failed to delete entity: {}", e)))?;
 
-        Ok(schema.to_entity())
+        Ok(updated_result.matched_count as usize)
     }
 
     async fn remove(&self, id: &str) -> DomainResponse<E> {
