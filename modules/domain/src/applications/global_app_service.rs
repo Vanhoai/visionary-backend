@@ -9,7 +9,8 @@ use crate::{
     entities::{experience_entity::ExperienceEntity, project_entity::ProjectEntity},
     services::{experience_service::ExperienceService, project_service::ProjectService},
     usecases::global_usecases::{
-        AddExperienceParams, AddProjectParams, ManageExperienceUseCase, ManageProjectUseCase, UpdateProjectParams,
+        AddExperienceParams, AddProjectParams, ManageExperienceUseCase, ManageProjectUseCase, UpdateExperienceParams,
+        UpdateProjectParams,
     },
 };
 
@@ -54,6 +55,26 @@ impl ManageExperienceUseCase for GlobalAppService {
     async fn find_experiences(&self) -> DomainResponse<Vec<ExperienceEntity>> {
         self.experience_service.find_experiences().await
     }
+
+    async fn remove_experience_with_id(&self, id: &str) -> DomainResponse<()> {
+        self.experience_service.remove_experience_with_id(id).await
+    }
+
+    async fn update_experience(&self, id: &str, params: &UpdateExperienceParams) -> DomainResponse<ExperienceEntity> {
+        self.experience_service
+            .update_experience(
+                id,
+                params.technologies.clone(),
+                params.position.clone(),
+                params.responsibility.clone(),
+                params.company.clone(),
+                params.location.clone(),
+                params.start_date,
+                params.end_date,
+                params.is_current,
+            )
+            .await
+    }
 }
 // endregion ============================== ManageExperienceUseCase ==============================
 
@@ -97,7 +118,18 @@ impl ManageProjectUseCase for GlobalAppService {
     }
 
     async fn update_project(&self, id: &str, params: &UpdateProjectParams) -> DomainResponse<ProjectEntity> {
-        todo!()
+        self.project_service
+            .update_project(
+                id,
+                params.cover.clone(),
+                params.name.clone(),
+                params.description.clone(),
+                params.link.clone(),
+                params.github.clone(),
+                params.tags.clone(),
+                params.markdown.clone(),
+            )
+            .await
     }
 }
 // endregion ============================= ManageProjectUseCase =============================

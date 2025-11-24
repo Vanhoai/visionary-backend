@@ -75,7 +75,7 @@ impl ProjectService for ProjectServiceImpl {
     }
 
     async fn remove_project_with_id(&self, id: &str) -> DomainResponse<()> {
-        let match_count = self.repository.delete(id).await?;
+        let match_count = self.repository.remove(id).await?;
         if match_count == 0 {
             return Err(Failure::NotFound(format!("Project with id {} not found", id)));
         }
@@ -103,6 +103,16 @@ impl ProjectService for ProjectServiceImpl {
         tags: Option<Vec<String>>,
         markdown: Option<String>,
     ) -> DomainResponse<ProjectEntity> {
-        todo!()
+        if let Some(ref name) = name {
+            ProjectEntity::validate_name(name)?;
+        }
+        if let Some(ref description) = description {
+            ProjectEntity::validate_description(description)?;
+        }
+
+        let updated =
+            self.repository.update_project_partial(id, cover, name, description, link, github, tags, markdown).await?;
+
+        Ok(updated)
     }
 }

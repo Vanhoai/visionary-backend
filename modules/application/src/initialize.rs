@@ -59,7 +59,7 @@ fn build_cors() -> Result<CorsLayer, Box<dyn std::error::Error>> {
 pub async fn initialize_app() -> Result<Router, Box<dyn std::error::Error>> {
     tracing_subscriber::fmt()
         .with_target(false)
-        .with_thread_ids(false)
+        .with_thread_ids(true)
         .with_max_level(Level::INFO)
         .with_line_number(true)
         .with_level(true)

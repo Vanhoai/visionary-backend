@@ -9,7 +9,7 @@ pub trait BaseRepository<E>: Send + Sync {
     async fn create(&self, entity: &E) -> DomainResponse<E>;
     async fn update(&self, id: &str, entity: &E) -> DomainResponse<E>;
     async fn delete(&self, id: &str) -> DomainResponse<usize>;
-    async fn remove(&self, id: &str) -> DomainResponse<E>;
+    async fn remove(&self, id: &str) -> DomainResponse<usize>;
     async fn find(&self, id: &str) -> DomainResponse<Option<E>>;
     async fn find_and_delete(&self, id: &str) -> DomainResponse<E>;
     async fn find_and_remove(&self, id: &str) -> DomainResponse<E>;

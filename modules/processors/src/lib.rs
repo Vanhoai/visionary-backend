@@ -28,7 +28,7 @@ pub fn mongo_repository_derive(input: TokenStream) -> TokenStream {
                 self.base.delete(id).await
             }
 
-            async fn remove(&self, id: &str) -> shared::types::DomainResponse<#entity_type> {
+            async fn remove(&self, id: &str) -> shared::types::DomainResponse<usize> {
                 self.base.remove(id).await
             }
 

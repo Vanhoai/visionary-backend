@@ -34,4 +34,19 @@ impl ExperienceRepository for ScyllaExperienceRepository {
     async fn find_by_company(&self, _company: &str) -> DomainResponse<Option<ExperienceEntity>> {
         todo!()
     }
+
+    async fn update_experience_partial(
+        &self,
+        id: &str,
+        technologies: Option<Vec<String>>,
+        position: Option<String>,
+        responsibility: Option<Vec<String>>,
+        company: Option<String>,
+        location: Option<String>,
+        start_date: Option<i64>,
+        end_date: Option<Option<i64>>,
+        is_current: Option<bool>,
+    ) -> DomainResponse<ExperienceEntity> {
+        unimplemented!()
+    }
 }

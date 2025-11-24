@@ -32,4 +32,18 @@ impl ProjectRepository for ScyllaProjectRepository {
     async fn find_by_name(&self, _name: &str) -> DomainResponse<Option<ProjectEntity>> {
         todo!()
     }
+
+    async fn update_project_partial(
+        &self,
+        _id: &str,
+        _cover: Option<String>,
+        _name: Option<String>,
+        _description: Option<String>,
+        _link: Option<String>,
+        _github: Option<String>,
+        _tags: Option<Vec<String>>,
+        _markdown: Option<String>,
+    ) -> DomainResponse<ProjectEntity> {
+        unimplemented!()
+    }
 }

@@ -32,10 +32,25 @@ pub struct AddExperienceParams {
     pub is_current: bool,
 }
 
+#[derive(Debug, Deserialize, Validate)]
+#[serde(rename_all = "camelCase")]
+pub struct UpdateExperienceParams {
+    pub technologies: Option<Vec<String>>,
+    pub position: Option<String>,
+    pub responsibility: Option<Vec<String>>,
+    pub company: Option<String>,
+    pub location: Option<String>,
+    pub start_date: Option<i64>,
+    pub end_date: Option<Option<i64>>,
+    pub is_current: Option<bool>,
+}
+
 #[async_trait]
 pub trait ManageExperienceUseCase: Send + Sync {
     async fn add_experience(&self, params: &AddExperienceParams) -> DomainResponse<ExperienceEntity>;
     async fn find_experiences(&self) -> DomainResponse<Vec<ExperienceEntity>>;
+    async fn remove_experience_with_id(&self, id: &str) -> DomainResponse<()>;
+    async fn update_experience(&self, id: &str, params: &UpdateExperienceParams) -> DomainResponse<ExperienceEntity>;
 }
 // endregion ============================= ManageExperienceUseCase =============================
 
@@ -65,6 +80,7 @@ pub struct AddProjectParams {
 }
 
 #[derive(Debug, Deserialize, Validate)]
+#[serde(rename_all = "camelCase")]
 pub struct UpdateProjectParams {
     pub cover: Option<String>,
     pub name: Option<String>,

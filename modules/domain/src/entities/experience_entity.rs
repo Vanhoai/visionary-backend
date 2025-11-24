@@ -61,7 +61,7 @@ impl ExperienceEntity {
         })
     }
 
-    fn validate_technologies(technologies: Vec<String>) -> DomainResponse<()> {
+    pub fn validate_technologies(technologies: Vec<String>) -> DomainResponse<()> {
         if technologies.len() > MAX_TECHNOLOGIES_LENGTH {
             return Err(Failure::ValidationError(format!(
                 "Technologies must not exceed {} characters",
@@ -72,7 +72,7 @@ impl ExperienceEntity {
         Ok(())
     }
 
-    fn validate_position(position: &str) -> DomainResponse<()> {
+    pub fn validate_position(position: &str) -> DomainResponse<()> {
         if position.len() > MAX_POSITION_LENGTH {
             return Err(Failure::ValidationError(format!(
                 "Position must not exceed {} characters",
@@ -83,7 +83,7 @@ impl ExperienceEntity {
         Ok(())
     }
 
-    fn validate_responsibility(responsibility: Vec<String>) -> DomainResponse<()> {
+    pub fn validate_responsibility(responsibility: Vec<String>) -> DomainResponse<()> {
         if responsibility.len() > MAX_RESPONSIBILITY_LENGTH {
             return Err(Failure::ValidationError(format!(
                 "Responsibility must not exceed {} characters",
@@ -94,7 +94,7 @@ impl ExperienceEntity {
         Ok(())
     }
 
-    fn validate_company(company: &str) -> DomainResponse<()> {
+    pub fn validate_company(company: &str) -> DomainResponse<()> {
         if company.len() > MAX_COMPANY_LENGTH {
             return Err(Failure::ValidationError(format!("Company must not exceed {} characters", MAX_COMPANY_LENGTH)));
         }
@@ -102,7 +102,7 @@ impl ExperienceEntity {
         Ok(())
     }
 
-    fn validate_location(location: &str) -> DomainResponse<()> {
+    pub fn validate_location(location: &str) -> DomainResponse<()> {
         if location.len() > MAX_LOCATION_LENGTH {
             return Err(Failure::ValidationError(format!(
                 "Location must not exceed {} characters",
@@ -113,7 +113,7 @@ impl ExperienceEntity {
         Ok(())
     }
 
-    fn validate_dates(start_date: i64, end_date: Option<i64>) -> DomainResponse<()> {
+    pub fn validate_dates(start_date: i64, end_date: Option<i64>) -> DomainResponse<()> {
         if let Some(end) = end_date {
             if end <= start_date {
                 return Err(Failure::ValidationError("End date cannot be earlier than start date".to_string()));

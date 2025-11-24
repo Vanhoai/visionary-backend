@@ -70,7 +70,7 @@ macro_rules! impl_scylla_base_repository {
                 self.base.delete(id).await
             }
 
-            async fn remove(&self, id: &str) -> shared::types::DomainResponse<$entity> {
+            async fn remove(&self, id: &str) -> shared::types::DomainResponse<usize> {
                 self.base.remove(id).await
             }
 
@@ -140,7 +140,7 @@ where
         todo!()
     }
 
-    async fn remove(&self, _id: &str) -> DomainResponse<E> {
+    async fn remove(&self, _id: &str) -> DomainResponse<usize> {
         todo!()
     }
 
