@@ -133,7 +133,7 @@ impl ManageSessionAuthUseCase for AuthAppService {
 
         // 3. Verify password
         if !self.auth_service.verify_password(&params.password, &password_provider.identify)? {
-            return Err(Failure::Unauthorized("Invalid password".to_string()));
+            return Err(Failure::Unauthorized("Password is not correct !!!".to_string()));
         }
 
         // 4. Generate tokens and create session
@@ -215,7 +215,7 @@ impl OAuth2UseCase for AuthAppService {
         }
     }
 
-    async fn oauth2_callback(
+    async fn oauth2_google_callback(
         &self,
         params: &OAuth2CallbackParams,
         metadata: &SessionMetadata,

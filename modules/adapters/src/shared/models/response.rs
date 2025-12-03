@@ -11,6 +11,22 @@ pub struct HttpResponse<T: Serialize> {
     pub payload: T,
 }
 
+fn map_status_to_code(status: StatusCode) -> &'static str {
+    match status {
+        StatusCode::OK => "Success",
+        StatusCode::CREATED => "Created",
+        StatusCode::BAD_REQUEST => "BadRequest",
+        StatusCode::UNAUTHORIZED => "Unauthorized",
+        StatusCode::FORBIDDEN => "Forbidden",
+        StatusCode::NOT_FOUND => "NotFound",
+        StatusCode::INTERNAL_SERVER_ERROR => "InternalServerError",
+        StatusCode::METHOD_NOT_ALLOWED => "MethodNotAllowed",
+        StatusCode::CONFLICT => "Conflict",
+        StatusCode::NOT_IMPLEMENTED => "NotImplemented",
+        _ => "UnknownStatus",
+    }
+}
+
 impl<T: Serialize> HttpResponse<T> {
     pub fn new(status_code: StatusCode, message: &str, payload: T) -> Self {
         HttpResponse { status_code, message: message.to_string(), payload }
@@ -20,7 +36,7 @@ impl<T: Serialize> HttpResponse<T> {
 impl<T: Serialize> IntoResponse for HttpResponse<T> {
     fn into_response(self) -> axum::response::Response {
         let response = Json(json!({
-            "code": "SUCCESS",
+            "code": map_status_to_code(self.status_code),
             "message": self.message,
             "payload": self.payload,
         }));

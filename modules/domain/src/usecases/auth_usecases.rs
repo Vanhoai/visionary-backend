@@ -80,7 +80,7 @@ pub struct OAuth2CallbackParams {
 #[async_trait]
 pub trait OAuth2UseCase: Send + Sync {
     async fn oauth2_init(&self, params: &OAuth2InitParams) -> DomainResponse<OAuth2InitResponse>;
-    async fn oauth2_callback(
+    async fn oauth2_google_callback(
         &self,
         params: &OAuth2CallbackParams,
         metadata: &SessionMetadata,

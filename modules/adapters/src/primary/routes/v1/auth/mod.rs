@@ -1,4 +1,4 @@
-mod oauth_callback_function;
+mod oauth_google_callback_function;
 mod oauth_init_function;
 mod refresh_token_function;
 pub mod routes;
